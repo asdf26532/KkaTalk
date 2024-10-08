@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="목록"
+        android:id="@+id/list"
+        android:icon="@drawable/list"/>
+    <item android:title="채팅"
+        android:id="@+id/chatting"
+        android:icon="@drawable/chatting"/>
+    <item android:title="세팅"
+        android:id="@+id/setting"
+        android:icon="@drawable/setting"/>
+</menu>
