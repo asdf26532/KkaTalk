@@ -1,4 +1,4 @@
-package com.han.KkaTalk
+package com.han.kkaTalk
 
 import org.junit.Test
 

@@ -1,14 +1,15 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.google.gms.google-services")
 }
 
 android {
-    namespace = "com.han.KkaTalk"
+    namespace = "com.han.kkaTalk"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.han.KkaTalk"
+        applicationId = "com.han.kkaTalk"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
@@ -33,6 +34,9 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    viewBinding {
+        enable = true
+    }
 }
 
 dependencies {
@@ -42,6 +46,22 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.2.0"))
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+    implementation ("com.firebaseui:firebase-ui-auth:8.0.0")
+    implementation(libs.firebase.database)
+
+    // admob
+    implementation("com.google.android.gms:play-services-ads:23.3.0")
+
+    // glide
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

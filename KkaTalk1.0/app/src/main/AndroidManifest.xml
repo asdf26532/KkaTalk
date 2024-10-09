@@ -13,6 +13,15 @@
         android:theme="@style/Theme.KkaTalk"
         tools:targetApi="31">
         <activity
+            android:name=".LoginActivity"
+            android:exported="false" />
+        <!-- Manifest 충돌 해결 -->
+        <property
+            android:name="android.adservices.AD_SERVICES_CONFIG"
+            android:resource="@xml/gma_ad_services_config"
+            tools:replace="android:resource" />
+
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
