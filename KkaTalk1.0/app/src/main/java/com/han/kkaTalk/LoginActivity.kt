@@ -1,7 +1,5 @@
 package com.han.kkaTalk
 
-package com.han.chattingapp
-
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -170,10 +168,11 @@ class LoginActivity : AppCompatActivity() {
                     val uid = firebaseUser?.uid
                     val name = firebaseUser?.displayName
                     val email = firebaseUser?.email
+                    val nick = firebaseUser?.displayName //이름으로 저장 후 나중에 변경페이지 만들기
 
                     // 파이어베이스 Realtime DB에 사용자 정보 저장
                     if (uid != null && name != null && email != null) {
-                        addUserToDatabase(name, email, uid)
+                        addUserToDatabase(name, email, uid, nick?: "")
                     }
 
                     val intent = Intent(this@LoginActivity, MainActivity::class.java)
@@ -190,8 +189,8 @@ class LoginActivity : AppCompatActivity() {
             }
     }
 
-    private fun addUserToDatabase(name: String, email: String, uId: String) {
-        val user = User(name, email, uId)
+    private fun addUserToDatabase(name: String, email: String, uId: String, nick: String) {
+        val user = User(name, email, uId, nick)
         Firebase.database.reference.child("user").child(uId).setValue(user)
     }
 
