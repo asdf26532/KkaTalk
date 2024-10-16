@@ -1,56 +1,65 @@
 package com.han.kkaTalk
 
 import android.os.Bundle
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
+import com.han.kkaTalk.databinding.FragmentHomeBinding
 
 class HomeFragment : Fragment() {
 
-    private lateinit var userRecyclerView: RecyclerView
-    private lateinit var userAdapter: UserAdapter
+    private lateinit var binding: FragmentHomeBinding
+    private lateinit var adapter: UserAdapter
     private lateinit var userList: ArrayList<User>
+    private lateinit var mAuth: FirebaseAuth
+    private lateinit var mDbRef: DatabaseReference
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_home, container, false)
+    ): View {
+        binding = FragmentHomeBinding.inflate(inflater, container, false)
+        mAuth = FirebaseAuth.getInstance()
+        mDbRef = Firebase.database.reference
 
-        // RecyclerView 초기화
-        userRecyclerView = view.findViewById(R.id.rv_user)
-        userRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        // 사용자 리스트 초기화
+        userList = ArrayList()
+        adapter = UserAdapter(requireContext(), userList)
 
-        // 사용자 목록 초기화 (여기에 실제 데이터 로드 로직 추가 필요)
-        userList = arrayListOf(
-            User("홍길동", "hong@kakao.com", "1", "길동이"),
-            User("이순신", "lee@kakao.com", "2", "이순신")
-        )
+        binding.rvUser.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvUser.adapter = adapter
 
-        // UserAdapter 초기화 및 설정
-        userAdapter = UserAdapter(requireContext(), userList) { user ->
-            // 사용자 클릭 시 ChattingFragment로 이동
-            val chatFragment = ChattingFragment()
-            val args = Bundle().apply {
-                putString("name", user.name)
-                putString("uId", user.uId)
-                putString("nick", user.nick)
+        // 사용자 정보를 Firebase에서 가져오기
+        fetchUserData()
+
+        return binding.root
+    }
+
+    private fun fetchUserData() {
+        mDbRef.child("user").addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                userList.clear() // 리스트 초기화
+                for (postSnapshot in snapshot.children) {
+                    val currentUser = postSnapshot.getValue(User::class.java)
+                    if (currentUser != null && mAuth.currentUser?.uid != currentUser.uId) {
+                        userList.add(currentUser)
+                    }
+                }
+                adapter.notifyDataSetChanged()
             }
-            chatFragment.arguments = args
 
-            // 현재 프래그먼트를 교체하여 채팅 프래그먼트로 이동
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.frame_layout, chatFragment)
-                .addToBackStack(null) // 뒤로가기 기능 추가
-                .commit()
-        }
-
-        userRecyclerView.adapter = userAdapter
-
-        return view
+            override fun onCancelled(error: DatabaseError) {
+                // 오류 처리
+            }
+        })
     }
 }
