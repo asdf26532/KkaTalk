@@ -12,9 +12,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        replaceFragment(HomeFragment())
-
         setContentView(binding.root)
+
+        replaceFragment(HomeFragment())
 
         binding.bottomNav.setOnItemSelectedListener {
             when(it.itemId) {
