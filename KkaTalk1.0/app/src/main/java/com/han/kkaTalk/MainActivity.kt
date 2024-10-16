@@ -1,6 +1,7 @@
 package com.han.kkaTalk
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.han.kkaTalk.databinding.ActivityMainBinding
@@ -36,9 +37,11 @@ class MainActivity : AppCompatActivity() {
     private fun replaceFragment(fragment: Fragment) {
 
         val fragmentManager = supportFragmentManager
-        val framentTransaction = fragmentManager.beginTransaction()
-        framentTransaction.replace(R.id.frame_layout,fragment)
-        framentTransaction.commit()
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        fragmentTransaction.replace(R.id.frame_layout,fragment)
+        fragmentTransaction.addToBackStack(null) // 백스택 추가
+        fragmentTransaction.commit()
+        Log.d("MainActivity", "Fragment replaced: ${fragment.javaClass.simpleName}") // 추가 로그
 
 
     }
