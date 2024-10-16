@@ -5,41 +5,74 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
-
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 
 class SettingFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private lateinit var mAuth: FirebaseAuth
+    private lateinit var mDbRef: DatabaseReference
+    private lateinit var etNick: EditText
+    private lateinit var btnSaveNick: Button
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_setting, container, false)
+        // Fragment의 레이아웃을 inflate
+        val view = inflater.inflate(R.layout.fragment_setting, container, false)
+
+        // Firebase 인증 및 DB 초기화
+        mAuth = FirebaseAuth.getInstance()
+        mDbRef = FirebaseDatabase.getInstance().reference
+
+        // 뷰 초기화
+        etNick = view.findViewById(R.id.et_nick)
+        btnSaveNick = view.findViewById(R.id.btn_save_nick)
+
+        // 현재 사용자 닉네임 로드
+        loadUserNick()
+
+        // 닉네임 저장 버튼 클릭 리스너
+        btnSaveNick.setOnClickListener {
+            val newNick = etNick.text.toString()
+            if (newNick.isNotEmpty()) {
+                saveNickToDatabase(newNick)
+            } else {
+                Toast.makeText(requireContext(), "닉네임을 입력하세요", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        return view
     }
 
-    companion object {
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            SettingFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+    // 사용자 닉네임 로드
+    private fun loadUserNick() {
+        val currentUser = mAuth.currentUser
+        currentUser?.let {
+            mDbRef.child("user").child(it.uid).child("nick")
+                .get().addOnSuccessListener { snapshot ->
+                    val nick = snapshot.getValue(String::class.java)
+                    etNick.setText(nick)
                 }
-            }
+        }
+    }
+
+    // 닉네임을 DB에 저장
+    private fun saveNickToDatabase(newNick: String) {
+        val currentUser = mAuth.currentUser
+        currentUser?.let {
+            mDbRef.child("user").child(it.uid).child("nick").setValue(newNick)
+                .addOnSuccessListener {
+                    Toast.makeText(requireContext(), "닉네임이 저장되었습니다", Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener {
+                    Toast.makeText(requireContext(), "닉네임 저장 실패", Toast.LENGTH_SHORT).show()
+                }
+        }
     }
 }

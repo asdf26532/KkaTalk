@@ -1,16 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
     tools:context=".SettingFragment">
 
-    <!-- TODO: Update blank fragment layout -->
+    <!-- 현재 닉네임을 표시하는 TextView -->
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="This is setting page"
-        android:textSize="36sp"
-        />
+        android:id="@+id/tv_current_nick"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="현재 닉네임: [닉네임]"
+        android:textSize="18sp"
+        android:padding="10dp"/>
 
-</FrameLayout>
+    <!-- 닉네임 변경 버튼 -->
+    <Button
+        android:id="@+id/btn_change_nick"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="닉네임 변경"
+        android:layout_marginTop="16dp"/>
+
+    <!-- 새로운 닉네임을 입력하는 EditText (기본적으로 숨김) -->
+    <EditText
+        android:id="@+id/edt_new_nick"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="새 닉네임 입력"
+        android:textSize="18sp"
+        android:padding="10dp"
+        android:visibility="gone" />
+
+    <!-- 닉네임 저장 버튼 (기본적으로 숨김) -->
+    <Button
+        android:id="@+id/btn_save_new_nick"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="저장"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"/>
+
+</LinearLayout>
