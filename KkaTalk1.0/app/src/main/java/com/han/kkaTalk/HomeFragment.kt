@@ -1,59 +1,56 @@
 package com.han.kkaTalk
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [HomeFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class HomeFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private lateinit var userRecyclerView: RecyclerView
+    private lateinit var userAdapter: UserAdapter
+    private lateinit var userList: ArrayList<User>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false)
-    }
+        val view = inflater.inflate(R.layout.fragment_home, container, false)
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment Home.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            HomeFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+        // RecyclerView 초기화
+        userRecyclerView = view.findViewById(R.id.rv_user)
+        userRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        // 사용자 목록 초기화 (여기에 실제 데이터 로드 로직 추가 필요)
+        userList = arrayListOf(
+            User("홍길동", "hong@kakao.com", "1", "길동이"),
+            User("이순신", "lee@kakao.com", "2", "이순신")
+        )
+
+        // UserAdapter 초기화 및 설정
+        userAdapter = UserAdapter(requireContext(), userList) { user ->
+            // 사용자 클릭 시 ChattingFragment로 이동
+            val chatFragment = ChattingFragment()
+            val args = Bundle().apply {
+                putString("name", user.name)
+                putString("uId", user.uId)
+                putString("nick", user.nick)
             }
+            chatFragment.arguments = args
+
+            // 현재 프래그먼트를 교체하여 채팅 프래그먼트로 이동
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.frame_layout, chatFragment)
+                .addToBackStack(null) // 뒤로가기 기능 추가
+                .commit()
+        }
+
+        userRecyclerView.adapter = userAdapter
+
+        return view
     }
 }
