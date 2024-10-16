@@ -30,7 +30,7 @@ class UserAdapter(private val context: Context, private val userList: ArrayList<
         // 아이템 클릭 이벤트
         holder.itemView.setOnClickListener {
 
-            val intent = Intent(context, Chatting::class.java)
+            val intent = Intent(context, ChattingFragment::class.java)
 
             // 넘겨줄 데이터
             intent.putExtra("name",currentUser.name)
