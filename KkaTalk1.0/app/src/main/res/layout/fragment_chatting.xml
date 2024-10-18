@@ -12,12 +12,12 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="대화 상대 목록"
+        android:text="채팅 목록"
         android:textSize="25sp"/>
 
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_user"
+        android:id="@+id/rv_chat"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"

@@ -23,7 +23,7 @@ class UserAdapter(private val context: Context, private val userList: ArrayList<
 
         // 아이템 클릭 이벤트
         holder.itemView.setOnClickListener {
-            // 사용자 정보를 ChattingFragment로 전달
+            // 사용자 정보를 ChatActivity로 전달
             val intent = Intent(context, ChatActivity::class.java)
             intent.putExtra("name", currentUser.name)
             intent.putExtra("uId", currentUser.uId)

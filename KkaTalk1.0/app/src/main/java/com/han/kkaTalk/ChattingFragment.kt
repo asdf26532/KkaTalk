@@ -1,59 +1,96 @@
 package com.han.kkaTalk
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.han.kkaTalk.databinding.FragmentChattingBinding
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [ChattingFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class ChattingFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private lateinit var binding: FragmentChattingBinding
+    private lateinit var chatListAdapter: ChatListAdapter
+    private lateinit var chatList: ArrayList<ChatPreview>  // 마지막 메시지를 포함한 채팅 목록
+    private lateinit var mDbRef: DatabaseReference
+    private lateinit var mAuth: FirebaseAuth
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_chatting, container, false)
+        binding = FragmentChattingBinding.inflate(inflater, container, false)
+
+        // RecyclerView 세팅
+        chatList = ArrayList()
+        chatListAdapter = ChatListAdapter(chatList) { chatPreview ->
+            // 채팅방으로 이동
+            val intent = Intent(activity, ChatActivity::class.java)
+            intent.putExtra("name", chatPreview.userName)
+            intent.putExtra("uId", chatPreview.userUid)
+            startActivity(intent)
+        }
+
+        binding.rvChat.layoutManager = LinearLayoutManager(activity)
+        binding.rvChat.adapter = chatListAdapter
+
+        // 파이어베이스에서 데이터 가져오기
+        mAuth = FirebaseAuth.getInstance()
+        mDbRef = FirebaseDatabase.getInstance().reference
+
+        loadChatPreviews()
+
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment Chatting.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            ChattingFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+    private fun loadChatPreviews() {
+        val currentUserId = mAuth.currentUser?.uid ?: return
+
+        // 마지막 메시지를 가져오는 로직 (senderRoom과 receiverRoom 사용)
+        mDbRef.child("chats").addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                chatList.clear()
+
+                for (chatSnapshot in snapshot.children) {
+                    val lastMessageSnapshot = chatSnapshot.child("message").children.lastOrNull()
+                    if (lastMessageSnapshot != null) {
+                        val lastMessage = lastMessageSnapshot.getValue(Message::class.java)
+                        val receiverUid = chatSnapshot.key?.replace(currentUserId, "")
+
+                        if (receiverUid != null) {
+                            // 상대방의 유저 이름을 가져오는 부분
+                            mDbRef.child("users").child(receiverUid)
+                                .addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(userSnapshot: DataSnapshot) {
+                                        chatList.clear()
+                                        val userName = userSnapshot.child("name").getValue(String::class.java) ?: "Unknown"
+                                        if (lastMessage != null) {
+                                            // 채팅 리스트에 추가
+                                            chatList.add(ChatPreview(userName, receiverUid, lastMessage.message))
+                                        }
+                                        chatListAdapter.notifyDataSetChanged()
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {
+                                        // 에러 처리
+                                    }
+                                })
+                        }
+                    }
                 }
             }
+
+            override fun onCancelled(error: DatabaseError) {
+                // 에러 처리
+            }
+        })
     }
 }
