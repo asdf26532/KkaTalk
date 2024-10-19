@@ -3,7 +3,7 @@ package com.han.kkaTalk
 data class ChatPreview(
     val userName: String,
     val userUid: String,
-    val lastMessage: String?
+    var lastMessage: String?
 )
 {
     constructor():this("","","")

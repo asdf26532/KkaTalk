@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -51,63 +52,60 @@ class ChattingFragment : Fragment() {
 
         return binding.root
     }
+
     private fun loadChatPreviews() {
         val currentUserId = mAuth.currentUser?.uid ?: return
 
-        mDbRef.child("chats").addValueEventListener(object : ValueEventListener {
+        // Firebase에서 데이터 불러오기
+        mDbRef.child("chats").addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val tempChatList = mutableListOf<ChatPreview>()
-                Log.d("ChattingFragment", "Chat snapshot children count: ${snapshot.childrenCount}")
 
-                // 모든 채팅을 순회
+                val tempChatList = ArrayList<ChatPreview>()
+
                 for (chatSnapshot in snapshot.children) {
-                    Log.d("ChattingFragment", "Chat snapshot key: ${chatSnapshot.key}")
-
-                    // 마지막 메시지 확인
                     val lastMessageSnapshot = chatSnapshot.child("message").children.lastOrNull()
+
                     if (lastMessageSnapshot != null) {
                         val lastMessage = lastMessageSnapshot.getValue(Message::class.java)
-                        val receiverId = chatSnapshot.child("receiverId").getValue(String::class.java)
+                        val receiverUid = chatSnapshot.key?.replace(currentUserId, "")
 
-                        // receiverId가 현재 유저 ID가 아닌 경우에만 진행
-                        if (receiverId != null && receiverId != currentUserId) {
-                            // 상대방의 유저 이름을 가져오는 부분
-                            mDbRef.child("users").child(receiverId).addListenerForSingleValueEvent(object : ValueEventListener {
-                                override fun onDataChange(userSnapshot: DataSnapshot) {
-                                    val userName = userSnapshot.child("name").getValue(String::class.java) ?: "Unknown"
+                        if (receiverUid != null && lastMessage?.message != null) {
+                            // 중복 확인 및 방지
+                            if (tempChatList.none { it.userUid == receiverUid }) {
+                                mDbRef.child("user").child(receiverUid)
+                                    .addListenerForSingleValueEvent(object : ValueEventListener {
+                                        override fun onDataChange(userSnapshot: DataSnapshot) {
+                                            val userName = userSnapshot.child("name").getValue(String::class.java) ?: "Unknown"
 
-                                    Log.d("ChattingFragment", "User Name: $userName")
+                                            // 채팅 리스트에 추가
+                                            tempChatList.add(ChatPreview(userName, receiverUid, lastMessage.message ?: ""))
 
-                                    // 채팅 프리뷰 추가
-                                    if (lastMessage != null) {
-                                        // 중복 체크를 위한 유니크한 키 사용
-                                        if (tempChatList.none { it.userUid == receiverId }) {
-                                            tempChatList.add(ChatPreview(userName, receiverId, lastMessage.message))
+                                            // UI 업데이트
+                                            if (tempChatList.isNotEmpty()) {
+                                                chatList.clear()
+                                                chatList.addAll(tempChatList)
+                                                chatListAdapter.notifyDataSetChanged()
+                                            }
+
                                         }
-                                    }
 
-                                    // 모든 사용자 이름이 로드되었는지 확인
-                                    if (tempChatList.size == snapshot.childrenCount.toInt()) {
-                                        chatList.clear()
-                                        chatList.addAll(tempChatList)
-                                        chatListAdapter.notifyDataSetChanged()
-                                    }
-                                }
-
-                                override fun onCancelled(error: DatabaseError) {
-                                    Log.e("ChattingFragment", "Error fetching user: ${error.message}")
-                                }
-                            })
+                                        override fun onCancelled(error: DatabaseError) {
+                                            Log.e("ChattingFragment", "Chat data load cancelled: $error")
+                                        }
+                                    })
+                            }
+                        } else {
+                            Log.d("ChattingFragment", "Receiver UID or last message is null")
                         }
-                    } else {
-                        Log.d("ChattingFragment", "No last message found for chat: ${chatSnapshot.key}")
                     }
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.e("ChattingFragment", "Error loading chats: ${error.message}")
+                Log.e("ChattingFragment", "Chat data load cancelled: $error")
             }
         })
     }
+
+
 }
