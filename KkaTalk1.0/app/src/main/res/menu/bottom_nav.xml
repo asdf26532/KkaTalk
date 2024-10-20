@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:title="Home"
+    <item android:title="친구"
         android:id="@+id/home"
         android:icon="@drawable/list"/>
 
-    <item android:title="Chatting"
+    <item android:title="채팅"
         android:id="@+id/chatting"
         android:icon="@drawable/chatting"/>
 
-    <item android:title="Setting"
+    <item android:title="더보기"
         android:id="@+id/setting"
         android:icon="@drawable/setting"/>
 </menu>

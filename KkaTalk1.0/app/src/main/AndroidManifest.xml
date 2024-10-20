@@ -18,7 +18,8 @@
         <!-- admob 앱 아이디 추가 -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3519505839382720~8130152987" /> <!-- Manifest 충돌 해결 -->
+            android:value="ca-app-pub-3519505839382720~8130152987" />
+        <!-- Manifest 충돌 해결 -->
         <property
             android:name="android.adservices.AD_SERVICES_CONFIG"
             android:resource="@xml/gma_ad_services_config"

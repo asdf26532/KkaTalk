@@ -59,7 +59,6 @@ class ChattingFragment : Fragment() {
         // Firebase에서 데이터 불러오기
         mDbRef.child("chats").addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-
                 val tempChatList = ArrayList<ChatPreview>()
 
                 for (chatSnapshot in snapshot.children) {
@@ -72,27 +71,24 @@ class ChattingFragment : Fragment() {
                         if (receiverUid != null && lastMessage?.message != null) {
                             // 중복 확인 및 방지
                             if (tempChatList.none { it.userUid == receiverUid }) {
-                                mDbRef.child("user").child(receiverUid)
-                                    .addListenerForSingleValueEvent(object : ValueEventListener {
-                                        override fun onDataChange(userSnapshot: DataSnapshot) {
-                                            val userName = userSnapshot.child("name").getValue(String::class.java) ?: "Unknown"
+                                // 유저 이름 가져오기
+                                mDbRef.child("user").child(receiverUid).addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(userSnapshot: DataSnapshot) {
+                                        val userName = userSnapshot.child("name").getValue(String::class.java) ?: "Unknown"
 
-                                            // 채팅 리스트에 추가
-                                            tempChatList.add(ChatPreview(userName, receiverUid, lastMessage.message ?: ""))
+                                        // 채팅 리스트에 추가
+                                        tempChatList.add(ChatPreview(userName, receiverUid, lastMessage.message ?: ""))
 
-                                            // UI 업데이트
-                                            if (tempChatList.isNotEmpty()) {
-                                                chatList.clear()
-                                                chatList.addAll(tempChatList)
-                                                chatListAdapter.notifyDataSetChanged()
-                                            }
+                                        // UI 업데이트
+                                        chatList.clear()
+                                        chatList.addAll(tempChatList)
+                                        chatListAdapter.notifyDataSetChanged()
+                                    }
 
-                                        }
-
-                                        override fun onCancelled(error: DatabaseError) {
-                                            Log.e("ChattingFragment", "Chat data load cancelled: $error")
-                                        }
-                                    })
+                                    override fun onCancelled(error: DatabaseError) {
+                                        Log.e("ChattingFragment", "User data load cancelled: $error")
+                                    }
+                                })
                             }
                         } else {
                             Log.d("ChattingFragment", "Receiver UID or last message is null")
@@ -106,6 +102,7 @@ class ChattingFragment : Fragment() {
             }
         })
     }
+
 
 
 }
