@@ -1,6 +1,9 @@
 package com.han.kkaTalk
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
@@ -10,6 +13,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.han.kkaTalk.databinding.ActivityChatBinding
+
 
 
 class ChatActivity : AppCompatActivity() {
@@ -102,4 +106,7 @@ class ChatActivity : AppCompatActivity() {
 
 
     }
+
+
+
 }

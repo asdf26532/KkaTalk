@@ -1,5 +1,6 @@
 package com.han.kkaTalk
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -9,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -69,19 +69,20 @@ class ChattingFragment : Fragment() {
                         val receiverUid = chatSnapshot.key?.replace(currentUserId, "")
 
                         if (receiverUid != null && lastMessage?.message != null) {
-                            // 중복 확인 및 방지
+                            // 중복 확인 및 방지 (userName으로 중복된 채팅방 확인)
                             if (tempChatList.none { it.userUid == receiverUid }) {
-                                // 유저 이름 가져오기
                                 mDbRef.child("user").child(receiverUid).addListenerForSingleValueEvent(object : ValueEventListener {
                                     override fun onDataChange(userSnapshot: DataSnapshot) {
                                         val userName = userSnapshot.child("name").getValue(String::class.java) ?: "Unknown"
 
-                                        // 채팅 리스트에 추가
-                                        tempChatList.add(ChatPreview(userName, receiverUid, lastMessage.message ?: ""))
+                                        // 중복 확인: 이미 해당 유저와의 채팅이 존재하는지 검사
+                                        if (chatList.none { it.userName == userName }) {
+                                            tempChatList.add(ChatPreview(userName, receiverUid, lastMessage.message ?: ""))
 
-                                        // UI 업데이트
-                                        chatList.clear()
-                                        chatList.addAll(tempChatList)
+                                            // UI 업데이트
+                                            chatList.clear()  // 전체 업데이트 전에 리스트 초기화
+                                            chatList.addAll(tempChatList)
+                                        }
                                         chatListAdapter.notifyDataSetChanged()
                                     }
 
@@ -102,7 +103,4 @@ class ChattingFragment : Fragment() {
             }
         })
     }
-
-
-
 }
