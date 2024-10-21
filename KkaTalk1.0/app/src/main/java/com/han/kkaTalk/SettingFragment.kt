@@ -1,5 +1,6 @@
 package com.han.kkaTalk
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -18,6 +19,7 @@ class SettingFragment : Fragment() {
     private lateinit var btnChangeNick: Button
     private lateinit var edtNewNick: EditText
     private lateinit var btnSaveNewNick: Button
+    private lateinit var btnLogout: Button
 
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDbRef: DatabaseReference
@@ -38,6 +40,9 @@ class SettingFragment : Fragment() {
         btnChangeNick = view.findViewById(R.id.btn_change_nick)
         edtNewNick = view.findViewById(R.id.edt_new_nick)
         btnSaveNewNick = view.findViewById(R.id.btn_save_new_nick)
+        btnLogout = view.findViewById(R.id.btn_logout)
+
+
 
         // 현재 닉네임 로드
         loadCurrentNick()
@@ -45,6 +50,7 @@ class SettingFragment : Fragment() {
         // 닉네임 변경 버튼 클릭 시
         btnChangeNick.setOnClickListener {
             edtNewNick.visibility = View.VISIBLE
+
             btnSaveNewNick.visibility = View.VISIBLE
         }
 
@@ -54,6 +60,15 @@ class SettingFragment : Fragment() {
             if (newNick.isNotEmpty()) {
                 updateNickname(newNick)
             }
+        }
+
+        // 로그아웃 버튼 클릭 시
+        btnLogout.setOnClickListener {
+            mAuth.signOut()  // Firebase에서 로그아웃
+            val intent = Intent(activity, LoginActivity::class.java) // 로그인 화면으로 이동
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK // 기존 액티비티 스택을 모두 제거
+            startActivity(intent)
+            activity?.finish()  // 현재 액티비티 종료
         }
 
         return view

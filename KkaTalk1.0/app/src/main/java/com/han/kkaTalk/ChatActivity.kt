@@ -45,7 +45,7 @@ class ChatActivity : AppCompatActivity() {
         binding.rvChat.adapter = messageAdapter
 
         // 넘어온 데이터 변수에 담기
-        receiverName = intent.getStringExtra("name").toString()
+        receiverName = intent.getStringExtra("nick").toString()
         receiverUid = intent.getStringExtra("uId").toString()
 
         mAuth = FirebaseAuth.getInstance()
