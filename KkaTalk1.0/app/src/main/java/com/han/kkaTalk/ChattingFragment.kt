@@ -37,6 +37,7 @@ class ChattingFragment : Fragment() {
             // 채팅방으로 이동
             val intent = Intent(activity, ChatActivity::class.java)
             intent.putExtra("name", chatPreview.userName)
+            intent.putExtra("nick", chatPreview.userNick)
             intent.putExtra("uId", chatPreview.userUid)
             startActivity(intent)
         }
@@ -74,10 +75,11 @@ class ChattingFragment : Fragment() {
                                 mDbRef.child("user").child(receiverUid).addListenerForSingleValueEvent(object : ValueEventListener {
                                     override fun onDataChange(userSnapshot: DataSnapshot) {
                                         val userName = userSnapshot.child("name").getValue(String::class.java) ?: "Unknown"
+                                        val userNick = userSnapshot.child("nick").getValue(String::class.java) ?: "Unknown"
 
                                         // 중복 확인: 이미 해당 유저와의 채팅이 존재하는지 검사
                                         if (chatList.none { it.userName == userName }) {
-                                            tempChatList.add(ChatPreview(userName, receiverUid, lastMessage.message ?: ""))
+                                            tempChatList.add(ChatPreview(userName, userNick, receiverUid, lastMessage.message ?: ""))
 
                                             // UI 업데이트
                                             chatList.clear()  // 전체 업데이트 전에 리스트 초기화

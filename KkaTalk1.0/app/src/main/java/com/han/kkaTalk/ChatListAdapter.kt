@@ -34,7 +34,7 @@ class ChatListAdapter(
         private val lastMessageTextView: TextView = itemView.findViewById(R.id.tv_last_message)
 
         fun bind(chatPreview: ChatPreview) {
-            userNameTextView.text = chatPreview.userName
+            userNameTextView.text = chatPreview.userNick
             lastMessageTextView.text = chatPreview.lastMessage
         }
     }
