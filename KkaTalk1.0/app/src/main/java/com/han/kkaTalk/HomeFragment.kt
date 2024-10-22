@@ -1,10 +1,13 @@
 package com.han.kkaTalk
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -61,5 +64,41 @@ class HomeFragment : Fragment() {
                 // 오류 처리
             }
         })
+
+        adapter.setOnItemClickListener { user ->
+            showPopupMenu(user)
+        }
     }
+
+    private fun showPopupMenu(user: User) {
+        val popupMenu = PopupMenu(requireContext(), binding.rvUser) // 팝업 메뉴의 anchor는 회원 리스트가 표시되는 리사이클러뷰로 설정
+        popupMenu.menuInflater.inflate(R.menu.user_options_menu, popupMenu.menu) // 메뉴 리소스를 inflate
+
+        popupMenu.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.view_profile -> {
+                    // 프로필 보기 기능
+                    Toast.makeText(requireContext(), "${user.nick}의 프로필 보기", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                R.id.start_chat -> {
+                    // 대화하기 기능
+                    val intent = Intent(activity, ChatActivity::class.java)
+                    intent.putExtra("name", user.name)
+                    intent.putExtra("nick", user.nick)
+                    intent.putExtra("uId", user.uId)
+                    startActivity(intent)
+                    true
+                }
+                R.id.cancel -> {
+                    // 취소 버튼
+                    popupMenu.dismiss()
+                    true
+                }
+                else -> false
+            }
+        }
+        popupMenu.show()
+    }
+
 }
