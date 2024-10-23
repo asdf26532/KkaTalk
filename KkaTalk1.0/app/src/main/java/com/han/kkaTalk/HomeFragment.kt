@@ -1,7 +1,9 @@
 package com.han.kkaTalk
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.view.Gravity
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -66,39 +68,38 @@ class HomeFragment : Fragment() {
         })
 
         adapter.setOnItemClickListener { user ->
-            showPopupMenu(user)
+            showPopupDialog(user)
         }
     }
 
-    private fun showPopupMenu(user: User) {
-        val popupMenu = PopupMenu(requireContext(), binding.rvUser) // 팝업 메뉴의 anchor는 회원 리스트가 표시되는 리사이클러뷰로 설정
-        popupMenu.menuInflater.inflate(R.menu.user_options_menu, popupMenu.menu) // 메뉴 리소스를 inflate
+    private fun showPopupDialog(user: User) {
+        val options = arrayOf("프로필 보기", "대화하기", "취소")
 
-        popupMenu.setOnMenuItemClickListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.view_profile -> {
-                    // 프로필 보기 기능
-                    Toast.makeText(requireContext(), "${user.nick}의 프로필 보기", Toast.LENGTH_SHORT).show()
-                    true
+        // AlertDialog Builder 생성
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("") // 프로필사진,닉네임 표시되도록 변경
+            .setItems(options) { dialog, which ->
+                when (options[which]) {
+                    "프로필 보기" -> {
+                        // 프로필 보기 로직
+                    }
+                    "대화하기" -> {
+                        // 대화하기 로직
+                        val intent = Intent(requireContext(), ChatActivity::class.java)
+                        intent.putExtra("name", user.name)
+                        intent.putExtra("nick", user.nick)
+                        intent.putExtra("uId", user.uId)
+                        startActivity(intent)
+                    }
+                    "취소" -> {
+                        dialog.dismiss() // 취소 로직
+                    }
                 }
-                R.id.start_chat -> {
-                    // 대화하기 기능
-                    val intent = Intent(activity, ChatActivity::class.java)
-                    intent.putExtra("name", user.name)
-                    intent.putExtra("nick", user.nick)
-                    intent.putExtra("uId", user.uId)
-                    startActivity(intent)
-                    true
-                }
-                R.id.cancel -> {
-                    // 취소 버튼
-                    popupMenu.dismiss()
-                    true
-                }
-                else -> false
             }
-        }
-        popupMenu.show()
+
+        // 다이얼로그 표시
+        val dialog = builder.create()
+        dialog.show()
     }
 
 }
