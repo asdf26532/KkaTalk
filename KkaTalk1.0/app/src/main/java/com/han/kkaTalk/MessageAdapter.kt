@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class MessageAdapter(private val context: Context, private val messageList: ArrayList<Message>):
     RecyclerView.Adapter<RecyclerView.ViewHolder>(){
@@ -31,14 +33,17 @@ class MessageAdapter(private val context: Context, private val messageList: Arra
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         // 현재 메시지
         val currentMessage = messageList[position]
+        val dateFormat = SimpleDateFormat("a hh:mm", Locale.getDefault()) // 시간 형식 설정
 
         // 보내는 데이터
         if(holder.javaClass == SendViewHolder::class.java) {
             val viewHolder = holder as SendViewHolder
             viewHolder.sendMessage.text = currentMessage.message
+            viewHolder.sendTime.text = dateFormat.format(currentMessage.timestamp)
         } else {
             val viewHolder = holder as ReceiveViewHolder
             viewHolder.receiveMessage.text = currentMessage.message
+            viewHolder.receiveTime.text = dateFormat.format(currentMessage.timestamp)
         }
 
     }
@@ -59,10 +64,12 @@ class MessageAdapter(private val context: Context, private val messageList: Arra
 
     class SendViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         val sendMessage: TextView = itemView.findViewById(R.id.tv_send_msg)
+        val sendTime: TextView = itemView.findViewById(R.id.tv_send_time)
     }
 
     class ReceiveViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         val receiveMessage: TextView = itemView.findViewById(R.id.tv_receive_msg)
+        val receiveTime: TextView = itemView.findViewById(R.id.tv_receive_time)
     }
 
 

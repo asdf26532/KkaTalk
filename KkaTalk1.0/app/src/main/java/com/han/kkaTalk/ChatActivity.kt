@@ -64,7 +64,8 @@ class ChatActivity : AppCompatActivity() {
         binding.btnSend.setOnClickListener{
 
             val message = binding.edtMessage.text.toString()
-            val messageObject = Message(message, senderUid, receiverUid)
+            val timeStamp = System.currentTimeMillis()
+            val messageObject = Message(message, senderUid, receiverUid, timeStamp)
 
             // 데이터 저장
             mDbRef.child("chats").child(senderRoom).child("message").push()

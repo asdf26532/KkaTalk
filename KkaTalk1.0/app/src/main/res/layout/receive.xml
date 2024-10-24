@@ -14,5 +14,15 @@
         android:text="받은 메시지"
         android:textSize="18sp"/>
 
+    <TextView
+        android:id="@+id/tv_receive_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="시간 표시"
+        android:textSize="12sp"
+        android:layout_toEndOf="@id/tv_receive_msg"
+        android:layout_alignBottom="@id/tv_receive_msg"
+        android:textColor="#888888"/>
+
 
 </RelativeLayout>
