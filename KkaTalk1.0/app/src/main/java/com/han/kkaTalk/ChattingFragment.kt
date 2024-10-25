@@ -96,13 +96,15 @@ class ChattingFragment : Fragment() {
                                     override fun onDataChange(userSnapshot: DataSnapshot) {
                                         val userName = userSnapshot.child("name").getValue(String::class.java) ?: "Unknown"
                                         val userNick = userSnapshot.child("nick").getValue(String::class.java) ?: "Unknown"
+                                        // 타임스탬프 가져오기
+                                        val lastMessageTime = lastMessageSnapshot.child("timestamp").getValue(Long::class.java) ?: 0L
 
                                         // 중복 확인: 이미 해당 유저와의 채팅이 존재하는지 검사
                                         if (tempChatList.none { it.userUid == receiverUid }) {
-                                            tempChatList.add(ChatPreview(userName, userNick, receiverUid, lastMessage.message ?: ""))
+                                            tempChatList.add(ChatPreview(userName, userNick, receiverUid, lastMessage.message ?: "", lastMessageTime))
                                         }
                                             // UI 업데이트
-                                            chatList.clear()  // 전체 업데이트 전에 리스트 초기화
+                                            chatList.clear()  // 전체 업데이트 전에 리스트 초기화ㅅ
                                             chatList.addAll(tempChatList)
                                             chatListAdapter.notifyDataSetChanged()
                                             Log.d("OnDataChaged", "UI 갱신") // 로그 추가

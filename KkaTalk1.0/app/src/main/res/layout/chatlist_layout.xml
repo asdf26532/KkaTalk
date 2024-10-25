@@ -22,6 +22,17 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"/>
 
+    <TextView
+        android:id="@+id/tv_last_message_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="시간 표시"
+        android:textSize="14sp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="30dp"
+        android:textColor="#888888"/>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
