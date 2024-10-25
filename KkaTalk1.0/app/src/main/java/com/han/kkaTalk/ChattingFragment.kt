@@ -25,6 +25,10 @@ class ChattingFragment : Fragment() {
     private lateinit var mDbRef: DatabaseReference
     private lateinit var mAuth: FirebaseAuth
 
+    companion object {
+        const val REQUEST_CHAT_UPDATE = 1001
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -35,11 +39,14 @@ class ChattingFragment : Fragment() {
         chatList = ArrayList()
         chatListAdapter = ChatListAdapter(chatList) { chatPreview ->
             // 채팅방으로 이동
-            val intent = Intent(activity, ChatActivity::class.java)
+            /*val intent = Intent(activity, ChatActivity::class.java)*/
+            val intent = Intent(context, ChatActivity::class.java)
+
             intent.putExtra("name", chatPreview.userName)
             intent.putExtra("nick", chatPreview.userNick)
             intent.putExtra("uId", chatPreview.userUid)
-            startActivity(intent)
+            /*startActivity(intent)*/
+            startActivityForResult(intent, REQUEST_CHAT_UPDATE) // REQUEST_CHAT_UPDATE는 식별용 상수
         }
 
         binding.rvChat.layoutManager = LinearLayoutManager(activity)
@@ -53,6 +60,19 @@ class ChattingFragment : Fragment() {
 
         return binding.root
     }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        Log.d("ChattingFragment", "onActivityResult 호출됨") // 로그 추가
+        if (requestCode == REQUEST_CHAT_UPDATE && resultCode == Activity.RESULT_OK) {
+            // 갱신 필요 플래그 확인
+            val chatUpdated = data?.getBooleanExtra("chatUpdated", false) ?: false
+            if (chatUpdated) {
+                loadChatPreviews() // 채팅 목록 갱신
+                Log.d("loadChatPreviews", "loadChatPreviews 호출") // 로그 추가
+            }
+        }
+    }
+
 
     private fun loadChatPreviews() {
         val currentUserId = mAuth.currentUser?.uid ?: return
@@ -60,6 +80,7 @@ class ChattingFragment : Fragment() {
         // Firebase에서 데이터 불러오기
         mDbRef.child("chats").addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
+                Log.d("OnDataChanged", "Data changed: ${snapshot.childrenCount} children found.")
                 val tempChatList = ArrayList<ChatPreview>()
 
                 for (chatSnapshot in snapshot.children) {
@@ -70,7 +91,6 @@ class ChattingFragment : Fragment() {
                         val receiverUid = chatSnapshot.key?.replace(currentUserId, "")
 
                         if (receiverUid != null && lastMessage?.message != null) {
-                            // 중복 확인 및 방지 (userName으로 중복된 채팅방 확인)
                             if (tempChatList.none { it.userUid == receiverUid }) {
                                 mDbRef.child("user").child(receiverUid).addListenerForSingleValueEvent(object : ValueEventListener {
                                     override fun onDataChange(userSnapshot: DataSnapshot) {
@@ -78,15 +98,15 @@ class ChattingFragment : Fragment() {
                                         val userNick = userSnapshot.child("nick").getValue(String::class.java) ?: "Unknown"
 
                                         // 중복 확인: 이미 해당 유저와의 채팅이 존재하는지 검사
-                                        if (chatList.none { it.userName == userName }) {
+                                        if (tempChatList.none { it.userUid == receiverUid }) {
                                             tempChatList.add(ChatPreview(userName, userNick, receiverUid, lastMessage.message ?: ""))
-
+                                        }
                                             // UI 업데이트
                                             chatList.clear()  // 전체 업데이트 전에 리스트 초기화
                                             chatList.addAll(tempChatList)
+                                            chatListAdapter.notifyDataSetChanged()
+                                            Log.d("OnDataChaged", "UI 갱신") // 로그 추가
                                         }
-                                        chatListAdapter.notifyDataSetChanged()
-                                    }
 
                                     override fun onCancelled(error: DatabaseError) {
                                         Log.e("ChattingFragment", "User data load cancelled: $error")

@@ -3,6 +3,8 @@ package com.han.kkaTalk
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -60,6 +62,7 @@ class ChatActivity : AppCompatActivity() {
 
         // 액션바에 상대방 이름 보이기
         supportActionBar?.title = receiverName
+        supportActionBar?.setDisplayHomeAsUpEnabled(true) // 화살표 버튼 추가
 
         binding.btnSend.setOnClickListener{
 
@@ -100,14 +103,23 @@ class ChatActivity : AppCompatActivity() {
                 override fun onCancelled(error: DatabaseError) {
                     TODO("Not yet implemented")
                 }
-
-
             })
-
-
-
     }
 
+    // 뒤로 가기 버튼 동작 구현
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                val intent = Intent()
+                intent.putExtra("chatUpdated", true) // 결과 값으로 '갱신 필요' 플래그 전달
+                setResult(Activity.RESULT_OK, intent)
+                Log.d("ChatActivity", "setResult 호출됨") // 로그 추가
+                onBackPressed()
+                true
+            }
 
+            else -> super.onOptionsItemSelected(item)
+        }
 
+    }
 }
