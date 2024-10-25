@@ -104,7 +104,8 @@ class ChattingFragment : Fragment() {
                                             tempChatList.add(ChatPreview(userName, userNick, receiverUid, lastMessage.message ?: "", lastMessageTime))
                                         }
                                             // UI 업데이트
-                                            chatList.clear()  // 전체 업데이트 전에 리스트 초기화ㅅ
+                                            chatList.clear()  // 전체 업데이트 전에 리스트 초기화
+                                            tempChatList.sortByDescending { it.lastMessageTime }
                                             chatList.addAll(tempChatList)
                                             chatListAdapter.notifyDataSetChanged()
                                             Log.d("OnDataChaged", "UI 갱신") // 로그 추가
