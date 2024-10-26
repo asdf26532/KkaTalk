@@ -22,6 +22,8 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.han.kkaTalk.databinding.ActivityLoginBinding
+import com.kakao.sdk.auth.model.OAuthToken
+import kotlin.jvm.functions.Function2
 
 class LoginActivity : AppCompatActivity() {
 
@@ -87,6 +89,9 @@ class LoginActivity : AppCompatActivity() {
                 mInterstitialAd = null
             }
         })
+
+
+
     }
 
     private fun showInterstitialAdAndProceed() {
@@ -188,6 +193,8 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
     }
+
+
 
     private fun addUserToDatabase(name: String, email: String, uId: String, nick: String) {
         val user = User(name, email, uId, nick)
