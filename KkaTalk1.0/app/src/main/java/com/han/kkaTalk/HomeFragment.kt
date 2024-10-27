@@ -3,6 +3,7 @@ package com.han.kkaTalk
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -50,20 +51,32 @@ class HomeFragment : Fragment() {
     }
 
     private fun fetchUserData() {
+        val currentUserId = mAuth.currentUser?.uid.toString() // uid를 문자열로 변환하여 일관성 유지
+        Log.d("fetchUserData", "Current User UID: $currentUserId") // 현재 사용자 UID 확인
         mDbRef.child("user").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 userList.clear() // 리스트 초기화
                 for (postSnapshot in snapshot.children) {
                     val currentUser = postSnapshot.getValue(User::class.java)
-                    if (currentUser != null && mAuth.currentUser?.uid != currentUser.uId) {
-                        userList.add(currentUser)
+
+                    if (currentUser != null) {
+                        Log.d("fetchUserData", "Fetched UID: ${currentUser.uId}") // 데이터베이스에서 가져온 UID 확인
+
+                        // UID 비교
+                        if (currentUser.uId.trim() == currentUserId.trim()) {
+                            Log.d("fetchUserData", "Skipping current user: ${currentUser.uId}") // 현재 사용자 UID가 일치할 경우
+                        } else {
+                            userList.add(currentUser)
+                        }
+                    } else {
+                        Log.d("fetchUserData", "Current user is null")
                     }
                 }
                 adapter.notifyDataSetChanged()
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // 오류 처리
+                Log.e("fetchUserData", "Failed to fetch user data: ${error.message}")
             }
         })
 

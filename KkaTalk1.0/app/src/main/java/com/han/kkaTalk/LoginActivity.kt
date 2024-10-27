@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -23,6 +24,7 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.han.kkaTalk.databinding.ActivityLoginBinding
 import com.kakao.sdk.auth.model.OAuthToken
+import com.kakao.sdk.user.UserApiClient
 import kotlin.jvm.functions.Function2
 
 class LoginActivity : AppCompatActivity() {
@@ -74,6 +76,11 @@ class LoginActivity : AppCompatActivity() {
         // Google 로그인 버튼 이벤트
         binding.btnGoogle.setOnClickListener {
             googleSignIn()
+        }
+
+        // 카카오 로그인 버튼 클릭
+        binding.btnKakao.setOnClickListener {
+            kakaoSignIn()
         }
 
         // 전면 광고 로드
@@ -192,6 +199,50 @@ class LoginActivity : AppCompatActivity() {
                     Toast.makeText(this, "Google 로그인 실패", Toast.LENGTH_LONG).show()
                 }
             }
+    }
+
+    private fun kakaoSignIn() {
+        Log.d("KakaoLogin", "카카오 로그인 시작")
+        // 카카오톡 설치 여부에 따라 로그인 방식 결정
+        val callback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
+            if (error != null) {
+                Log.e("KakaoLogin", "카카오 로그인 실패: ${error.message}")
+                Toast.makeText(this, "카카오 로그인 실패: ${error.message}", Toast.LENGTH_SHORT).show()
+            } else if (token != null) {
+                Log.d("KakaoLogin", "카카오 로그인 성공, 토큰 획득")
+                // 로그인 성공 시 사용자 정보 업데이트
+                updateKakaoLoginUi()
+                val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                startActivity(intent)
+                Toast.makeText(this, "카카오 로그인 성공", Toast.LENGTH_LONG).show()
+            }
+        }
+
+        if (UserApiClient.instance.isKakaoTalkLoginAvailable(this)) {
+            UserApiClient.instance.loginWithKakaoTalk(this, callback = callback)
+        } else {
+            UserApiClient.instance.loginWithKakaoAccount(this, callback = callback)
+        }
+    }
+
+    private fun updateKakaoLoginUi() {
+        Log.d("KakaoLogin", "사용자 정보 업데이트 시작")
+        UserApiClient.instance.me { user, error ->
+            if (user != null) {
+                Log.d("KakaoLogin", "사용자 정보 획득 성공: ${user.kakaoAccount?.profile?.nickname}")
+                // 사용자 정보 업데이트
+                val nickname = user.kakaoAccount?.profile?.nickname
+
+                // Firebase DB에 사용자 정보 저장
+                val uid = user.id.toString()
+                val email = user.kakaoAccount?.email ?: ""
+                addUserToDatabase(nickname ?: "", email, uid, nickname ?: "")
+
+            } else {
+                Log.e("KakaoLogin", "사용자 정보 업데이트 실패: ${error?.message}")
+
+            }
+        }
     }
 
 

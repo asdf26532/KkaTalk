@@ -75,7 +75,7 @@ class SettingFragment : Fragment() {
     }
 
     private fun loadCurrentNick() {
-        val userId = mAuth.currentUser?.uid
+        val userId = mAuth.currentUser?.uid.toString()
         if (userId != null) {
             mDbRef.child("user").child(userId).get().addOnSuccessListener { snapshot ->
                 val currentUser = snapshot.getValue(User::class.java)
@@ -85,7 +85,7 @@ class SettingFragment : Fragment() {
     }
 
     private fun updateNickname(newNick: String) {
-        val userId = mAuth.currentUser?.uid
+        val userId = mAuth.currentUser?.uid.toString()
         if (userId != null) {
             mDbRef.child("user").child(userId).child("nick").setValue(newNick).addOnSuccessListener {
                 tvCurrentNick.text = "현재 닉네임: $newNick"
