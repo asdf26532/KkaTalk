@@ -37,6 +37,9 @@ class LoginActivity : AppCompatActivity() {
 
     private val RC_SIGN_IN = 9001 // Request code for Google Sign-In
 
+    // 기본 프로필 이미지 URL
+    private val defaultProfileImageUrl = "gs://kkatalk-cf3fd.appspot.com/profile_default.png"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -248,7 +251,7 @@ class LoginActivity : AppCompatActivity() {
 
 
     private fun addUserToDatabase(name: String, email: String, uId: String, nick: String) {
-        val user = User(name, email, uId, nick)
+        val user = User(name, email, uId, nick, defaultProfileImageUrl)
         Firebase.database.reference.child("user").child(uId).setValue(user)
     }
 

@@ -14,10 +14,11 @@ import com.han.kkaTalk.databinding.ActivitySignUpBinding
 class SignUpActivity : AppCompatActivity() {
 
     lateinit var binding: ActivitySignUpBinding
-
     lateinit var mAuth: FirebaseAuth
-
     private lateinit var mDbRef: DatabaseReference
+
+    // 기본 프로필 이미지 URL
+    private val defaultProfileImageUrl = "gs://kkatalk-cf3fd.appspot.com/profile_default.png"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,7 +60,7 @@ class SignUpActivity : AppCompatActivity() {
     }
 
     private fun addUserToDatabase(name:String, email:String, uId: String, nick: String) {
-        mDbRef.child("user").child(uId).setValue(User(name, email, uId, nick))
+        mDbRef.child("user").child(uId).setValue(User(name, email, uId, nick, defaultProfileImageUrl))
     }
 
 }
