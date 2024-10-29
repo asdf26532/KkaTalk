@@ -8,12 +8,38 @@
     android:padding="16dp"
     tools:context=".SettingFragment">
 
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="설정"
+        android:textSize="25sp"/>
+
+    <ImageView
+        android:id="@+id/iv_profile"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center"
+        android:src="@drawable/profile_default"
+        />
+
+    <Button
+        android:id="@+id/btn_change_profile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="프로필 사진 변경"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"/>
+
+
     <!-- 현재 닉네임을 표시하는 TextView -->
     <TextView
         android:id="@+id/tv_current_nick"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="현재 닉네임: [닉네임]"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
         android:textSize="18sp"
         android:padding="10dp"/>
 
@@ -23,7 +49,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="닉네임 변경"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="16dp"
+        android:layout_gravity="center"/>
 
     <!-- 새로운 닉네임을 입력하는 EditText (기본적으로 숨김) -->
     <EditText
@@ -33,6 +60,7 @@
         android:hint="새 닉네임 입력"
         android:textSize="18sp"
         android:padding="10dp"
+        android:layout_gravity="center"
         android:visibility="gone" />
 
     <!-- 닉네임 저장 버튼 (기본적으로 숨김) -->
@@ -42,6 +70,7 @@
         android:layout_height="wrap_content"
         android:text="저장"
         android:layout_marginTop="16dp"
+        android:layout_gravity="center"
         android:visibility="gone"/>
 
     <Button
@@ -49,6 +78,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="로그아웃"
-        android:layout_marginTop="16dp"/>
+        android:layout_gravity="center"
+        android:layout_marginTop="24dp"/>
 
 </LinearLayout>
