@@ -95,17 +95,14 @@ class HomeFragment : Fragment() {
                 when (options[which]) {
                     "프로필 보기" -> {
                         // 프로필 보기 로직
-                        val intent = Intent(requireContext(), ProfileActivity::class.java)
-                        intent.putExtra("name", user.name)
+                        val intent = Intent(activity, ProfileActivity::class.java)
                         intent.putExtra("nick", user.nick)
                         intent.putExtra("uId", user.uId)
                         startActivity(intent)
-
                     }
                     "대화하기" -> {
                         // 대화하기 로직
                         val intent = Intent(requireContext(), ChatActivity::class.java)
-                        intent.putExtra("name", user.name)
                         intent.putExtra("nick", user.nick)
                         intent.putExtra("uId", user.uId)
                         startActivity(intent)
