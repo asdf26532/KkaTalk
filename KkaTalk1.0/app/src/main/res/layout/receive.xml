@@ -4,16 +4,34 @@
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp">
 
+    <ImageView
+        android:id="@+id/iv_profile"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginLeft="8dp"
+        android:src="@drawable/profile_default"
+        />
+
+    <TextView
+        android:id="@+id/tv_nick"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="45dp"
+        android:text="닉네임 표시"/>
+
     <TextView
         android:id="@+id/tv_receive_msg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_margin="5dp"
+        android:layout_alignStart="@+id/iv_profile"
+        android:layout_margin="30dp"
+        android:layout_marginStart="120dp"
+        android:layout_marginEnd="5dp"
         android:background="@drawable/edit_background"
         android:padding="10dp"
         android:text="받은 메시지"
-        android:textSize="18sp"/>
+        android:textSize="18sp" />
 
     <TextView
         android:id="@+id/tv_receive_time"

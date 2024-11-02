@@ -27,7 +27,7 @@ class ProfileActivity : AppCompatActivity() {
         binding.tvNick.text = "닉네임: $userNick"
 
         // 사용자 프로필 이미지 로드
-        loadProfileImage()
+        /*loadProfileImage()*/
 
         // 대화하기 버튼 클릭 이벤트
         binding.btnChat.setOnClickListener {
@@ -43,7 +43,7 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadProfileImage() {
+    /*private fun loadProfileImage() {
         val userRef = FirebaseDatabase.getInstance().getReference("user").child(userId)
         userRef.get().addOnSuccessListener { snapshot ->
             val user = snapshot.getValue(User::class.java)
@@ -67,5 +67,5 @@ class ProfileActivity : AppCompatActivity() {
         }.addOnFailureListener {
             binding.ivProfile.setImageResource(R.drawable.profile_default)
         }
-    }
+    }*/
 }
