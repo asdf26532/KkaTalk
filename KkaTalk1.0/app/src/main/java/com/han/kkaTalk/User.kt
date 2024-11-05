@@ -5,11 +5,9 @@ data class User(
     var email: String,
     var uId: String,
     var nick: String,
-    val profileImageUrl: String,
-    var status: String = "offline", // 기본값을 offline으로 설정
-    var lastActiveTime: Long?
+    val profileImageUrl: String
 
 ) {
-    constructor(): this("", "", "", "","","offline",0L)
+    constructor(): this("", "", "", "","")
 }
 

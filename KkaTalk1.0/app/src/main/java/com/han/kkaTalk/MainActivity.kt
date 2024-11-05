@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
         Log.d("MainActivity", "Fragment replaced: ${fragment.javaClass.simpleName}") // 추가 로그
     }
 
-    override fun onStart() {
+    /*override fun onStart() {
         super.onStart()
         updateUserStatus("online")
     }
@@ -63,5 +63,5 @@ class MainActivity : AppCompatActivity() {
             "lastActiveTime" to System.currentTimeMillis()
         )
         FirebaseDatabase.getInstance().getReference("user").child(userId).updateChildren(updates)
-    }
+    }*/
 }

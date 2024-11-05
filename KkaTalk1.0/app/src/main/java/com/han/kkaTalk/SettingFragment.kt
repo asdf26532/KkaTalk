@@ -1,7 +1,13 @@
 package com.han.kkaTalk
 
+import android.Manifest
+import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +15,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
@@ -16,7 +23,6 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
-import com.kakao.sdk.user.model.Profile
 
 class SettingFragment : Fragment() {
 
@@ -90,22 +96,30 @@ class SettingFragment : Fragment() {
         if (userId.isNotEmpty()) {
             mDbRef.child("user").child(userId).get().addOnSuccessListener { snapshot ->
                 val currentUser = snapshot.getValue(User::class.java)
-                val profileImageUrl = currentUser?.profileImageUrl ?: "gs://kkatalk-cf3fd.appspot.com/profile_default.png"
+                val profileImageUrl = currentUser?.profileImageUrl
 
-                // Firebase Storage 참조 생성
-                val storageRef = Firebase.storage.getReferenceFromUrl(profileImageUrl)
+                if (!profileImageUrl.isNullOrEmpty()) {
+                    // Firebase Storage 참조 생성
+                    val storageRef = Firebase.storage.getReferenceFromUrl(profileImageUrl)
 
-                // Firebase Storage에서 이미지 URL 다운로드
-                storageRef.downloadUrl.addOnSuccessListener { uri ->
-                    // Glide를 사용해 ImageView에 이미지 로드
-                    Glide.with(this@SettingFragment)
-                        .load(uri)
-                        .placeholder(R.drawable.profile_default) // 기본 이미지 설정
-                        .into(ivProfile)
-                }.addOnFailureListener {
-                    // 실패 시 기본 이미지 로드
+                    // Firebase Storage에서 이미지 URL 다운로드
+                    storageRef.downloadUrl.addOnSuccessListener { uri ->
+                        // Glide를 사용해 ImageView에 이미지 로드
+                        Glide.with(this@SettingFragment)
+                            .load(uri)
+                            .placeholder(R.drawable.profile_default) // 기본 이미지 설정
+                            .into(ivProfile)
+                    }.addOnFailureListener {
+                        // 실패 시 기본 이미지 로드
+                        ivProfile.setImageResource(R.drawable.profile_default)
+                    }
+                } else {
+                    // profileImageUrl이 null이거나 비어있는 경우 기본 이미지를 설정
                     ivProfile.setImageResource(R.drawable.profile_default)
                 }
+            }.addOnFailureListener {
+                // Firebase에서 데이터를 가져오는 데 실패한 경우 기본 이미지를 설정
+                ivProfile.setImageResource(R.drawable.profile_default)
             }
         }
     }
@@ -130,4 +144,82 @@ class SettingFragment : Fragment() {
             }
         }
     }
+    // 사진 선택 기능
+    private fun selectProfileImage() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Android 13 이상: READ_MEDIA_IMAGES 권한 요청
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
+                REQUEST_CODE_SELECT_PHOTOS
+            )
+        } else {
+            // Android 12 이하: READ_EXTERNAL_STORAGE 권한 요청
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                REQUEST_CODE_SELECT_PHOTOS
+            )
+        }
+    }
+
+    private fun requestGalleryPermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                REQUEST_CODE_SELECT_PHOTOS
+            )
+        }
+    }
+
+    // 선택된 사진 처리
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_SELECT_PHOTOS && resultCode == Activity.RESULT_OK) {
+            data?.clipData?.let { clipData ->
+                for (i in 0 until clipData.itemCount) {
+                    val imageUri = clipData.getItemAt(i).uri
+                    displaySelectedImage(imageUri)
+                }
+            } ?: data?.data?.let { imageUri ->
+                displaySelectedImage(imageUri)
+            }
+        }
+    }
+
+    private fun displaySelectedImage(uri: Uri) {
+        Glide.with(this)
+            .load(uri)
+            .into(ivProfile)
+        // Firebase에 이미지 업로드 기능 추가 가능
+    }
+
+    companion object {
+        private const val REQUEST_CODE_SELECT_PHOTOS = 2001
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE_SELECT_PHOTOS) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // 권한이 승인되면 갤러리를 엽니다.
+                openGallery()
+            } else {
+                // 권한이 거부된 경우, 사용자에게 알림을 표시하거나 대체 처리를 합니다.
+            }
+        }
+    }
+
+    private fun openGallery() {
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.type = "image/*"
+        startActivityForResult(intent, REQUEST_CODE_SELECT_PHOTOS)
+    }
+
+
 }
