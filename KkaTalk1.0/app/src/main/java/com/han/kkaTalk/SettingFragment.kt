@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,6 +37,8 @@ class SettingFragment : Fragment() {
 
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDbRef: DatabaseReference
+
+    private val TAG = "SettingFragment"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -85,6 +88,12 @@ class SettingFragment : Fragment() {
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK // 기존 액티비티 스택을 모두 제거
             startActivity(intent)
             activity?.finish()  // 현재 액티비티 종료
+        }
+
+        // 프로필 변경 버튼에 대한 클릭 리스너 설정
+        btnChangeProfile.setOnClickListener {
+            Log.d(TAG, "Profile change button clicked")
+            selectProfileImage()
         }
 
         return view
@@ -148,47 +157,43 @@ class SettingFragment : Fragment() {
     private fun selectProfileImage() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             // Android 13 이상: READ_MEDIA_IMAGES 권한 요청
-            ActivityCompat.requestPermissions(
-                requireActivity(),
+            Log.d(TAG, "Requesting READ_MEDIA_IMAGES permission")
+            requestPermissions(
                 arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
                 REQUEST_CODE_SELECT_PHOTOS
             )
         } else {
             // Android 12 이하: READ_EXTERNAL_STORAGE 권한 요청
-            ActivityCompat.requestPermissions(
-                requireActivity(),
+            Log.d(TAG, "Requesting READ_EXTERNAL_STORAGE permission")
+            requestPermissions(
                 arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
                 REQUEST_CODE_SELECT_PHOTOS
             )
         }
     }
 
-    private fun requestGalleryPermission() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            ActivityCompat.requestPermissions(
-                requireActivity(),
-                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                REQUEST_CODE_SELECT_PHOTOS
-            )
-        }
-    }
 
     // 선택된 사진 처리
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        Log.d(TAG, "onActivityResult called with requestCode: $requestCode and resultCode: $resultCode")
+
         if (requestCode == REQUEST_CODE_SELECT_PHOTOS && resultCode == Activity.RESULT_OK) {
             data?.clipData?.let { clipData ->
                 for (i in 0 until clipData.itemCount) {
                     val imageUri = clipData.getItemAt(i).uri
+                    Log.d(TAG, "Selected image URI: $imageUri")
                     displaySelectedImage(imageUri)
                 }
             } ?: data?.data?.let { imageUri ->
+                Log.d(TAG, "Single image URI: $imageUri")
                 displaySelectedImage(imageUri)
             }
         }
     }
 
     private fun displaySelectedImage(uri: Uri) {
+        Log.d(TAG, "Displaying selected image: $uri")
         Glide.with(this)
             .load(uri)
             .into(ivProfile)
@@ -205,17 +210,22 @@ class SettingFragment : Fragment() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        Log.d(TAG, "onRequestPermissionsResult called with requestCode: $requestCode")
+
         if (requestCode == REQUEST_CODE_SELECT_PHOTOS) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // 권한이 승인되면 갤러리를 엽니다.
+                Log.d(TAG, "Permission granted, opening gallery")
                 openGallery()
             } else {
                 // 권한이 거부된 경우, 사용자에게 알림을 표시하거나 대체 처리를 합니다.
+                Log.d(TAG, "Permission denied, cannot open gallery")
             }
         }
     }
 
     private fun openGallery() {
+        Log.d(TAG, "Opening gallery")
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         startActivityForResult(intent, REQUEST_CODE_SELECT_PHOTOS)
