@@ -133,26 +133,6 @@ class SettingFragment : Fragment() {
         }
     }
 
-    private fun loadCurrentNick() {
-        val userId = mAuth.currentUser?.uid.toString()
-        if (userId != null) {
-            mDbRef.child("user").child(userId).get().addOnSuccessListener { snapshot ->
-                val currentUser = snapshot.getValue(User::class.java)
-                tvCurrentNick.text = "현재 닉네임: ${currentUser?.nick}"
-            }
-        }
-    }
-
-    private fun updateNickname(newNick: String) {
-        val userId = mAuth.currentUser?.uid.toString()
-        if (userId != null) {
-            mDbRef.child("user").child(userId).child("nick").setValue(newNick).addOnSuccessListener {
-                tvCurrentNick.text = "현재 닉네임: $newNick"
-                edtNewNick.visibility = View.GONE
-                btnSaveNewNick.visibility = View.GONE
-            }
-        }
-    }
     // 사진 선택 기능
     private fun selectProfileImage() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -172,6 +152,36 @@ class SettingFragment : Fragment() {
         }
     }
 
+    // Firebase에 선택한 이미지를 업로드
+    private fun uploadProfileImage(uri: Uri) {
+        val userId = mAuth.currentUser?.uid.toString()
+        val storageRef = Firebase.storage.reference.child("profileImages/$userId.jpg")
+
+        storageRef.putFile(uri)
+            .addOnSuccessListener {
+                // 업로드 성공 시 다운로드 URL 가져오기
+                storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                    saveProfileImageUrl(downloadUri.toString())
+                }
+            }
+            .addOnFailureListener {
+                Log.d(TAG, "Failed to upload image to Firebase")
+            }
+    }
+
+    // 다운로드 URL을 Firebase Realtime Database에 저장
+    private fun saveProfileImageUrl(url: String) {
+        val userId = mAuth.currentUser?.uid.toString()
+        mDbRef.child("user").child(userId).child("profileImageUrl").setValue(url)
+            .addOnSuccessListener {
+                Log.d(TAG, "Profile image URL saved to database")
+                // 이미지가 성공적으로 저장되었으면 로드
+                loadCurrentProfile()
+            }
+            .addOnFailureListener {
+                Log.d(TAG, "Failed to save image URL to database")
+            }
+    }
 
     // 선택된 사진 처리
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -197,7 +207,9 @@ class SettingFragment : Fragment() {
         Glide.with(this)
             .load(uri)
             .into(ivProfile)
-        // Firebase에 이미지 업로드 기능 추가 가능
+
+        // Firebase에 이미지 업로드
+        uploadProfileImage(uri)
     }
 
     companion object {
@@ -231,5 +243,25 @@ class SettingFragment : Fragment() {
         startActivityForResult(intent, REQUEST_CODE_SELECT_PHOTOS)
     }
 
+    private fun loadCurrentNick() {
+        val userId = mAuth.currentUser?.uid.toString()
+        if (userId != null) {
+            mDbRef.child("user").child(userId).get().addOnSuccessListener { snapshot ->
+                val currentUser = snapshot.getValue(User::class.java)
+                tvCurrentNick.text = "현재 닉네임: ${currentUser?.nick}"
+            }
+        }
+    }
+
+    private fun updateNickname(newNick: String) {
+        val userId = mAuth.currentUser?.uid.toString()
+        if (userId != null) {
+            mDbRef.child("user").child(userId).child("nick").setValue(newNick).addOnSuccessListener {
+                tvCurrentNick.text = "현재 닉네임: $newNick"
+                edtNewNick.visibility = View.GONE
+                btnSaveNewNick.visibility = View.GONE
+            }
+        }
+    }
 
 }
