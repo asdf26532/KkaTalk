@@ -210,6 +210,7 @@ class SettingFragment : Fragment() {
 
         // Firebase에 이미지 업로드
         uploadProfileImage(uri)
+
     }
 
     companion object {
