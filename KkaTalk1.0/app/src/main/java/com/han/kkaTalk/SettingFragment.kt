@@ -15,6 +15,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
@@ -38,6 +39,8 @@ class SettingFragment : Fragment() {
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDbRef: DatabaseReference
 
+    private lateinit var progressBar: ProgressBar
+
     private val TAG = "SettingFragment"
 
     override fun onCreateView(
@@ -59,6 +62,9 @@ class SettingFragment : Fragment() {
         btnLogout = view.findViewById(R.id.btn_logout)
         btnChangeProfile = view.findViewById(R.id.btn_change_profile)
         ivProfile = view.findViewById(R.id.iv_profile)
+
+        // ProgressBar 초기화
+        progressBar = view.findViewById(R.id.progress_bar)
 
         // 현재 프로필 사진 로드
         loadCurrentProfile()
@@ -103,6 +109,9 @@ class SettingFragment : Fragment() {
         val userId = mAuth.currentUser?.uid.toString()
 
         if (userId.isNotEmpty()) {
+            // 프로그레스바 보이기
+            progressBar.visibility = View.VISIBLE
+
             mDbRef.child("user").child(userId).get().addOnSuccessListener { snapshot ->
                 val currentUser = snapshot.getValue(User::class.java)
                 val profileImageUrl = currentUser?.profileImageUrl
@@ -118,6 +127,10 @@ class SettingFragment : Fragment() {
                             .load(uri)
                             .placeholder(R.drawable.profile_default) // 기본 이미지 설정
                             .into(ivProfile)
+
+                        // 이미지 로드가 완료되면 프로그레스바 숨기기
+                        progressBar.visibility = View.GONE
+                        
                     }.addOnFailureListener {
                         // 실패 시 기본 이미지 로드
                         ivProfile.setImageResource(R.drawable.profile_default)
