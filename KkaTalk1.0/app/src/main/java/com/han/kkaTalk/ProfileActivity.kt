@@ -48,18 +48,14 @@ class ProfileActivity : AppCompatActivity() {
         userRef.get().addOnSuccessListener { snapshot ->
             val user = snapshot.getValue(User::class.java)
             user?.let {
-                // 프로필 이미지 로드
                 val profileImageUrl = it.profileImageUrl
                 if (profileImageUrl.isNotEmpty()) {
-                    val storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(profileImageUrl)
-                    storageRef.downloadUrl.addOnSuccessListener { uri ->
-                        Glide.with(this@ProfileActivity)
-                            .load(uri)
-                            .placeholder(R.drawable.profile_default)
-                            .into(binding.ivProfile)
-                    }.addOnFailureListener {
-                        binding.ivProfile.setImageResource(R.drawable.profile_default)
-                    }
+                    // Glide를 사용해 URL을 바로 로드
+                    Glide.with(this@ProfileActivity)
+                        .load(profileImageUrl)
+                        .placeholder(R.drawable.profile_default)
+                        .error(R.drawable.profile_default) // 오류 시 기본 이미지 표시
+                        .into(binding.ivProfile)
                 } else {
                     binding.ivProfile.setImageResource(R.drawable.profile_default)
                 }
