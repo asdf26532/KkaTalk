@@ -100,8 +100,6 @@ class LoginActivity : AppCompatActivity() {
             }
         })
 
-
-
     }
 
     private fun showInterstitialAdAndProceed() {
@@ -130,9 +128,6 @@ class LoginActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
-
-
-
 
     private fun login(email: String, password: String) {
         mAuth.signInWithEmailAndPassword(email, password)

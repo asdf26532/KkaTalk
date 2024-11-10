@@ -5,9 +5,10 @@ data class ChatPreview(
     val userNick: String,
     val userUid: String,
     var lastMessage: String?,
-    val lastMessageTime: Long
+    val lastMessageTime: Long,
+    val profileImageUrl: String? = null
 )
 {
-    constructor():this("","","","",0L)
+    constructor():this("","","","",0L,"")
 }
 
