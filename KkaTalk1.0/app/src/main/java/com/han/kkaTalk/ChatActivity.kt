@@ -31,6 +31,8 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var receiverRoom: String
     private lateinit var senderRoom: String
 
+    private lateinit var profileImageUrl: String
+
     private lateinit var messageList: ArrayList<Message>
 
 
@@ -40,7 +42,7 @@ class ChatActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         messageList = ArrayList()
-        val messageAdapter: MessageAdapter = MessageAdapter(this, messageList)
+        val messageAdapter: MessageAdapter = MessageAdapter(this, messageList, profileImageUrl)
 
         // RecyclerView
         binding.rvChat.layoutManager = LinearLayoutManager(this)
@@ -49,6 +51,8 @@ class ChatActivity : AppCompatActivity() {
         // 넘어온 데이터 변수에 담기
         receiverName = intent.getStringExtra("nick").toString()
         receiverUid = intent.getStringExtra("uId").toString()
+
+        profileImageUrl = intent.getStringExtra("profileImageUrl").toString()
 
         mAuth = FirebaseAuth.getInstance()
         mDbRef = FirebaseDatabase.getInstance().reference

@@ -4,14 +4,18 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class MessageAdapter(private val context: Context, private val messageList: ArrayList<Message>):
-    RecyclerView.Adapter<RecyclerView.ViewHolder>(){
+class MessageAdapter(private val context: Context,
+                     private val messageList: ArrayList<Message>,
+                     private val profileImageUrl: String
+                    ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
 
     private val receive = 1
 
@@ -44,6 +48,13 @@ class MessageAdapter(private val context: Context, private val messageList: Arra
             val viewHolder = holder as ReceiveViewHolder
             viewHolder.receiveMessage.text = currentMessage.message
             viewHolder.receiveTime.text = dateFormat.format(currentMessage.timestamp)
+
+            // 프로필 이미지를 설정하기 위해 Glide를 사용
+            Glide.with(context)
+                .load(profileImageUrl) // 전달받은 프로필 이미지 URL 사용
+                .placeholder(R.drawable.profile_default) // 기본 이미지 설정
+                .into(holder.profileImageUrl) // ReceiveViewHolder의 ImageView에 로드
+
         }
 
     }
@@ -70,6 +81,7 @@ class MessageAdapter(private val context: Context, private val messageList: Arra
     class ReceiveViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         val receiveMessage: TextView = itemView.findViewById(R.id.tv_receive_msg)
         val receiveTime: TextView = itemView.findViewById(R.id.tv_receive_time)
+        val profileImageUrl: ImageView = itemView.findViewById(R.id.iv_profile)
     }
 
 
