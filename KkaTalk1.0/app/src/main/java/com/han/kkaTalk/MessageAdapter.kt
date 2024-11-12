@@ -14,7 +14,7 @@ import java.util.Locale
 
 class MessageAdapter(private val context: Context,
                      private val messageList: ArrayList<Message>,
-                     private val profileImageUrl: String
+                     private val profileImageUrl: String?
                     ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
 
     private val receive = 1
@@ -53,7 +53,7 @@ class MessageAdapter(private val context: Context,
             Glide.with(context)
                 .load(profileImageUrl) // 전달받은 프로필 이미지 URL 사용
                 .placeholder(R.drawable.profile_default) // 기본 이미지 설정
-                .into(holder.profileImageUrl) // ReceiveViewHolder의 ImageView에 로드
+                .into(holder.profileImage) // ReceiveViewHolder의 ImageView에 로드
 
         }
 
@@ -81,7 +81,7 @@ class MessageAdapter(private val context: Context,
     class ReceiveViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         val receiveMessage: TextView = itemView.findViewById(R.id.tv_receive_msg)
         val receiveTime: TextView = itemView.findViewById(R.id.tv_receive_time)
-        val profileImageUrl: ImageView = itemView.findViewById(R.id.iv_profile)
+        val profileImage: ImageView = itemView.findViewById(R.id.iv_profile)
     }
 
 

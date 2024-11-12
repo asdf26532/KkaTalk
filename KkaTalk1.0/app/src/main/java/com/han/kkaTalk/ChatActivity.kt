@@ -31,7 +31,7 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var receiverRoom: String
     private lateinit var senderRoom: String
 
-    private lateinit var profileImageUrl: String
+    private var profileImageUrl: String? = null
 
     private lateinit var messageList: ArrayList<Message>
 
@@ -109,6 +109,8 @@ class ChatActivity : AppCompatActivity() {
                 }
             })
     }
+
+
 
     // 뒤로 가기 버튼 동작 구현
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
