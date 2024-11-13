@@ -34,12 +34,23 @@ class ChatActivity : AppCompatActivity() {
     private var profileImageUrl: String? = null
 
     private lateinit var messageList: ArrayList<Message>
+    private lateinit var messageAdapter: MessageAdapter
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityChatBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // 넘어온 데이터 변수에 담기
+        receiverName = intent.getStringExtra("nick").toString()
+        receiverUid = intent.getStringExtra("uId").toString()
+        profileImageUrl = intent.getStringExtra("profileImageUrl").toString()
+
+        // 데이터가 제대로 넘어오는지 로그로 확인
+        Log.d("ChatActivity", "Receiver Name: $receiverName")
+        Log.d("ChatActivity", "Receiver UID: $receiverUid")
+        Log.d("ChatActivity", "Profile Image URL: $profileImageUrl")
 
         messageList = ArrayList()
         val messageAdapter: MessageAdapter = MessageAdapter(this, messageList, profileImageUrl)
@@ -48,12 +59,7 @@ class ChatActivity : AppCompatActivity() {
         binding.rvChat.layoutManager = LinearLayoutManager(this)
         binding.rvChat.adapter = messageAdapter
 
-        // 넘어온 데이터 변수에 담기
-        receiverName = intent.getStringExtra("nick").toString()
-        receiverUid = intent.getStringExtra("uId").toString()
-
-        profileImageUrl = intent.getStringExtra("profileImageUrl").toString()
-
+        // Firebase 설정
         mAuth = FirebaseAuth.getInstance()
         mDbRef = FirebaseDatabase.getInstance().reference
 

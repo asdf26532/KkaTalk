@@ -42,9 +42,9 @@ class ChattingFragment : Fragment() {
             /*val intent = Intent(activity, ChatActivity::class.java)*/
             val intent = Intent(context, ChatActivity::class.java)
 
-            intent.putExtra("name", chatPreview.userName)
             intent.putExtra("nick", chatPreview.userNick)
             intent.putExtra("uId", chatPreview.userUid)
+            intent.putExtra("profileImageUrl", chatPreview.profileImageUrl)
             /*startActivity(intent)*/
             startActivityForResult(intent, REQUEST_CHAT_UPDATE) // REQUEST_CHAT_UPDATE는 식별용 상수
         }
