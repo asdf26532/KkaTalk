@@ -20,7 +20,7 @@ import com.han.kkaTalk.databinding.ActivityChatBinding
 
 class ChatActivity : AppCompatActivity() {
 
-    private lateinit var receiverName: String
+    private lateinit var receiverNick: String
     private lateinit var receiverUid: String
 
     private lateinit var binding: ActivityChatBinding
@@ -43,17 +43,17 @@ class ChatActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // 넘어온 데이터 변수에 담기
-        receiverName = intent.getStringExtra("nick").toString()
+        receiverNick = intent.getStringExtra("nick").toString()
         receiverUid = intent.getStringExtra("uId").toString()
         profileImageUrl = intent.getStringExtra("profileImageUrl").toString()
 
-        // 데이터가 제대로 넘어오는지 로그로 확인
-        Log.d("ChatActivity", "Receiver Name: $receiverName")
+        // 데이터가 제대로 넘어오는지 로그 확인
+        Log.d("ChatActivity", "Receiver Name: $receiverNick")
         Log.d("ChatActivity", "Receiver UID: $receiverUid")
         Log.d("ChatActivity", "Profile Image URL: $profileImageUrl")
 
         messageList = ArrayList()
-        val messageAdapter: MessageAdapter = MessageAdapter(this, messageList, profileImageUrl)
+        val messageAdapter: MessageAdapter = MessageAdapter(this, messageList, profileImageUrl, receiverNick)
 
         // RecyclerView
         binding.rvChat.layoutManager = LinearLayoutManager(this)
@@ -71,7 +71,7 @@ class ChatActivity : AppCompatActivity() {
 
 
         // 액션바에 상대방 이름 보이기
-        supportActionBar?.title = receiverName
+        supportActionBar?.title = receiverNick
         supportActionBar?.setDisplayHomeAsUpEnabled(true) // 화살표 버튼 추가
 
         binding.btnSend.setOnClickListener{

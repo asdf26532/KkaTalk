@@ -14,7 +14,8 @@ import java.util.Locale
 
 class MessageAdapter(private val context: Context,
                      private val messageList: ArrayList<Message>,
-                     private val profileImageUrl: String?
+                     private val profileImageUrl: String?,
+                     private val receiverNick: String
                     ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
 
     private val receive = 1
@@ -46,6 +47,7 @@ class MessageAdapter(private val context: Context,
             viewHolder.sendTime.text = dateFormat.format(currentMessage.timestamp)
         } else {
             val viewHolder = holder as ReceiveViewHolder
+            holder.nickName.text = receiverNick
             viewHolder.receiveMessage.text = currentMessage.message
             viewHolder.receiveTime.text = dateFormat.format(currentMessage.timestamp)
 
@@ -79,6 +81,7 @@ class MessageAdapter(private val context: Context,
     }
 
     class ReceiveViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
+        val nickName: TextView = itemView.findViewById(R.id.tv_nick)
         val receiveMessage: TextView = itemView.findViewById(R.id.tv_receive_msg)
         val receiveTime: TextView = itemView.findViewById(R.id.tv_receive_time)
         val profileImage: ImageView = itemView.findViewById(R.id.iv_profile)

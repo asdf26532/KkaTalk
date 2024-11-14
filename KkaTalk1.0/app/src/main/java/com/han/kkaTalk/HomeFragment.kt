@@ -105,7 +105,7 @@ class HomeFragment : Fragment() {
                         val intent = Intent(requireContext(), ChatActivity::class.java)
                         intent.putExtra("nick", user.nick)
                         intent.putExtra("uId", user.uId)
-                        intent.putExtra("profileImgUrl", user.profileImageUrl)
+                        intent.putExtra("profileImageUrl", user.profileImageUrl)
                         startActivity(intent)
                     }
                     "취소" -> {
