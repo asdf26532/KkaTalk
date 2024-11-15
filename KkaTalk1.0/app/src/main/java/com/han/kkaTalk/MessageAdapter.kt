@@ -45,6 +45,14 @@ class MessageAdapter(private val context: Context,
             val viewHolder = holder as SendViewHolder
             viewHolder.sendMessage.text = currentMessage.message
             viewHolder.sendTime.text = dateFormat.format(currentMessage.timestamp)
+
+            // 읽음 상태 표시
+            if (currentMessage.isRead) {
+                viewHolder.readStatus.text = ""
+            } else {
+                viewHolder.readStatus.text = "1"
+            }
+
         } else {
             val viewHolder = holder as ReceiveViewHolder
             holder.nickName.text = receiverNick
@@ -78,6 +86,7 @@ class MessageAdapter(private val context: Context,
     class SendViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         val sendMessage: TextView = itemView.findViewById(R.id.tv_send_msg)
         val sendTime: TextView = itemView.findViewById(R.id.tv_send_time)
+        val readStatus: TextView = itemView.findViewById(R.id.tv_read_status)
     }
 
     class ReceiveViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {

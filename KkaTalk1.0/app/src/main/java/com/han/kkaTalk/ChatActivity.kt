@@ -78,6 +78,7 @@ class ChatActivity : AppCompatActivity() {
 
             val message = binding.edtMessage.text.toString()
             val timeStamp = System.currentTimeMillis()
+
             val messageObject = Message(message, senderUid, receiverUid, timeStamp)
 
             // 데이터 저장
@@ -114,9 +115,30 @@ class ChatActivity : AppCompatActivity() {
                     TODO("Not yet implemented")
                 }
             })
+
     }
 
+    // 메시지 읽음 상태 업데이트 함수
+    private fun markMessagesAsRead(chatRoomId: String) {
+        val database = FirebaseDatabase.getInstance().reference
+        val messagesRef = database.child("chats").child(chatRoomId).child("message")
 
+        messagesRef.get().addOnSuccessListener { snapshot ->
+            for (messageSnapshot in snapshot.children) {
+                val message = messageSnapshot.getValue(Message::class.java)
+                if (message != null && !message.isRead && message.sendId != FirebaseAuth.getInstance().currentUser?.uid) {
+                    // 메시지가 읽히지 않았고, 현재 사용자가 보낸 메시지가 아닐 경우 업데이트
+                    messageSnapshot.ref.child("isRead").setValue(true)
+                    }
+                }
+            }
+        }
+
+    override fun onResume() {
+        super.onResume()
+        // 메시지 읽음 상태 업데이트
+        markMessagesAsRead(senderRoom)
+    }
 
     // 뒤로 가기 버튼 동작 구현
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

@@ -15,6 +15,17 @@
         android:textColor="#888888"/>
 
     <TextView
+        android:id="@+id/tv_read_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="읽지 않음"
+        android:textSize="12sp"
+        android:layout_toStartOf="@id/tv_send_msg"
+        android:layout_above="@+id/tv_send_time"
+        android:layout_marginTop="4dp"
+        android:textColor="#888888"/>
+
+    <TextView
         android:id="@+id/tv_send_msg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
