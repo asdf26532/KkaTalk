@@ -32,10 +32,7 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var senderRoom: String
 
     private var profileImageUrl: String? = null
-
     private lateinit var messageList: ArrayList<Message>
-    private lateinit var messageAdapter: MessageAdapter
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +42,7 @@ class ChatActivity : AppCompatActivity() {
         // 넘어온 데이터 변수에 담기
         receiverNick = intent.getStringExtra("nick").toString()
         receiverUid = intent.getStringExtra("uId").toString()
-        profileImageUrl = intent.getStringExtra("profileImageUrl").toString()
+        profileImageUrl = intent.getStringExtra("profileImageUrl") ?: ""
 
         // 데이터가 제대로 넘어오는지 로그 확인
         Log.d("ChatActivity", "Receiver Name: $receiverNick")
@@ -53,7 +50,7 @@ class ChatActivity : AppCompatActivity() {
         Log.d("ChatActivity", "Profile Image URL: $profileImageUrl")
 
         messageList = ArrayList()
-        val messageAdapter: MessageAdapter = MessageAdapter(this, messageList, profileImageUrl, receiverNick)
+        val messageAdapter = MessageAdapter(this, messageList, profileImageUrl, receiverNick)
 
         // RecyclerView
         binding.rvChat.layoutManager = LinearLayoutManager(this)
@@ -74,12 +71,12 @@ class ChatActivity : AppCompatActivity() {
         supportActionBar?.title = receiverNick
         supportActionBar?.setDisplayHomeAsUpEnabled(true) // 화살표 버튼 추가
 
-        binding.btnSend.setOnClickListener{
-
+        binding.btnSend.setOnClickListener {
             val message = binding.edtMessage.text.toString()
             val timeStamp = System.currentTimeMillis()
+            val isRead = false
 
-            val messageObject = Message(message, senderUid, receiverUid, timeStamp)
+            val messageObject = Message(message, senderUid, receiverUid, timeStamp, isRead)
 
             // 데이터 저장
             mDbRef.child("chats").child(senderRoom).child("message").push()
@@ -88,6 +85,7 @@ class ChatActivity : AppCompatActivity() {
                     mDbRef.child("chats").child(receiverRoom).child("message").push()
                         .setValue(messageObject)
                 }
+
             // 입력 부분 초기화
             binding.edtMessage.setText("")
         }
@@ -112,27 +110,38 @@ class ChatActivity : AppCompatActivity() {
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    TODO("Not yet implemented")
+                    Log.e("DatabaseError", "Database error: $error")
                 }
             })
 
     }
 
-    // 메시지 읽음 상태 업데이트 함수
     private fun markMessagesAsRead(chatRoomId: String) {
         val database = FirebaseDatabase.getInstance().reference
         val messagesRef = database.child("chats").child(chatRoomId).child("message")
 
-        messagesRef.get().addOnSuccessListener { snapshot ->
-            for (messageSnapshot in snapshot.children) {
-                val message = messageSnapshot.getValue(Message::class.java)
-                if (message != null && !message.isRead && message.sendId != FirebaseAuth.getInstance().currentUser?.uid) {
-                    // 메시지가 읽히지 않았고, 현재 사용자가 보낸 메시지가 아닐 경우 업데이트
-                    messageSnapshot.ref.child("isRead").setValue(true)
+        messagesRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (messageSnapshot in snapshot.children) {
+                    val message = messageSnapshot.getValue(Message::class.java)
+                    if (message != null && !message.isRead && message.sendId != FirebaseAuth.getInstance().currentUser?.uid) {
+                        // 읽지 않은 메시지이고, 현재 사용자가 보낸 것이 아니면 업데이트
+                        messageSnapshot.ref.child("isRead").setValue(true)
+                            .addOnSuccessListener {
+                                Log.d("markMessagesAsRead", "Message marked as read: ${messageSnapshot.key}")
+                            }
+                            .addOnFailureListener { error ->
+                                Log.e("markMessagesAsRead", "Failed to mark message as read: $error")
+                            }
                     }
                 }
             }
-        }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("markMessagesAsRead", "Database error: $error")
+            }
+        })
+    }
 
     override fun onResume() {
         super.onResume()

@@ -48,7 +48,7 @@ class MessageAdapter(private val context: Context,
 
             // 읽음 상태 표시
             if (currentMessage.isRead) {
-                viewHolder.readStatus.text = ""
+                viewHolder.readStatus.text = " "
             } else {
                 viewHolder.readStatus.text = "1"
             }
