@@ -47,7 +47,7 @@ class MessageAdapter(private val context: Context,
             viewHolder.sendTime.text = dateFormat.format(currentMessage.timestamp)
 
             // 읽음 상태 표시
-            if (currentMessage.isRead) {
+            if (currentMessage.mread == true) {
                 viewHolder.readStatus.text = " "
             } else {
                 viewHolder.readStatus.text = "1"

@@ -5,7 +5,7 @@ data class Message(
     val sendId: String?,
     val receiverId: String?,
     val timestamp: Long?,
-    val isRead: Boolean = false
+    val mread: Boolean? = null
 ){
     constructor():this("","","",0L, false)
 }

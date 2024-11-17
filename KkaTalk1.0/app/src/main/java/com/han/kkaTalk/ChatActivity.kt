@@ -74,9 +74,9 @@ class ChatActivity : AppCompatActivity() {
         binding.btnSend.setOnClickListener {
             val message = binding.edtMessage.text.toString()
             val timeStamp = System.currentTimeMillis()
-            val isRead = false
+            val mread = false
 
-            val messageObject = Message(message, senderUid, receiverUid, timeStamp, isRead)
+            val messageObject = Message(message, senderUid, receiverUid, timeStamp, mread)
 
             // 데이터 저장
             mDbRef.child("chats").child(senderRoom).child("message").push()
@@ -124,9 +124,9 @@ class ChatActivity : AppCompatActivity() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (messageSnapshot in snapshot.children) {
                     val message = messageSnapshot.getValue(Message::class.java)
-                    if (message != null && !message.isRead && message.sendId != FirebaseAuth.getInstance().currentUser?.uid) {
+                    if (message != null && !message.mread!! && message.sendId != FirebaseAuth.getInstance().currentUser?.uid) {
                         // 읽지 않은 메시지이고, 현재 사용자가 보낸 것이 아니면 업데이트
-                        messageSnapshot.ref.child("isRead").setValue(true)
+                        messageSnapshot.ref.child("mRead").setValue(true)
                             .addOnSuccessListener {
                                 Log.d("markMessagesAsRead", "Message marked as read: ${messageSnapshot.key}")
                             }
