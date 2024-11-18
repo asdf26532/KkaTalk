@@ -113,26 +113,38 @@ class ChatActivity : AppCompatActivity() {
                     Log.e("DatabaseError", "Database error: $error")
                 }
             })
-
     }
 
-    private fun markMessagesAsRead(chatRoomId: String) {
-        val database = FirebaseDatabase.getInstance().reference
-        val messagesRef = database.child("chats").child(chatRoomId).child("message")
+    private fun markMessagesAsRead(senderRoom: String, receiverRoom: String) {
+        val senderMessagesRef = mDbRef.child("chats").child(senderRoom).child("message")
+        val receiverMessagesRef = mDbRef.child("chats").child(receiverRoom).child("message")
 
-        messagesRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        // Sender Room 업데이트
+        senderMessagesRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (messageSnapshot in snapshot.children) {
                     val message = messageSnapshot.getValue(Message::class.java)
-                    if (message != null && !message.mread!! && message.sendId != FirebaseAuth.getInstance().currentUser?.uid) {
-                        // 읽지 않은 메시지이고, 현재 사용자가 보낸 것이 아니면 업데이트
-                        messageSnapshot.ref.child("mRead").setValue(true)
-                            .addOnSuccessListener {
-                                Log.d("markMessagesAsRead", "Message marked as read: ${messageSnapshot.key}")
-                            }
-                            .addOnFailureListener { error ->
-                                Log.e("markMessagesAsRead", "Failed to mark message as read: $error")
-                            }
+                    if (message != null && (message.mread == false) && message.sendId != FirebaseAuth.getInstance().currentUser?.uid) {
+                        // Sender Room 업데이트
+                        messageSnapshot.ref.child("mread").setValue(true)
+
+                        // Receiver Room 업데이트
+                        message.timestamp?.let { timestamp ->  // timestamp가 null이 아닌 경우만 실행
+                            receiverMessagesRef.orderByChild("timestamp")
+                                .equalTo(timestamp.toDouble())
+                                .addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(receiverSnapshot: DataSnapshot) {
+                                        for (receiverMessageSnapshot in receiverSnapshot.children) {
+                                            receiverMessageSnapshot.ref.child("mread")
+                                                .setValue(true)
+                                        }
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {
+                                        Log.e("markMessagesAsRead", "Database error: $error")
+                                    }
+                                })
+                        }
                     }
                 }
             }
@@ -143,10 +155,12 @@ class ChatActivity : AppCompatActivity() {
         })
     }
 
+
+
     override fun onResume() {
         super.onResume()
         // 메시지 읽음 상태 업데이트
-        markMessagesAsRead(senderRoom)
+        markMessagesAsRead(senderRoom, receiverRoom)
     }
 
     // 뒤로 가기 버튼 동작 구현
