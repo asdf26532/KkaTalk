@@ -37,6 +37,7 @@ class ChatListAdapter(
     class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val userNameTextView: TextView = itemView.findViewById(R.id.tv_user_name)
         private val lastMessageTextView: TextView = itemView.findViewById(R.id.tv_last_message)
+        private val unreadCount: TextView = itemView.findViewById(R.id.tv_unread_count)
         private val lastMessageTimeTextView: TextView = itemView.findViewById(R.id.tv_last_message_time)
         private val profileImageView: ImageView = itemView.findViewById(R.id.iv_profile_picture)
 
@@ -55,6 +56,13 @@ class ChatListAdapter(
                     .into(profileImageView)
             } else {
                 profileImageView.setImageResource(R.drawable.profile_default)
+            }
+
+            if (chatPreview.unreadCount > 0) {
+                unreadCount.visibility = View.VISIBLE
+                unreadCount.text = chatPreview.unreadCount.toString()
+            } else {
+                unreadCount.visibility = View.GONE
             }
 
         }

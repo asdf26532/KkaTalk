@@ -91,7 +91,11 @@ class ChattingFragment : Fragment() {
                         val receiverUid = chatSnapshot.key?.replace(currentUserId, "")
 
                         if (receiverUid != null && lastMessage?.message != null) {
-                            if (tempChatList.none { it.userUid == receiverUid }) {
+                            val unreadCount = chatSnapshot.child("message")
+                                .children
+                                .filter { it.child("mread").getValue(Boolean::class.java) == false && it.child("receiverId").value == currentUserId }
+                                .count()
+
                                 mDbRef.child("user").child(receiverUid).addListenerForSingleValueEvent(object : ValueEventListener {
                                     override fun onDataChange(userSnapshot: DataSnapshot) {
                                         val userName = userSnapshot.child("name").getValue(String::class.java) ?: "Unknown"
@@ -102,7 +106,7 @@ class ChattingFragment : Fragment() {
 
                                         // 중복 확인: 이미 해당 유저와의 채팅이 존재하는지 검사
                                         if (tempChatList.none { it.userUid == receiverUid }) {
-                                            tempChatList.add(ChatPreview(userName, userNick, receiverUid, lastMessage.message ?: "", lastMessageTime, profileImageUrl))
+                                            tempChatList.add(ChatPreview(userName, userNick, receiverUid, lastMessage.message ?: "", lastMessageTime, profileImageUrl,unreadCount))
                                         }
                                             // UI 업데이트
                                             chatList.clear()  // 전체 업데이트 전에 리스트 초기화
@@ -117,12 +121,13 @@ class ChattingFragment : Fragment() {
                                     }
                                 })
                             }
+
                         } else {
                             Log.d("ChattingFragment", "Receiver UID or last message is null")
                         }
                     }
                 }
-            }
+
 
             override fun onCancelled(error: DatabaseError) {
                 Log.e("ChattingFragment", "Chat data load cancelled: $error")
