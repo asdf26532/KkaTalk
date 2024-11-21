@@ -45,7 +45,6 @@ class ChattingFragment : Fragment() {
             intent.putExtra("nick", chatPreview.userNick)
             intent.putExtra("uId", chatPreview.userUid)
             intent.putExtra("profileImageUrl", chatPreview.profileImageUrl)
-            /*startActivity(intent)*/
             startActivityForResult(intent, REQUEST_CHAT_UPDATE) // REQUEST_CHAT_UPDATE는 식별용 상수
         }
 
@@ -77,10 +76,8 @@ class ChattingFragment : Fragment() {
     private fun loadChatPreviews() {
         val currentUserId = mAuth.currentUser?.uid ?: return
 
-        // Firebase에서 데이터 불러오기
         mDbRef.child("chats").addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                Log.d("OnDataChanged", "Data changed: ${snapshot.childrenCount} children found.")
                 val tempChatList = ArrayList<ChatPreview>()
 
                 for (chatSnapshot in snapshot.children) {
@@ -91,43 +88,37 @@ class ChattingFragment : Fragment() {
                         val receiverUid = chatSnapshot.key?.replace(currentUserId, "")
 
                         if (receiverUid != null && lastMessage?.message != null) {
-                            val unreadCount = chatSnapshot.child("message")
-                                .children
+                            val unreadCount = chatSnapshot.child("message").children
                                 .filter { it.child("mread").getValue(Boolean::class.java) == false && it.child("receiverId").value == currentUserId }
                                 .count()
 
-                                mDbRef.child("user").child(receiverUid).addListenerForSingleValueEvent(object : ValueEventListener {
+                            mDbRef.child("user").child(receiverUid)
+                                .addListenerForSingleValueEvent(object : ValueEventListener {
                                     override fun onDataChange(userSnapshot: DataSnapshot) {
                                         val userName = userSnapshot.child("name").getValue(String::class.java) ?: "Unknown"
                                         val userNick = userSnapshot.child("nick").getValue(String::class.java) ?: "Unknown"
                                         val profileImageUrl = userSnapshot.child("profileImageUrl").getValue(String::class.java) ?: "default_url"
-                                        // 타임스탬프 가져오기
                                         val lastMessageTime = lastMessageSnapshot.child("timestamp").getValue(Long::class.java) ?: 0L
 
-                                        // 중복 확인: 이미 해당 유저와의 채팅이 존재하는지 검사
                                         if (tempChatList.none { it.userUid == receiverUid }) {
-                                            tempChatList.add(ChatPreview(userName, userNick, receiverUid, lastMessage.message ?: "", lastMessageTime, profileImageUrl,unreadCount))
+                                            tempChatList.add(ChatPreview(userName, userNick, receiverUid,lastMessage.message ?: "", lastMessageTime, profileImageUrl, unreadCount))
                                         }
-                                            // UI 업데이트
-                                            chatList.clear()  // 전체 업데이트 전에 리스트 초기화
-                                            tempChatList.sortByDescending { it.lastMessageTime }
-                                            chatList.addAll(tempChatList)
-                                            chatListAdapter.notifyDataSetChanged()
-                                            Log.d("OnDataChaged", "UI 갱신") // 로그 추가
-                                        }
+
+                                        // UI 업데이트는 여기서 수행
+                                        chatList.clear()
+                                        tempChatList.sortByDescending { it.lastMessageTime }
+                                        chatList.addAll(tempChatList)
+                                        chatListAdapter.notifyDataSetChanged()
+                                    }
 
                                     override fun onCancelled(error: DatabaseError) {
                                         Log.e("ChattingFragment", "User data load cancelled: $error")
                                     }
                                 })
-                            }
-
-                        } else {
-                            Log.d("ChattingFragment", "Receiver UID or last message is null")
                         }
                     }
                 }
-
+            }
 
             override fun onCancelled(error: DatabaseError) {
                 Log.e("ChattingFragment", "Chat data load cancelled: $error")
