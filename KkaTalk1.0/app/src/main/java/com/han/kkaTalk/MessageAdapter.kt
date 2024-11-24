@@ -36,6 +36,8 @@ class MessageAdapter(private val context: Context,
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (position >= messageList.size) return
+
         // 현재 메시지
         val currentMessage = messageList[position]
         val dateFormat = SimpleDateFormat("a hh:mm", Locale.getDefault()) // 시간 형식 설정

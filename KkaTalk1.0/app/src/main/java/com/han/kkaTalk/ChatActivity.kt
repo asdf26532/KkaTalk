@@ -94,14 +94,20 @@ class ChatActivity : AppCompatActivity() {
         mDbRef.child("chats").child(senderRoom).child("message")
             .addValueEventListener(object: ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
+                    val tempMessages = ArrayList<Message>()
+
                     for(postSnapshot in snapshot.children) {
                         val message = postSnapshot.getValue(Message::class.java)
-                        if (message != null) {
-                            messageList.add(message)
-                            binding.rvChat.post {  // UI 작업을 안전하게 수행
-                                messageAdapter.notifyItemInserted(messageList.size - 1)
-                                binding.rvChat.scrollToPosition(messageList.size - 1) // 최신 메시지로 스크롤
-                            }
+                        if (message != null && !messageList.contains(message)) {
+                            tempMessages.add(message)
+                        }
+                    }
+                    if (tempMessages.isNotEmpty()) {
+                        messageList.clear()
+                        messageList.addAll(tempMessages)
+                        binding.rvChat.post {
+                            messageAdapter.notifyDataSetChanged()
+                            binding.rvChat.scrollToPosition(messageList.size - 1)
                         }
                     }
 
