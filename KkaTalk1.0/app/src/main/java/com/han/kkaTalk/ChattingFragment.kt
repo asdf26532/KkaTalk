@@ -114,8 +114,8 @@
                                 mDbRef.child("user").child(receiverUid)
                                     .addListenerForSingleValueEvent(object : ValueEventListener {
                                         override fun onDataChange(userSnapshot: DataSnapshot) {
-                                            val userName = userSnapshot.child("name").getValue(String::class.java) ?: "Unknown"
-                                            val userNick = userSnapshot.child("nick").getValue(String::class.java) ?: "Unknown"
+                                            val userName = userSnapshot.child("name").getValue(String::class.java) ?: "(알 수 없음)"
+                                            val userNick = userSnapshot.child("nick").getValue(String::class.java) ?: "(알 수 없음)"
                                             val profileImageUrl = userSnapshot.child("profileImageUrl").getValue(String::class.java) ?: "default_url"
                                             val lastMessageTime = lastMessageSnapshot.child("timestamp").getValue(Long::class.java) ?: 0L
 
