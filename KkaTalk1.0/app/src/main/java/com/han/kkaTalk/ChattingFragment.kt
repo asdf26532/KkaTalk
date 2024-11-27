@@ -100,6 +100,11 @@
                     val tempChatList = ArrayList<ChatPreview>()
 
                     for (chatSnapshot in snapshot.children) {
+                        val chatKey = chatSnapshot.key ?: continue
+
+                        // 현재 사용자가 포함되지 않은 채팅방은 건너뛴다
+                        if (!chatKey.contains(currentUserId)) continue
+
                         val lastMessageSnapshot = chatSnapshot.child("message").children.lastOrNull()
 
                         if (lastMessageSnapshot != null) {
@@ -108,7 +113,8 @@
 
                             if (receiverUid != null && lastMessage?.message != null) {
                                 val unreadCount = chatSnapshot.child("message").children
-                                    .filter { it.child("mread").getValue(Boolean::class.java) == false && it.child("receiverId").value == currentUserId }
+                                    .filter { it.child("mread").getValue(Boolean::class.java) == false &&
+                                              it.child("receiverId").value == currentUserId }
                                     .count()
 
                                 mDbRef.child("user").child(receiverUid)
@@ -123,7 +129,7 @@
                                                 tempChatList.add(ChatPreview(userName, userNick, receiverUid,lastMessage.message ?: "", lastMessageTime, profileImageUrl, unreadCount))
                                             }
 
-                                            // UI 업데이트는 여기서 수행
+                                            // UI 업데이트
                                             chatList.clear()
                                             chatList.addAll(tempChatList.sortedByDescending { it.lastMessageTime })
                                             chatListAdapter.notifyDataSetChanged()
