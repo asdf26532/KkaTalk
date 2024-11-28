@@ -13,7 +13,8 @@ import java.util.Locale
 
 class ChatListAdapter(
     private val chatList: ArrayList<ChatPreview>,
-    private val onItemClick: (ChatPreview) -> Unit
+    private val onItemClick: (ChatPreview) -> Unit,
+    private val onItemDelete: (ChatPreview) -> Unit // 삭제 기능 추가
 ) : RecyclerView.Adapter<ChatListAdapter.ChatViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
@@ -27,6 +28,10 @@ class ChatListAdapter(
         holder.bind(chatPreview)
         holder.itemView.setOnClickListener {
             onItemClick(chatPreview)
+        }
+        holder.itemView.setOnLongClickListener { // 롱클릭으로 삭제 이벤트 처리
+            onItemDelete(chatPreview)
+            true
         }
     }
 

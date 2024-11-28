@@ -1,6 +1,7 @@
     package com.han.kkaTalk
 
     import android.app.Activity
+    import android.app.AlertDialog
     import android.content.Intent
     import android.os.Bundle
     import android.util.Log
@@ -38,7 +39,7 @@
 
             // RecyclerView 세팅
             chatList = ArrayList()
-            chatListAdapter = ChatListAdapter(chatList) { chatPreview ->
+            chatListAdapter = ChatListAdapter(chatList, { chatPreview ->
                 // 채팅방으로 이동
                 /*val intent = Intent(activity, ChatActivity::class.java)*/
                 val intent = Intent(context, ChatActivity::class.java)
@@ -47,7 +48,10 @@
                 intent.putExtra("uId", chatPreview.userUid)
                 intent.putExtra("profileImageUrl", chatPreview.profileImageUrl)
                 startActivityForResult(intent, REQUEST_CHAT_UPDATE) // REQUEST_CHAT_UPDATE는 식별용 상수
-            }
+            }, { chatPreview ->
+                // 삭제 처리
+                deleteChatRoom(chatPreview)
+            })
 
             binding.rvChat.layoutManager = LinearLayoutManager(activity)
             binding.rvChat.adapter = chatListAdapter
@@ -89,6 +93,27 @@
                     Log.e("ChattingFragment", "Chat update listener cancelled: ${error.message}")
                 }
             })
+        }
+
+        private fun deleteChatRoom(chatPreview: ChatPreview) {
+            val currentUserId = mAuth.currentUser?.uid ?: return
+            val chatKey = currentUserId + chatPreview.userUid
+
+            // 확인 다이얼로그 표시
+            val builder = AlertDialog.Builder(requireContext())
+            builder.setTitle("채팅방 삭제")
+            builder.setMessage("채팅방을 정말 삭제하시겠습니까?")
+            builder.setPositiveButton("삭제") { _, _ ->
+                mDbRef.child("chats").child(chatKey).removeValue().addOnSuccessListener {
+                    // UI 업데이트
+                    chatList.remove(chatPreview)
+                    chatListAdapter.notifyDataSetChanged()
+                }.addOnFailureListener { e ->
+                    Log.e("ChattingFragment", "Failed to delete chat: ${e.message}")
+                }
+            }
+            builder.setNegativeButton("취소", null)
+            builder.show()
         }
 
 
