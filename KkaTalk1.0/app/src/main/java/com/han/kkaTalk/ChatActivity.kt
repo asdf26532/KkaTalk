@@ -4,7 +4,9 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
@@ -162,12 +164,34 @@ class ChatActivity : AppCompatActivity() {
         })
     }
 
+    private fun blockUser(blockedUserId: String) {
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+        if (currentUserId != null) {
+            val userRef = FirebaseDatabase.getInstance().reference.child("user").child(currentUserId).child("blockedUsers")
+            userRef.child(blockedUserId).setValue(true).addOnSuccessListener {
+                Toast.makeText(this, "사용자를 차단했습니다.", Toast.LENGTH_SHORT).show()
+                // 차단 후 채팅방 종료
+                finish()
+            }.addOnFailureListener {
+                Toast.makeText(this, "차단에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(this, "로그인 상태를 확인하세요.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
 
     override fun onResume() {
         super.onResume()
         // 메시지 읽음 상태 업데이트
         markMessagesAsRead(senderRoom, receiverRoom)
+    }
+
+    // 사용자 차단하기 구현
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.chat_menu, menu)
+        return super.onCreateOptionsMenu(menu)
     }
 
     // 뒤로 가기 버튼 동작 구현
@@ -182,8 +206,12 @@ class ChatActivity : AppCompatActivity() {
                 true
             }
 
+            R.id.menu_block_user -> { // 오른쪽 위 차단하기 버튼
+                blockUser(receiverUid)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
-
     }
+
 }
