@@ -29,6 +29,8 @@ class HomeFragment : Fragment() {
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDbRef: DatabaseReference
 
+    private val blockedUserIds = mutableListOf<String>()
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -44,39 +46,67 @@ class HomeFragment : Fragment() {
         binding.rvUser.layoutManager = LinearLayoutManager(requireContext())
         binding.rvUser.adapter = adapter
 
-        // 사용자 정보를 Firebase에서 가져오기
-        fetchUserData()
+        // 차단된 사용자 데이터 먼저 가져오기
+        fetchBlockedUsers {
+            // 차단된 사용자 데이터를 가져온 후 사용자 목록 가져오기
+            fetchUserData()
+        }
 
         return binding.root
     }
 
+    private fun fetchBlockedUsers(callback: () -> Unit) {
+        val currentUserId = mAuth.currentUser?.uid ?: return
+        val blockedUsersRef = mDbRef.child("user").child(currentUserId).child("blockedUsers")
+
+        blockedUsersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                blockedUserIds.clear()
+                for (blockedUserSnapshot in snapshot.children) {
+                    val blockedUserId = blockedUserSnapshot.key.toString()
+                    blockedUserIds.add(blockedUserId)
+                    // 차단된 유저 UID 로그
+                    Log.d("fetchBlockedUsers", "Blocked User UID: $blockedUserId")
+                }
+                Log.d("fetchBlockedUsers", "Total Blocked Users: $blockedUserIds")
+                callback() // 차단된 사용자 데이터를 가져온 후 처리 계속
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("fetchBlockedUsers", "Error fetching blocked users: ${error.message}")
+            }
+        })
+    }
+
     private fun fetchUserData() {
-        val currentUserId = mAuth.currentUser?.uid.toString() // uid를 문자열로 변환하여 일관성 유지
-        Log.d("fetchUserData", "Current User UID: $currentUserId") // 현재 사용자 UID 확인
+        val currentUserId = mAuth.currentUser?.uid ?: return
+
+        // Firebase에서 모든 사용자 데이터를 가져옵니다.
         mDbRef.child("user").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                userList.clear() // 리스트 초기화
+                userList.clear() // 사용자 리스트 초기화
                 for (postSnapshot in snapshot.children) {
                     val currentUser = postSnapshot.getValue(User::class.java)
 
                     if (currentUser != null) {
-                        Log.d("fetchUserData", "Fetched UID: ${currentUser.uId}") // 데이터베이스에서 가져온 UID 확인
-
-                        // UID 비교
-                        if (currentUser.uId.trim() == currentUserId.trim()) {
-                            Log.d("fetchUserData", "Skipping current user: ${currentUser.uId}") // 현재 사용자 UID가 일치할 경우
-                        } else {
-                            userList.add(currentUser)
+                        if (currentUser.uId != currentUserId) {
+                            if (blockedUserIds.contains(currentUser.uId)) {
+                                // 차단된 유저가 필터링되는지 확인
+                                Log.d("fetchUserData", "Blocked User Skipped: ${currentUser.uId}")
+                            } else {
+                                userList.add(currentUser)
+                                // 차단되지 않은 유저 로그
+                                Log.d("fetchUserData", "User Added: ${currentUser.uId}")
+                            }
                         }
-                    } else {
-                        Log.d("fetchUserData", "Current user is null")
                     }
                 }
+                Log.d("fetchUserData", "Final User List: ${userList.map { it.uId }}")
                 adapter.notifyDataSetChanged()
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.e("fetchUserData", "Failed to fetch user data: ${error.message}")
+                Log.e("fetchUserData", "Error fetching user data: ${error.message}")
             }
         })
 
