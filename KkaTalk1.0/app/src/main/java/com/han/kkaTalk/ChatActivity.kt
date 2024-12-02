@@ -36,6 +36,8 @@ class ChatActivity : AppCompatActivity() {
     private var profileImageUrl: String? = null
     private lateinit var messageList: ArrayList<Message>
 
+    private val blockedUserIds: ArrayList<String> = ArrayList()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityChatBinding.inflate(layoutInflater)
@@ -68,12 +70,20 @@ class ChatActivity : AppCompatActivity() {
         senderRoom = receiverUid + senderUid
         receiverRoom = senderUid + receiverUid
 
+        // 차단된 사용자 목록 가져오기
+        fetchBlockedUsers()
 
         // 액션바에 상대방 이름 보이기
         supportActionBar?.title = receiverNick
         supportActionBar?.setDisplayHomeAsUpEnabled(true) // 화살표 버튼 추가
 
         binding.btnSend.setOnClickListener {
+
+            if (blockedUserIds.contains(receiverUid)) {
+                Toast.makeText(this, "차단한 사용자에게 메시지를 보낼 수 없습니다.", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+
             val message = binding.edtMessage.text.toString()
             val timeStamp = System.currentTimeMillis()
             val mread = false
@@ -98,10 +108,12 @@ class ChatActivity : AppCompatActivity() {
                 override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                     val message = snapshot.getValue(Message::class.java)
                     if (message != null) {
-                        messageList.add(message)
-                        binding.rvChat.post {
-                            messageAdapter.notifyDataSetChanged()
-                            binding.rvChat.scrollToPosition(messageList.size - 1)
+                        if (!blockedUserIds.contains(message.sendId)) {
+                            messageList.add(message)
+                            binding.rvChat.post {
+                                messageAdapter.notifyDataSetChanged()
+                                binding.rvChat.scrollToPosition(messageList.size - 1)
+                            }
                         }
                     }
 
@@ -179,6 +191,31 @@ class ChatActivity : AppCompatActivity() {
             Toast.makeText(this, "로그인 상태를 확인하세요.", Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun fetchBlockedUsers() {
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+        if (currentUserId != null) {
+            val userRef = FirebaseDatabase.getInstance().reference.child("user").child(currentUserId).child("blockedUsers")
+
+            userRef.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    blockedUserIds.clear() // 기존 데이터를 초기화
+                    for (child in snapshot.children) {
+                        val blockedUserId = child.key
+                        if (blockedUserId != null) {
+                            blockedUserIds.add(blockedUserId)
+                        }
+                    }
+                    Log.d("ChatActivity", "Blocked Users: $blockedUserIds") // 차단된 사용자 확인
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("ChatActivity", "Failed to fetch blocked users: ${error.message}")
+                }
+            })
+        }
+    }
+
 
 
 
