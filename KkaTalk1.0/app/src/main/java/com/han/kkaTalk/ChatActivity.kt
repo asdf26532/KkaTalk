@@ -107,13 +107,12 @@ class ChatActivity : AppCompatActivity() {
             .addChildEventListener(object : ChildEventListener {
                 override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                     val message = snapshot.getValue(Message::class.java)
+
                     if (message != null) {
-                        if (!blockedUserIds.contains(message.sendId)) {
-                            messageList.add(message)
-                            binding.rvChat.post {
-                                messageAdapter.notifyDataSetChanged()
-                                binding.rvChat.scrollToPosition(messageList.size - 1)
-                            }
+                        messageList.add(message)
+                        binding.rvChat.post {
+                            messageAdapter.notifyDataSetChanged()
+                            binding.rvChat.scrollToPosition(messageList.size - 1)
                         }
                     }
 
@@ -244,7 +243,17 @@ class ChatActivity : AppCompatActivity() {
             }
 
             R.id.menu_block_user -> { // 오른쪽 위 차단하기 버튼
-                blockUser(receiverUid)
+                android.app.AlertDialog.Builder(this)
+                    .setTitle("사용자 차단")
+                    .setMessage("대화 상대를 차단하시겠습니까?")
+                    .setPositiveButton("차단하기") { dialog, _ ->
+                        blockUser(receiverUid) // 차단 실행
+                        dialog.dismiss()
+                    }
+                    .setNegativeButton("취소") { dialog, _ ->
+                        dialog.dismiss() // 다이얼로그 닫기
+                    }
+                    .show()
                 true
             }
             else -> super.onOptionsItemSelected(item)
