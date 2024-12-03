@@ -33,6 +33,7 @@ class SettingFragment : Fragment() {
     private lateinit var edtNewNick: EditText
     private lateinit var btnSaveNewNick: Button
     private lateinit var btnLogout: Button
+    private lateinit var btnBlock: Button
     private lateinit var btnChangeProfile: Button
     private lateinit var ivProfile: ImageView
 
@@ -62,6 +63,7 @@ class SettingFragment : Fragment() {
         btnLogout = view.findViewById(R.id.btn_logout)
         btnChangeProfile = view.findViewById(R.id.btn_change_profile)
         ivProfile = view.findViewById(R.id.iv_profile)
+        btnBlock = view.findViewById(R.id.btnManageBlockedUsers)
 
         // ProgressBar 초기화
         progressBar = view.findViewById(R.id.progress_bar)
@@ -85,6 +87,12 @@ class SettingFragment : Fragment() {
             if (newNick.isNotEmpty()) {
                 updateNickname(newNick)
             }
+        }
+
+        // 차단 관리 버튼 클릭 시
+        btnBlock.setOnClickListener {
+            val intent = Intent(requireContext(), BlockedUsersActivity::class.java)
+            startActivity(intent)
         }
 
         // 로그아웃 버튼 클릭 시

@@ -10,7 +10,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
-class UserAdapter(private val context: Context, private val userList: ArrayList<User>) :
+class UserAdapter(private val context: Context, private var userList: ArrayList<User>) :
     RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
 
     private var onItemClickListener: ((User) -> Unit)? = null
@@ -49,6 +49,12 @@ class UserAdapter(private val context: Context, private val userList: ArrayList<
 
     override fun getItemCount(): Int {
         return userList.size
+    }
+
+    // 차단된 사용자 목록만 업데이트
+    fun updateList(blockedUserIds: List<String>, allUsers: List<User>) {
+        userList = ArrayList(allUsers.filter { blockedUserIds.contains(it.uId) })
+        notifyDataSetChanged()
     }
 
     class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
