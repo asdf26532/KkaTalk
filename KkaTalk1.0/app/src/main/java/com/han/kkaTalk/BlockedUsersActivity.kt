@@ -8,6 +8,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -39,8 +40,11 @@ class BlockedUsersActivity : AppCompatActivity() {
         userAdapter = UserAdapter(this, ArrayList())
         recyclerView.adapter = userAdapter
 
-        fetchAllUsers()
         fetchBlockedUsers()
+
+        userAdapter.setOnItemClickListener { user ->
+            showUnblockDialog(user)
+        }
     }
 
     private fun fetchAllUsers() {
@@ -77,7 +81,8 @@ class BlockedUsersActivity : AppCompatActivity() {
                             blockedUserIds.add(blockedUserId)
                         }
                     }
-                    updateAdapter() // 차단된 사용자 목록 갱신
+
+                    fetchAllUsers()
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -90,4 +95,29 @@ class BlockedUsersActivity : AppCompatActivity() {
     private fun updateAdapter() {
         userAdapter.updateList(blockedUserIds, allUsers)
     }
+
+    private fun showUnblockDialog(user: User) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("차단 해제")
+            .setMessage("차단을 해제하시겠습니까?")
+            .setPositiveButton("해제") { _, _ ->
+                unblockUser(user)
+            }
+            .setNegativeButton("취소", null) // 아무 동작 없이 닫기
+            .show()
+    }
+
+    private fun unblockUser(user: User) {
+        val currentUserId = mAuth.currentUser?.uid ?: return
+        val blockedUsersRef = mDbRef.child("user").child(currentUserId).child("blockedUsers")
+
+        blockedUsersRef.child(user.uId).removeValue().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Log.d("BlockedUsersActivity", "${user.nick} 차단 해제 성공")
+            } else {
+                Log.e("BlockedUsersActivity", "${user.nick} 차단 해제 실패: ${task.exception?.message}")
+            }
+        }
+    }
+
 }
