@@ -116,7 +116,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun showPopupDialog(user: User) {
-        val options = arrayOf("프로필 보기", "대화하기", "취소")
+        val options = arrayOf("프로필 보기", "대화하기", "차단하기", "취소")
 
         // AlertDialog Builder 생성
         val builder = AlertDialog.Builder(requireContext())
@@ -124,19 +124,21 @@ class HomeFragment : Fragment() {
             .setItems(options) { dialog, which ->
                 when (options[which]) {
                     "프로필 보기" -> {
-                        // 프로필 보기 로직
                         val intent = Intent(activity, ProfileActivity::class.java)
                         intent.putExtra("nick", user.nick)
                         intent.putExtra("uId", user.uId)
                         startActivity(intent)
                     }
                     "대화하기" -> {
-                        // 대화하기 로직
                         val intent = Intent(requireContext(), ChatActivity::class.java)
                         intent.putExtra("nick", user.nick)
                         intent.putExtra("uId", user.uId)
                         intent.putExtra("profileImageUrl", user.profileImageUrl)
                         startActivity(intent)
+                    }
+                    "차단하기" -> {
+                        // 차단 확인 다이얼로그 표시
+                        showBlockConfirmationDialog(user)
                     }
                     "취소" -> {
                         dialog.dismiss() // 취소 로직
@@ -147,6 +149,38 @@ class HomeFragment : Fragment() {
         // 다이얼로그 표시
         val dialog = builder.create()
         dialog.show()
+    }
+
+    private fun showBlockConfirmationDialog(user: User) {
+        // 차단 확인 다이얼로그 표시
+        AlertDialog.Builder(requireContext())
+            .setTitle("차단하기")
+            .setMessage("${user.nick} 님을 차단하시겠습니까?")
+            .setPositiveButton("차단") { _, _ ->
+                blockUser(user) // 차단 처리 로직 호출
+            }
+            .setNegativeButton("취소", null) // 아무 동작 없이 닫기
+            .show()
+    }
+
+    private fun blockUser(user: User) {
+        val currentUserId = mAuth.currentUser?.uid ?: return
+        val blockedUsersRef = mDbRef.child("user").child(currentUserId).child("blockedUsers")
+
+        blockedUsersRef.child(user.uId).setValue(true).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Toast.makeText(requireContext(), "${user.nick} 님을 차단했습니다.", Toast.LENGTH_SHORT).show()
+                Log.d("HomeFragment", "User ${user.uId} blocked successfully.")
+                // 데이터 새로고침
+                fetchBlockedUsers {
+                    fetchUserData() // 차단된 사용자 제외하고 리스트 갱신
+                }
+
+            } else {
+                Toast.makeText(requireContext(), "차단에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+                Log.e("HomeFragment", "Failed to block user: ${task.exception?.message}")
+            }
+        }
     }
 
 }
