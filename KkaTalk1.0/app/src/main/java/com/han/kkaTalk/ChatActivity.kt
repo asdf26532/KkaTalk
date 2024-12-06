@@ -109,6 +109,12 @@ class ChatActivity : AppCompatActivity() {
                     val message = snapshot.getValue(Message::class.java)
 
                     if (message != null) {
+                        // 차단된 사용자의 메시지는 필터링
+                        if (blockedUserIds.contains(message.sendId)) {
+                            Log.d("ChatActivity", "차단된 사용자의 메시지 필터링: ${message.sendId}")
+                            return // 차단된 사용자 메시지 무시
+                        }
+
                         messageList.add(message)
                         binding.rvChat.post {
                             messageAdapter.notifyDataSetChanged()
@@ -181,6 +187,11 @@ class ChatActivity : AppCompatActivity() {
             val userRef = FirebaseDatabase.getInstance().reference.child("user").child(currentUserId).child("blockedUsers")
             userRef.child(blockedUserId).setValue(true).addOnSuccessListener {
                 Toast.makeText(this, "사용자를 차단했습니다.", Toast.LENGTH_SHORT).show()
+
+                // 차단 성공 시 결과 전달
+                val intent = Intent()
+                intent.putExtra("refreshRequired", true) // 새로고침 필요 플래그
+                setResult(Activity.RESULT_OK, intent)
                 // 차단 후 채팅방 종료
                 finish()
             }.addOnFailureListener {

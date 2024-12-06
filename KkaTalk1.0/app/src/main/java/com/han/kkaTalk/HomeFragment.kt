@@ -4,12 +4,10 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.Gravity
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
@@ -28,6 +26,8 @@ class HomeFragment : Fragment() {
     private lateinit var userList: ArrayList<User>
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDbRef: DatabaseReference
+
+    private var refreshRequired = false
 
     private val blockedUserIds = mutableListOf<String>()
 
@@ -53,6 +53,22 @@ class HomeFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        // 새로고침 요청이 있을 경우 차단 목록 다시 로드
+        if (refreshRequired) {
+            refreshUserList()
+            refreshRequired = false // 초기화
+        }
+    }
+
+    private fun refreshUserList() {
+        fetchBlockedUsers {
+            fetchUserData() // 사용자 목록 새로고침
+        }
     }
 
     private fun fetchBlockedUsers(callback: () -> Unit) {
