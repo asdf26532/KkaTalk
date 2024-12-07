@@ -27,6 +27,8 @@
         private lateinit var mDbRef: DatabaseReference
         private lateinit var mAuth: FirebaseAuth
 
+        private val blockedUserIds: ArrayList<String> = ArrayList()
+
         companion object {
             const val REQUEST_CHAT_UPDATE = 1001
         }
@@ -125,33 +127,69 @@
             builder.show()
         }
 
+        private fun fetchBlockedUsers(onComplete: () -> Unit) {
+            val currentUserId = mAuth.currentUser?.uid ?: return
+
+            val blockedUsersRef = mDbRef.child("user").child(currentUserId).child("blockedUsers")
+            blockedUsersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    blockedUserIds.clear()
+                    for (child in snapshot.children) {
+                        val blockedUserId = child.key
+                        if (blockedUserId != null) {
+                            blockedUserIds.add(blockedUserId)
+                        }
+                    }
+                    onComplete() // 차단 목록을 가져온 후 수행할 작업
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("ChattingFragment", "Failed to fetch blocked users: ${error.message}")
+                }
+            })
+        }
+
 
 
         private fun loadChatPreviews() {
             val currentUserId = mAuth.currentUser?.uid ?: return
 
-            mDbRef.child("chats").addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val tempChatList = ArrayList<ChatPreview>()
+            fetchBlockedUsers {
+                mDbRef.child("chats").addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val tempChatList = ArrayList<ChatPreview>()
 
-                    for (chatSnapshot in snapshot.children) {
-                        val chatKey = chatSnapshot.key ?: continue
+                        for (chatSnapshot in snapshot.children) {
+                            val chatKey = chatSnapshot.key ?: continue
 
-                        // 현재 사용자가 포함되지 않은 채팅방은 건너뛴다
-                        if (!chatKey.contains(currentUserId)) continue
+                            // 현재 사용자가 포함되지 않은 채팅방은 건너뛴다
+                            if (!chatKey.contains(currentUserId)) continue
 
-                        val lastMessageSnapshot = chatSnapshot.child("message").children.lastOrNull()
+                            val receiverUid = chatKey.replace(currentUserId, "")
+                            val lastMessageSnapshot = chatSnapshot.child("message").children.lastOrNull()
 
-                        if (lastMessageSnapshot != null) {
-                            val lastMessage = lastMessageSnapshot.getValue(Message::class.java)
-                            val receiverUid = chatSnapshot.key?.replace(currentUserId, "")
+                            if (lastMessageSnapshot != null) {
+                                val lastMessage = lastMessageSnapshot.getValue(Message::class.java)
+                                val isBlocked = blockedUserIds.contains(receiverUid)
 
-                            if (receiverUid != null && lastMessage?.message != null) {
-                                val unreadCount = chatSnapshot.child("message").children
-                                    .filter { it.child("mread").getValue(Boolean::class.java) == false &&
-                                              it.child("receiverId").value == currentUserId }
-                                    .count()
+                                val messageContent = if (isBlocked) {
+                                    "(차단된 사용자입니다)" // 차단된 사용자의 메시지 대체
+                                } else {
+                                    lastMessage?.message ?: ""
+                                }
 
+                                val unreadCount = if (isBlocked) {
+                                    0 // 차단된 사용자 메시지는 항상 0으로 설정
+                                } else {
+                                    chatSnapshot.child("message").children
+                                        .filter {
+                                            it.child("mread")
+                                                .getValue(Boolean::class.java) == false &&
+                                                    it.child("receiverId").value == currentUserId &&
+                                                    !blockedUserIds.contains(it.child("senderId").value)
+                                        }
+                                        .count()
+                                }
                                 mDbRef.child("user").child(receiverUid)
                                     .addListenerForSingleValueEvent(object : ValueEventListener {
                                         override fun onDataChange(userSnapshot: DataSnapshot) {
@@ -161,7 +199,13 @@
                                             val lastMessageTime = lastMessageSnapshot.child("timestamp").getValue(Long::class.java) ?: 0L
 
                                             if (tempChatList.none { it.userUid == receiverUid }) {
-                                                tempChatList.add(ChatPreview(userName, userNick, receiverUid,lastMessage.message ?: "", lastMessageTime, profileImageUrl, unreadCount))
+                                                tempChatList.add(
+                                                    ChatPreview(
+                                                        userName, userNick, receiverUid,
+                                                        messageContent, lastMessageTime,
+                                                        profileImageUrl, unreadCount
+                                                    )
+                                                )
                                             }
 
                                             // UI 업데이트
@@ -177,11 +221,12 @@
                             }
                         }
                     }
-                }
+
 
                 override fun onCancelled(error: DatabaseError) {
                     Log.e("ChattingFragment", "Chat data load cancelled: $error")
-                }
-            })
+                    }
+                })
+            }
         }
     }
