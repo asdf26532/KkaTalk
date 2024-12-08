@@ -152,7 +152,15 @@ class ChatActivity : AppCompatActivity() {
                     val message = messageSnapshot.getValue(Message::class.java)
                     if (message != null && (message.mread == false) && message.sendId != FirebaseAuth.getInstance().currentUser?.uid) {
                         // Sender Room 업데이트
-                        messageSnapshot.ref.child("mread").setValue(true)
+                        if (blockedUserIds.contains(message.sendId)) {
+                            Log.d("markMessagesAsRead", "차단된 사용자의 메시지 읽음 처리 제외: ${message.sendId}")
+                            continue // 차단된 사용자의 메시지는 읽음 처리하지 않음
+                        }
+
+                        // 읽음 처리
+                        if (message.sendId != FirebaseAuth.getInstance().currentUser?.uid) {
+                            messageSnapshot.ref.child("mread").setValue(true)
+                        }
 
                         // Receiver Room 업데이트
                         message.timestamp?.let { timestamp ->  // timestamp가 null이 아닌 경우만 실행
