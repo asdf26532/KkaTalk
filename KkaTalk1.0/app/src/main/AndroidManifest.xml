@@ -18,6 +18,9 @@
         android:theme="@style/Theme.KkaTalk"
         tools:targetApi="31">
         <activity
+            android:name=".RandomChatActivity"
+            android:exported="false" />
+        <activity
             android:name=".RandomChatSetupActivity"
             android:exported="false" />
         <activity

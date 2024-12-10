@@ -50,7 +50,7 @@ class RandomChatSetupActivity : AppCompatActivity() {
                     "timestamp" to System.currentTimeMillis()
                 )
             )
-            startActivity(Intent(this, RandomChatActivity::class.java)) // 채팅 대기 액티비티로 이동
+           // startActivity(Intent(this, RandomChatActivity::class.java)) // 채팅 대기 액티비티로 이동
         }
     }
 }
