@@ -23,5 +23,14 @@
         android:layout_weight="1"
         tools:listitem="@layout/user_layout"/>
 
+    <!-- 랜덤 채팅 버튼 -->
+    <Button
+        android:id="@+id/btnRandomChat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="랜덤 채팅 시작"
+        android:textSize="18sp"
+        android:layout_margin="16dp" />
+
 
 </LinearLayout>
