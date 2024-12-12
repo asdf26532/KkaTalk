@@ -40,6 +40,8 @@ class LoginActivity : AppCompatActivity() {
     // 기본 프로필 이미지 URL
     private val defaultProfileImageUrl = "gs://kkatalk-cf3fd.appspot.com/profile_default.png"
 
+    private val defaultStatusMessage = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -246,7 +248,9 @@ class LoginActivity : AppCompatActivity() {
 
 
     private fun addUserToDatabase(name: String, email: String, uId: String, nick: String) {
-        val user = User(name, email, uId, nick, defaultProfileImageUrl)
+
+        val user = User(name, email, uId, nick, defaultProfileImageUrl, defaultStatusMessage)
+
         Firebase.database.reference.child("user").child(uId).setValue(user)
     }
 

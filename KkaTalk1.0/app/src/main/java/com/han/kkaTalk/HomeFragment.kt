@@ -105,29 +105,24 @@ class HomeFragment : Fragment() {
     }
 
     private fun fetchUserData() {
+        // 현재 로그인한 사용자의 UID를 가져옴
         val currentUserId = mAuth.currentUser?.uid ?: return
 
-        // Firebase에서 모든 사용자 데이터를 가져옵니다.
+        // Firebase에서 사용자 데이터를 가져오기
         mDbRef.child("user").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                userList.clear() // 사용자 리스트 초기화
+                userList.clear()
                 for (postSnapshot in snapshot.children) {
                     val currentUser = postSnapshot.getValue(User::class.java)
-
-                    if (currentUser != null) {
-                        if (currentUser.uId != currentUserId) {
-                            if (blockedUserIds.contains(currentUser.uId)) {
-                                // 차단된 유저가 필터링되는지 확인
-                                Log.d("fetchUserData", "Blocked User Skipped: ${currentUser.uId}")
-                            } else {
-                                userList.add(currentUser)
-                                // 차단되지 않은 유저 로그
-                                Log.d("fetchUserData", "User Added: ${currentUser.uId}")
-                            }
+                    currentUser?.let {
+                        // currentUser가 null이 아니고, 현재 로그인된 사용자도 아니며, 차단된 사용자도 아닐 때 리스트에 추가
+                        if (it.uId != currentUserId && !blockedUserIds.contains(it.uId)) {
+                            userList.add(it)
+                            Log.d("fetchUserData", "User Added: ${it.uId}, Status: ${it.statusMessage}")
                         }
                     }
                 }
-                Log.d("fetchUserData", "Final User List: ${userList.map { it.uId }}")
+                // 어댑터에 데이터 변경 알림
                 adapter.notifyDataSetChanged()
             }
 
@@ -135,7 +130,7 @@ class HomeFragment : Fragment() {
                 Log.e("fetchUserData", "Error fetching user data: ${error.message}")
             }
         })
-
+        // 사용자 목록 아이템 클릭 시 팝업 다이얼로그 표시
         adapter.setOnItemClickListener { user ->
             showPopupDialog(user)
         }
