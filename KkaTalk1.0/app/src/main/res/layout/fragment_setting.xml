@@ -61,7 +61,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="닉네임 변경"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="10dp"
             android:layout_gravity="center" />
 
         <EditText
@@ -82,6 +82,40 @@
             android:layout_marginTop="16dp"
             android:layout_gravity="center"
             android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tv_current_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="현재 상태 메시지: 없음"
+            android:layout_marginTop="16dp"
+            android:textSize="16sp"
+            android:layout_gravity="center"/>
+
+        <Button
+            android:id="@+id/btn_change_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="상태 메시지 변경"
+            android:layout_marginTop="8dp"
+            android:layout_gravity="center"/>
+
+        <EditText
+            android:id="@+id/edt_new_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="새 상태 메시지 입력"
+            android:visibility="gone"
+            android:layout_marginTop="8dp" />
+
+        <Button
+            android:id="@+id/btn_save_new_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="저장"
+            android:visibility="gone"
+            android:layout_marginTop="8dp"
+            android:layout_gravity="center"/>
 
         <Button
             android:id="@+id/btnManageBlockedUsers"

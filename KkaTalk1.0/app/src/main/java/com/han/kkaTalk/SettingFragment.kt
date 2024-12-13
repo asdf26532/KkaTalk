@@ -37,6 +37,11 @@ class SettingFragment : Fragment() {
     private lateinit var btnChangeProfile: Button
     private lateinit var ivProfile: ImageView
 
+    private lateinit var tvCurrentStatus: TextView
+    private lateinit var btnChangeStatus: Button
+    private lateinit var edtNewStatus: EditText
+    private lateinit var btnSaveNewStatus: Button
+
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDbRef: DatabaseReference
 
@@ -65,6 +70,12 @@ class SettingFragment : Fragment() {
         ivProfile = view.findViewById(R.id.iv_profile)
         btnBlock = view.findViewById(R.id.btnManageBlockedUsers)
 
+        // 상태 메시지 관련 UI 요소 초기화
+        tvCurrentStatus = view.findViewById(R.id.tv_current_status)
+        btnChangeStatus = view.findViewById(R.id.btn_change_status)
+        edtNewStatus = view.findViewById(R.id.edt_new_status)
+        btnSaveNewStatus = view.findViewById(R.id.btn_save_new_status)
+
         // ProgressBar 초기화
         progressBar = view.findViewById(R.id.progress_bar)
 
@@ -86,6 +97,20 @@ class SettingFragment : Fragment() {
             val newNick = edtNewNick.text.toString().trim()
             if (newNick.isNotEmpty()) {
                 updateNickname(newNick)
+            }
+        }
+
+        // 상태 메시지 변경 버튼 클릭 시
+        btnChangeStatus.setOnClickListener {
+            edtNewStatus.visibility = View.VISIBLE
+            btnSaveNewStatus.visibility = View.VISIBLE
+        }
+
+        // 상태 메시지 저장 버튼 클릭 시
+        btnSaveNewStatus.setOnClickListener {
+            val newStatus = edtNewStatus.text.toString().trim()
+            if (newStatus.isNotEmpty()) {
+                updateStatusMessage(newStatus)
             }
         }
 
@@ -283,6 +308,30 @@ class SettingFragment : Fragment() {
                 edtNewNick.visibility = View.GONE
                 btnSaveNewNick.visibility = View.GONE
             }
+        }
+    }
+
+    // 현재 상태 메시지 로드
+    private fun loadCurrentStatus() {
+        val userId = mAuth.currentUser?.uid.toString()
+        if (userId.isNotEmpty()) {
+            mDbRef.child("user").child(userId).get().addOnSuccessListener { snapshot ->
+                val currentUser = snapshot.getValue(User::class.java)
+                tvCurrentStatus.text = "현재 상태 메시지: ${currentUser?.statusMessage ?: "없음"}"
+            }
+        }
+    }
+
+    // 상태 메시지 업데이트
+    private fun updateStatusMessage(newStatus: String) {
+        val userId = mAuth.currentUser?.uid.toString()
+        if (userId.isNotEmpty()) {
+            mDbRef.child("user").child(userId).child("statusMessage").setValue(newStatus)
+                .addOnSuccessListener {
+                    tvCurrentStatus.text = "현재 상태 메시지: $newStatus"
+                    edtNewStatus.visibility = View.GONE
+                    btnSaveNewStatus.visibility = View.GONE
+                }
         }
     }
 
