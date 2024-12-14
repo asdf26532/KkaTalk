@@ -25,7 +25,10 @@ class UserAdapter(private val context: Context, private var userList: ArrayList<
         val currentUser = userList[position]
         holder.nameText.text = currentUser.nick
 
-        // Glide를 사용하여 프로필 이미지를 Firebase Storage에서 불러오기
+        // 상태 메시지 추가
+        holder.statusText.text = currentUser.statusMessage ?: ""
+
+        // 프로필 이미지 바인딩
         if (!currentUser.profileImageUrl.isNullOrEmpty()) {
             Glide.with(context)
                 .load(currentUser.profileImageUrl) // URL 가져오기
@@ -60,6 +63,7 @@ class UserAdapter(private val context: Context, private var userList: ArrayList<
     class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val nameText: TextView = itemView.findViewById(R.id.tv_name)
         val profileImage: ImageView = itemView.findViewById(R.id.iv_profile_picture)
+        val statusText: TextView = itemView.findViewById(R.id.tv_status_message)
 
     }
 }

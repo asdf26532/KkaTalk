@@ -85,6 +85,9 @@ class SettingFragment : Fragment() {
         // 현재 닉네임 로드
         loadCurrentNick()
 
+        // 현재 상태메세지 로드
+        loadCurrentStatus()
+
         // 닉네임 변경 버튼 클릭 시
         btnChangeNick.setOnClickListener {
             edtNewNick.visibility = View.VISIBLE
@@ -318,6 +321,9 @@ class SettingFragment : Fragment() {
             mDbRef.child("user").child(userId).get().addOnSuccessListener { snapshot ->
                 val currentUser = snapshot.getValue(User::class.java)
                 tvCurrentStatus.text = "현재 상태 메시지: ${currentUser?.statusMessage ?: "없음"}"
+            }.addOnFailureListener { exception ->
+                tvCurrentStatus.text = "현재 상태 메시지: 없음"
+                Log.e(TAG, "Failed to load status message", exception)
             }
         }
     }
