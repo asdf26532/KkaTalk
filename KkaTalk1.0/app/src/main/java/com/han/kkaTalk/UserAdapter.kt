@@ -2,6 +2,7 @@ package com.han.kkaTalk
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,6 +28,9 @@ class UserAdapter(private val context: Context, private var userList: ArrayList<
 
         // 상태 메시지 추가
         holder.statusText.text = currentUser.statusMessage ?: ""
+
+        // 디버깅 로그 추가
+        Log.d("UserAdapter", "Nick: ${currentUser.nick}, StatusMessage: ${currentUser.statusMessage}")
 
         // 프로필 이미지 바인딩
         if (!currentUser.profileImageUrl.isNullOrEmpty()) {
