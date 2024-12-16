@@ -27,10 +27,12 @@ class UserAdapter(private val context: Context, private var userList: ArrayList<
         holder.nameText.text = currentUser.nick
 
         // 상태 메시지 추가
-        holder.statusText.text = currentUser.statusMessage ?: ""
-
-        // 디버깅 로그 추가
-        Log.d("UserAdapter", "Nick: ${currentUser.nick}, StatusMessage: ${currentUser.statusMessage}")
+        if (!currentUser.statusMessage.isNullOrEmpty()) {
+            holder.statusText.text = currentUser.statusMessage
+            holder.statusText.visibility = View.VISIBLE // 상태 메시지가 있으면 보이기
+        } else {
+            holder.statusText.visibility = View.GONE // 상태 메시지가 없으면 숨기기
+        }
 
         // 프로필 이미지 바인딩
         if (!currentUser.profileImageUrl.isNullOrEmpty()) {
