@@ -26,15 +26,21 @@
         android:id="@+id/tv_status_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_marginEnd="30dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="5dp"
         android:padding="8dp"
         android:layout_alignParentEnd="true"
         android:text="상태 메시지"
-        android:textSize="24sp"
+        android:textSize="16sp"
         android:textColor="@color/black"
         android:background="@drawable/bubble_background"
+        android:visibility="gone"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="10sp"
+        android:autoSizeMaxTextSize="16sp"
+        android:autoSizeStepGranularity="1sp"
         />
+
 
     <View
         android:layout_width="match_parent"

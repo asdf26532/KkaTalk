@@ -28,7 +28,13 @@ class UserAdapter(private val context: Context, private var userList: ArrayList<
 
         // 상태 메시지 추가
         if (!currentUser.statusMessage.isNullOrEmpty()) {
-            holder.statusText.text = currentUser.statusMessage
+            val maxLength = 15 // 최대 글자 수 제한
+            val statusMessage = if (currentUser.statusMessage!!.length > maxLength) {
+                currentUser.statusMessage!!.take(maxLength) + "..." // 제한 초과 시 "..." 추가
+            } else {
+                currentUser.statusMessage
+            }
+            holder.statusText.text = statusMessage
             holder.statusText.visibility = View.VISIBLE // 상태 메시지가 있으면 보이기
         } else {
             holder.statusText.visibility = View.GONE // 상태 메시지가 없으면 숨기기
