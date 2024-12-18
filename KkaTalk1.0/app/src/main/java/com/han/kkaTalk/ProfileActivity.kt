@@ -2,6 +2,7 @@ package com.han.kkaTalk
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.google.firebase.database.FirebaseDatabase
@@ -62,6 +63,24 @@ class ProfileActivity : AppCompatActivity() {
             }
         }.addOnFailureListener {
             binding.ivProfile.setImageResource(R.drawable.profile_default)
+        }
+    }
+
+    private fun loadStatusMessage() {
+        val userRef = FirebaseDatabase.getInstance().getReference("user").child(userId)
+        userRef.get().addOnSuccessListener { snapshot ->
+            val user = snapshot.getValue(User::class.java)
+            user?.let {
+                val statusMessage = it.statusMessage
+                if (!statusMessage.isNullOrEmpty()) {
+                    binding.tvStatusMessage.text = statusMessage
+                    binding.tvStatusMessage.visibility = View.VISIBLE
+                } else {
+                    binding.tvStatusMessage.visibility = View.GONE
+                }
+            }
+        }.addOnFailureListener {
+            binding.tvStatusMessage.visibility = View.GONE
         }
     }
 }
