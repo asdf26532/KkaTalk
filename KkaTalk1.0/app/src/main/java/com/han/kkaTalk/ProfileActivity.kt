@@ -2,6 +2,8 @@ package com.han.kkaTalk
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
@@ -20,6 +22,11 @@ class ProfileActivity : AppCompatActivity() {
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // 툴바에 뒤로가기 버튼 추가
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+        }
+
         // Intent에서 사용자 UID와 닉네임 가져오기
         userId = intent.getStringExtra("uId") ?: ""
         userNick = intent.getStringExtra("nick") ?: ""
@@ -30,11 +37,15 @@ class ProfileActivity : AppCompatActivity() {
         // 사용자 프로필 이미지 로드
         loadProfileImage()
 
+        // 상태 메시지 표시
+        loadStatusMessage()
+
         // 대화하기 버튼 클릭 이벤트
         binding.btnChat.setOnClickListener {
             val intent = Intent(this, ChatActivity::class.java)
             intent.putExtra("uId", userId)
             intent.putExtra("nick", userNick)
+            intent.putExtra("profileImageUrl", getUserProfileImageUrl())
             startActivity(intent)
         }
 
@@ -42,6 +53,30 @@ class ProfileActivity : AppCompatActivity() {
         binding.btnLogout.setOnClickListener {
             finish()
         }
+    }
+
+    // 뒤로 가기 버튼
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> { // 뒤로가기 버튼 클릭 이벤트 처리
+                Log.d("ProfileActivity", "뒤로가기 버튼 클릭됨")
+                onBackPressed()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun getUserProfileImageUrl(): String {
+        var profileImageUrl = ""
+        val userRef = FirebaseDatabase.getInstance().getReference("user").child(userId)
+        userRef.get().addOnSuccessListener { snapshot ->
+            val user = snapshot.getValue(User::class.java)
+            user?.let {
+                profileImageUrl = it.profileImageUrl
+            }
+        }
+        return profileImageUrl
     }
 
     private fun loadProfileImage() {
