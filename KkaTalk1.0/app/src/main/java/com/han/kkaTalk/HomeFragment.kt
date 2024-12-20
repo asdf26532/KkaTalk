@@ -148,6 +148,7 @@ class HomeFragment : Fragment() {
                         val intent = Intent(activity, ProfileActivity::class.java)
                         intent.putExtra("nick", user.nick)
                         intent.putExtra("uId", user.uId)
+                        intent.putExtra("profileImageUrl", user.profileImageUrl)
                         startActivity(intent)
                     }
                     "대화하기" -> {

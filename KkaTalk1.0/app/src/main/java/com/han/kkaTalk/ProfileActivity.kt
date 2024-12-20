@@ -16,6 +16,7 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var binding: ActivityProfileBinding
     private lateinit var userId: String
     private lateinit var userNick: String
+    private lateinit var profileImageUrl: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +31,7 @@ class ProfileActivity : AppCompatActivity() {
         // Intent에서 사용자 UID와 닉네임 가져오기
         userId = intent.getStringExtra("uId") ?: ""
         userNick = intent.getStringExtra("nick") ?: ""
+        profileImageUrl = intent.getStringExtra("profileImageUrl") ?: ""
 
         // 닉네임 표시
         binding.tvNick.text = "닉네임: $userNick"
@@ -45,7 +47,7 @@ class ProfileActivity : AppCompatActivity() {
             val intent = Intent(this, ChatActivity::class.java)
             intent.putExtra("uId", userId)
             intent.putExtra("nick", userNick)
-            intent.putExtra("profileImageUrl", getUserProfileImageUrl())
+            intent.putExtra("profileImageUrl", profileImageUrl)
             startActivity(intent)
         }
 
@@ -67,17 +69,6 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
-    private fun getUserProfileImageUrl(): String {
-        var profileImageUrl = ""
-        val userRef = FirebaseDatabase.getInstance().getReference("user").child(userId)
-        userRef.get().addOnSuccessListener { snapshot ->
-            val user = snapshot.getValue(User::class.java)
-            user?.let {
-                profileImageUrl = it.profileImageUrl
-            }
-        }
-        return profileImageUrl
-    }
 
     private fun loadProfileImage() {
         val userRef = FirebaseDatabase.getInstance().getReference("user").child(userId)
