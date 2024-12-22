@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
+
     <application
         android:name=".KakaoAplication"
         android:allowBackup="true"
@@ -26,12 +27,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".RandomChatActivity"
-            android:exported="false" />
-        <activity
-            android:name=".RandomChatSetupActivity"
-            android:exported="false" />
         <activity
             android:name=".BlockedUsersActivity"
             android:exported="false" />

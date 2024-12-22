@@ -59,6 +59,9 @@ dependencies {
     // admob
     implementation("com.google.android.gms:play-services-ads:23.3.0")
 
+    // Messaging
+    implementation("com.google.firebase:firebase-messaging:24.4.1")
+
     // glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
