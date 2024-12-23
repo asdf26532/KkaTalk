@@ -279,4 +279,18 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    private fun deleteMessage(chatRoomId: String, messageId: String) {
+        val messageRef = FirebaseDatabase.getInstance()
+            .getReference("chats/$chatRoomId/messages/$messageId")
+
+        messageRef.removeValue()
+            .addOnSuccessListener {
+                Log.d("ChatAdapter", "Message deleted successfully")
+            }
+            .addOnFailureListener {
+                Log.e("ChatAdapter", "Failed to delete message: ${it.message}")
+            }
+    }
+
+
 }
