@@ -46,10 +46,6 @@ class HomeFragment : Fragment() {
         binding.rvUser.layoutManager = LinearLayoutManager(requireContext())
         binding.rvUser.adapter = adapter
 
-        // 랜덤 채팅 버튼 클릭 이벤트 추가
-        binding.btnRandomChat.setOnClickListener {
-            startRandomChat()
-        }
 
         // 차단된 사용자 데이터 먼저 가져오기
         fetchBlockedUsers {
@@ -76,10 +72,6 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun startRandomChat() {
-        val intent = Intent(requireContext(), RandomChatActivity::class.java)
-        startActivity(intent)
-    }
 
     private fun fetchBlockedUsers(callback: () -> Unit) {
         val currentUserId = mAuth.currentUser?.uid ?: return

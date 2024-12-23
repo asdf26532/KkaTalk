@@ -15,22 +15,11 @@
         android:text="대화 상대 목록"
         android:textSize="25sp"/>
 
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_user"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         tools:listitem="@layout/user_layout"/>
-
-    <!-- 랜덤 채팅 버튼 -->
-    <Button
-        android:id="@+id/btnRandomChat"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="랜덤 채팅 시작"
-        android:textSize="18sp"
-        android:layout_margin="16dp" />
-
 
 </LinearLayout>
