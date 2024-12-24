@@ -115,6 +115,10 @@ class ChatActivity : AppCompatActivity() {
                             return // 차단된 사용자 메시지 무시
                         }
 
+                        if (message.deleted == true) {
+                            message.message = "삭제된 메시지입니다."
+                        }
+
                         messageList.add(message)
                         binding.rvChat.post {
                             messageAdapter.notifyDataSetChanged()
@@ -124,21 +128,50 @@ class ChatActivity : AppCompatActivity() {
 
                 }
                 override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-                    // 변경된 메시지 처리 (필요 시 구현)
+                    // 메시지 수정시 처리
+
                 }
 
                 override fun onChildRemoved(snapshot: DataSnapshot) {
-                    // 삭제된 메시지 처리 (필요 시 구현)
+                    // 삭제된 메시지 처리
                 }
 
                 override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
-                    // 이동된 메시지 처리 (필요 시 구현)
+                    // 이동된 메시지 처리
                 }
 
                 override fun onCancelled(error: DatabaseError) {
                     Log.e("DatabaseError", "Database error: $error")
                 }
             })
+
+    }
+
+    private fun showDeletePopup(message: Message) {
+        android.app.AlertDialog.Builder(this)
+            .setTitle("메시지 삭제")
+            .setMessage("이 메시지를 삭제하시겠습니까?")
+            .setPositiveButton("삭제") { _, _ ->
+                deleteMessage(senderRoom,
+                    (message.timestamp ?: return@setPositiveButton).toString()
+                )
+                deleteMessage(receiverRoom,
+                    (message.timestamp ?: return@setPositiveButton).toString()
+                )
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
+
+    private fun deleteMessage(messageId: String, chatRoomId: String) {
+        val messageRef = mDbRef.child("chats").child(chatRoomId).child("message").child(messageId)
+        messageRef.child("deleted").setValue(true)
+            .addOnSuccessListener {
+                Log.d("ChatActivity", "Message deleted successfully")
+            }
+            .addOnFailureListener {
+                Log.e("ChatActivity", "Failed to delete message: ${it.message}")
+            }
     }
 
     private fun markMessagesAsRead(senderRoom: String, receiverRoom: String) {
@@ -237,6 +270,7 @@ class ChatActivity : AppCompatActivity() {
 
 
 
+
     override fun onResume() {
         super.onResume()
         // 메시지 읽음 상태 업데이트
@@ -278,19 +312,5 @@ class ChatActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
-
-    private fun deleteMessage(chatRoomId: String, messageId: String) {
-        val messageRef = FirebaseDatabase.getInstance()
-            .getReference("chats/$chatRoomId/messages/$messageId")
-
-        messageRef.removeValue()
-            .addOnSuccessListener {
-                Log.d("ChatAdapter", "Message deleted successfully")
-            }
-            .addOnFailureListener {
-                Log.e("ChatAdapter", "Failed to delete message: ${it.message}")
-            }
-    }
-
 
 }
