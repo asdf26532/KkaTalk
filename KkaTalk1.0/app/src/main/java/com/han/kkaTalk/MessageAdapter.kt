@@ -71,6 +71,12 @@ class MessageAdapter(private val context: Context,
                 viewHolder.readStatus.text = "1"
             }
 
+            // 메시지 꾹 눌렀을 때 (보내는 메시지에만 설정)
+            holder.itemView.setOnLongClickListener {
+                (context as ChatActivity).showDeletePopup(currentMessage)
+                true
+            }
+
         } else {
             val viewHolder = holder as ReceiveViewHolder
             holder.nickName.text = receiverNick
