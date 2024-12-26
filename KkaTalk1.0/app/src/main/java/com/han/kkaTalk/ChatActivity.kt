@@ -118,6 +118,7 @@ class ChatActivity : AppCompatActivity() {
 
                         if (message.deleted == true) {
                             message.message = "삭제된 메시지입니다."
+
                         }
 
                         messageList.add(message)
@@ -125,12 +126,21 @@ class ChatActivity : AppCompatActivity() {
                             messageAdapter.notifyDataSetChanged()
                             binding.rvChat.scrollToPosition(messageList.size - 1)
                         }
+
+
                     }
 
                 }
                 override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-                    // 메시지 수정시 처리
-
+                    val updatedMessage = snapshot.getValue(Message::class.java)
+                    updatedMessage?.let {
+                        val index = messageList.indexOfFirst { it.timestamp == updatedMessage.timestamp }
+                        if (index != -1) {
+                            // 메시지 갱신
+                            messageList[index] = updatedMessage
+                            refreshMessageList(messageAdapter)
+                        }
+                    }
                 }
 
                 override fun onChildRemoved(snapshot: DataSnapshot) {
@@ -220,6 +230,13 @@ class ChatActivity : AppCompatActivity() {
                         Log.e("deleteMessageInRooms", "ReceiverRoom: 데이터베이스 오류 - ${error.message}")
                     }
                 })
+        }
+    }
+
+    private fun refreshMessageList(adapter: MessageAdapter) {
+        binding.rvChat.post {
+            adapter.notifyDataSetChanged()
+            binding.rvChat.scrollToPosition(messageList.size - 1)
         }
     }
 
@@ -315,9 +332,6 @@ class ChatActivity : AppCompatActivity() {
             })
         }
     }
-
-
-
 
 
     override fun onResume() {
