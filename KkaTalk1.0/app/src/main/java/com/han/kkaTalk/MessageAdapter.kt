@@ -52,8 +52,17 @@ class MessageAdapter(private val context: Context,
             // 삭제된 메시지를 표시
             if (holder is SendViewHolder) {
                 holder.sendMessage.text = "삭제된 메시지입니다"
+                holder.sendTime.text = dateFormat.format(currentMessage.timestamp)
+                holder.readStatus.text = if (currentMessage.mread == true) " " else "1"
             } else if (holder is ReceiveViewHolder) {
+                holder.nickName.text = receiverNick // 닉네임 유지
+                Glide.with(context)
+                    .load(profileImageUrl) // 프로필 이미지 유지
+                    .placeholder(R.drawable.profile_default)
+                    .into(holder.profileImage)
                 holder.receiveMessage.text = "삭제된 메시지입니다"
+                holder.receiveTime.text = dateFormat.format(currentMessage.timestamp)
+
             }
             return
         }

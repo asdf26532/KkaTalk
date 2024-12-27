@@ -106,6 +106,7 @@ class ChatActivity : AppCompatActivity() {
         // 메시지 가져오기
         mDbRef.child("chats").child(senderRoom).child("message")
             .addChildEventListener(object : ChildEventListener {
+
                 override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                     val message = snapshot.getValue(Message::class.java)
 
@@ -132,15 +133,23 @@ class ChatActivity : AppCompatActivity() {
 
                 }
                 override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-                    val updatedMessage = snapshot.getValue(Message::class.java)
-                    updatedMessage?.let {
-                        val index = messageList.indexOfFirst { it.timestamp == updatedMessage.timestamp }
+
+                    val removedMessage = snapshot.getValue(Message::class.java)
+                    if (removedMessage != null) {
+                        val index = messageList.indexOfFirst { it.timestamp == removedMessage.timestamp }
                         if (index != -1) {
-                            // 메시지 갱신
-                            messageList[index] = updatedMessage
-                            refreshMessageList(messageAdapter)
+                            messageList[index].message = "삭제된 메시지입니다."
+                            messageList[index].deleted = true
+
+                            // 새로고침
+                            runOnUiThread {
+                                binding.rvChat.post {
+                                    messageAdapter.notifyItemChanged(index)
+                                }
+                            }
                         }
                     }
+
                 }
 
                 override fun onChildRemoved(snapshot: DataSnapshot) {
