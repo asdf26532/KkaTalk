@@ -172,9 +172,14 @@
                                 val lastMessage = lastMessageSnapshot.getValue(Message::class.java)
                                 val isBlocked = blockedUserIds.contains(receiverUid)
 
-                                val messageContent = if (isBlocked) {
-                                    "(차단된 사용자입니다)" // 차단된 사용자의 메시지 대체
+                                val messageContent: String = if (isBlocked) {
+                                    // 차단된 사용자 메시지 처리
+                                    "(차단된 사용자입니다)"
+                                } else if (lastMessage?.deleted == true) {
+                                    // 삭제된 메시지 처리
+                                    "삭제된 메시지입니다"
                                 } else {
+                                    // 일반 메시지 처리
                                     lastMessage?.message ?: ""
                                 }
 
