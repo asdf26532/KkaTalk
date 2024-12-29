@@ -6,16 +6,15 @@
 
     <ImageView
         android:id="@+id/iv_profile"
-        android:layout_width="55dp"
-        android:layout_height="55dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:layout_marginStart="8dp"/>
 
     <TextView
         android:id="@+id/tv_nick"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_marginStart="65dp"
+        android:layout_marginStart="70dp"
         android:text="닉네임 표시"/>
 
     <TextView
@@ -23,8 +22,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignStart="@+id/iv_profile"
-        android:layout_marginStart="55dp"
-        android:layout_marginTop="35dp"
+        android:layout_marginStart="60dp"
+        android:layout_marginTop="20dp"
         android:background="@drawable/edit_background"
         android:padding="10dp"
         android:text="받은 메시지"

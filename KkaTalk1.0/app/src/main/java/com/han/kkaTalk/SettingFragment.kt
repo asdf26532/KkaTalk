@@ -17,6 +17,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
@@ -35,6 +36,7 @@ class SettingFragment : Fragment() {
     private lateinit var btnLogout: Button
     private lateinit var btnBlock: Button
     private lateinit var btnChangeProfile: Button
+    private lateinit var btnDeleteProfile: Button
     private lateinit var ivProfile: ImageView
 
     private lateinit var tvCurrentStatus: TextView
@@ -69,6 +71,7 @@ class SettingFragment : Fragment() {
         btnChangeProfile = view.findViewById(R.id.btn_change_profile)
         ivProfile = view.findViewById(R.id.iv_profile)
         btnBlock = view.findViewById(R.id.btnManageBlockedUsers)
+        btnDeleteProfile = view.findViewById(R.id.btn_delete_profile)
 
         // 상태 메시지 관련 UI 요소 초기화
         tvCurrentStatus = view.findViewById(R.id.tv_current_status)
@@ -136,6 +139,11 @@ class SettingFragment : Fragment() {
         btnChangeProfile.setOnClickListener {
             Log.d(TAG, "Profile change button clicked")
             selectProfileImage()
+        }
+
+        // 프로필 삭제 버튼
+        btnDeleteProfile.setOnClickListener {
+            deleteProfileImage()
         }
 
         return view
@@ -291,6 +299,41 @@ class SettingFragment : Fragment() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         startActivityForResult(intent, REQUEST_CODE_SELECT_PHOTOS)
+    }
+
+    private fun deleteProfileImage() {
+        val userId = mAuth.currentUser?.uid.toString()
+        if (userId.isNotEmpty()) {
+            // Firebase Realtime Database에서 프로필 이미지 URL 삭제
+            mDbRef.child("user").child(userId).child("profileImageUrl").removeValue()
+                .addOnSuccessListener {
+                    // ImageView를 기본 이미지로 변경
+                    ivProfile.setImageResource(R.drawable.profile_default)
+
+                    // 상태 알림
+                    Toast.makeText(
+                        requireContext(),
+                        "기본 프로필 이미지가 적용되었습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                .addOnFailureListener {
+                    Log.e(TAG, "Failed to delete profile image URL")
+                    Toast.makeText(
+                        requireContext(),
+                        "프로필 이미지를 삭제하는 중 오류가 발생했습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+        } else {
+            // 사용자 ID가 비어있을 경우 기본 이미지 설정 및 알림
+            ivProfile.setImageResource(R.drawable.profile_default)
+            Toast.makeText(
+                requireContext(),
+                "기본 프로필 이미지가 적용되었습니다.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     private fun loadCurrentNick() {
