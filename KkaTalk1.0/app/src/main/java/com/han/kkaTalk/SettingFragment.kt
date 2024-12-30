@@ -172,21 +172,24 @@ class SettingFragment : Fragment() {
                             .placeholder(R.drawable.profile_default) // 기본 이미지 설정
                             .into(ivProfile)
 
-                        // 이미지 로드가 완료되면 프로그레스바 숨기기
-                        progressBar.visibility = View.GONE
-                        
                     }.addOnFailureListener {
                         // 실패 시 기본 이미지 로드
                         ivProfile.setImageResource(R.drawable.profile_default)
+                    }.addOnCompleteListener {
+                        // 다운로드 성공/실패 관계없이 프로그래스바 숨기기
+                        progressBar.visibility = View.GONE
                     }
                 } else {
                     // profileImageUrl이 null이거나 비어있는 경우 기본 이미지를 설정
                     ivProfile.setImageResource(R.drawable.profile_default)
+                    progressBar.visibility = View.GONE
                 }
             }.addOnFailureListener {
                 // Firebase에서 데이터를 가져오는 데 실패한 경우 기본 이미지를 설정
                 ivProfile.setImageResource(R.drawable.profile_default)
+                progressBar.visibility = View.GONE
             }
+
         }
     }
 
