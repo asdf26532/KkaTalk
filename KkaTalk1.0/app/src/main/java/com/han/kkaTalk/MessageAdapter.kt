@@ -1,6 +1,7 @@
 package com.han.kkaTalk
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -20,7 +21,8 @@ import java.util.Locale
 class MessageAdapter(private val context: Context,
                      private val messageList: ArrayList<Message>,
                      private val profileImageUrl: String?,
-                     private val receiverNick: String
+                     private val receiverNick: String,
+                     private val receiverUid: String
                     ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
 
     private val receive = 1
@@ -63,6 +65,8 @@ class MessageAdapter(private val context: Context,
                 holder.receiveMessage.text = "삭제된 메시지입니다"
                 holder.receiveTime.text = dateFormat.format(currentMessage.timestamp)
 
+                // 프로필이미지 클릭
+                profileClick(holder.profileImage)
             }
             return
         }
@@ -98,8 +102,21 @@ class MessageAdapter(private val context: Context,
                 .placeholder(R.drawable.profile_default) // 기본 이미지 설정
                 .into(holder.profileImage) // ReceiveViewHolder의 ImageView에 로드
 
+            // 프로필이미지 클릭
+            profileClick(holder.profileImage)
+
         }
 
+    }
+
+    private fun profileClick(imageView: ImageView) {
+        imageView.setOnClickListener {
+            val intent = Intent(context, ProfileActivity::class.java)
+            intent.putExtra("nick", receiverNick)
+            intent.putExtra("profileImageUrl", profileImageUrl)
+            intent.putExtra("uId", receiverUid) // UID 추가 전달
+            context.startActivity(intent)
+        }
     }
 
     override fun getItemCount(): Int {

@@ -55,7 +55,7 @@ class ChatActivity : AppCompatActivity() {
         Log.d("ChatActivity", "Profile Image URL: $profileImageUrl")
 
         messageList = ArrayList()
-        val messageAdapter = MessageAdapter(this, messageList, profileImageUrl, receiverNick)
+        val messageAdapter = MessageAdapter(this, messageList, profileImageUrl, receiverNick, receiverUid)
 
         // RecyclerView
         binding.rvChat.layoutManager = LinearLayoutManager(this)

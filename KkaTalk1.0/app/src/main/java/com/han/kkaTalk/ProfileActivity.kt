@@ -28,7 +28,7 @@ class ProfileActivity : AppCompatActivity() {
             setDisplayHomeAsUpEnabled(true)
         }
 
-        // Intent에서 사용자 UID와 닉네임 가져오기
+        // Intent에서 사용자 정보 가져오기
         userId = intent.getStringExtra("uId") ?: ""
         userNick = intent.getStringExtra("nick") ?: ""
         profileImageUrl = intent.getStringExtra("profileImageUrl") ?: ""
