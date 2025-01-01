@@ -242,13 +242,6 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    private fun refreshMessageList(adapter: MessageAdapter) {
-        binding.rvChat.post {
-            adapter.notifyDataSetChanged()
-            binding.rvChat.scrollToPosition(messageList.size - 1)
-        }
-    }
-
     private fun markMessagesAsRead(senderRoom: String, receiverRoom: String) {
         val senderMessagesRef = mDbRef.child("chats").child(senderRoom).child("message")
         val receiverMessagesRef = mDbRef.child("chats").child(receiverRoom).child("message")
@@ -368,7 +361,7 @@ class ChatActivity : AppCompatActivity() {
             }
 
             R.id.menu_block_user -> { // 오른쪽 위 차단하기 버튼
-                android.app.AlertDialog.Builder(this)
+                    AlertDialog.Builder(this)
                     .setTitle("사용자 차단")
                     .setMessage("대화 상대를 차단하시겠습니까?")
                     .setPositiveButton("차단하기") { dialog, _ ->

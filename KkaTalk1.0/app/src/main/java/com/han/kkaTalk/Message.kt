@@ -6,8 +6,9 @@ data class Message(
     val receiverId: String?,
     val timestamp: Long?,
     val mread: Boolean? = null,
-    var deleted: Boolean? = false
+    var deleted: Boolean? = false,
+    var reactions: Map<String, String>? = null
 ){
-    constructor():this("","","",0L, false, false)
+    constructor():this("","","",0L, false, false, null)
 }
 

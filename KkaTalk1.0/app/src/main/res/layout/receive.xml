@@ -39,5 +39,16 @@
         android:layout_alignBottom="@id/tv_receive_msg"
         android:textColor="#888888"/>
 
+    <TextView
+        android:id="@+id/tv_reactions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_receive_msg"
+        android:layout_marginStart="80dp"
+        android:visibility="gone"
+        android:paddingTop="4dp"
+        android:textColor="#FF5733"
+        android:textSize="14sp" />
+
 
 </RelativeLayout>
