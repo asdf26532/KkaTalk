@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -165,6 +166,45 @@ class ChatActivity : AppCompatActivity() {
                 }
             })
 
+    }
+
+     fun showReactionPopup(message: Message) {
+         val reactions = listOf("❤️", "😂", "👍", "😮", "😢", "👎") // 리액션 목록
+         val userId = FirebaseAuth.getInstance().currentUser?.uid
+         if (userId == null) {
+             Toast.makeText(this, "로그인 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+             return
+         }
+
+         // LongClick 발생한 뷰를 기준으로 PopupMenu를 띄우기 위해 itemView를 사용
+         val popup = PopupMenu(this, findViewById(android.R.id.content)) // 대체로 안전한 기본 뷰 사용
+         reactions.forEach { reaction ->
+             popup.menu.add(reaction) // 리액션 목록 추가
+         }
+
+         popup.setOnMenuItemClickListener { menuItem ->
+             val selectedReaction = menuItem.title.toString()
+
+             // Firebase Database 참조 설정
+             val messageRef = FirebaseDatabase.getInstance().getReference("messages/${message.message}")
+             val currentReactions =
+                 (message.reactions ?: hashMapOf()).toMutableMap() // reactions 초기화
+
+             // 새로운 리액션 추가 (이미 있으면 덮어쓰기)
+             currentReactions[userId] = selectedReaction
+
+             // 업데이트된 리액션을 Firebase에 저장
+             messageRef.child("reactions").setValue(currentReactions)
+                 .addOnSuccessListener {
+                     Toast.makeText(this, "리액션이 추가되었습니다.", Toast.LENGTH_SHORT).show()
+                 }
+                 .addOnFailureListener {
+                     Toast.makeText(this, "리액션 추가 실패: ${it.message}", Toast.LENGTH_SHORT).show()
+                 }
+
+             true
+         }
+         popup.show()
     }
 
      fun showDeletePopup(message: Message) {
@@ -332,6 +372,17 @@ class ChatActivity : AppCompatActivity() {
                     Log.e("ChatActivity", "Failed to fetch blocked users: ${error.message}")
                 }
             })
+        }
+    }
+
+    private fun addReactionToMessage(messageId: String, reaction: String) {
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val messageRef = mDbRef.child("chats").child(receiverRoom).child("message").child(messageId)
+
+        messageRef.child("reactions").child(currentUserId).setValue(reaction).addOnSuccessListener {
+            Log.d("ChatActivity", "Reaction added successfully")
+        }.addOnFailureListener {
+            Log.e("ChatActivity", "Failed to add reaction: ${it.message}")
         }
     }
 
