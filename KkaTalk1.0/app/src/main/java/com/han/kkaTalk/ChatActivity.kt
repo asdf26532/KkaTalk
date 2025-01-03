@@ -134,23 +134,33 @@ class ChatActivity : AppCompatActivity() {
 
                 }
                 override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-
-                    val removedMessage = snapshot.getValue(Message::class.java)
-                    if (removedMessage != null) {
-                        val index = messageList.indexOfFirst { it.timestamp == removedMessage.timestamp }
+                    val changedMessage = snapshot.getValue(Message::class.java)
+                    if (changedMessage != null) {
+                        val index = messageList.indexOfFirst { it.timestamp == changedMessage.timestamp }
                         if (index != -1) {
-                            messageList[index].message = "삭제된 메시지입니다."
-                            messageList[index].deleted = true
+                            // 메시지가 삭제된 경우에만 처리
+                            if (changedMessage.deleted == true && messageList[index].deleted != true) {
+                                messageList[index].message = "삭제된 메시지입니다."
+                                messageList[index].deleted = true
 
-                            // 새로고침
-                            runOnUiThread {
-                                binding.rvChat.post {
-                                    messageAdapter.notifyItemChanged(index)
+                                // 새로고침
+                                runOnUiThread {
+                                    binding.rvChat.post {
+                                        messageAdapter.notifyItemChanged(index)
+                                    }
+                                }
+                            } else if (changedMessage.reactions != messageList[index].reactions) {
+                                // 리액션이 추가된 경우 메시지 목록 업데이트
+                                messageList[index].reactions = changedMessage.reactions
+
+                                runOnUiThread {
+                                    binding.rvChat.post {
+                                        messageAdapter.notifyItemChanged(index)
+                                    }
                                 }
                             }
                         }
                     }
-
                 }
 
                 override fun onChildRemoved(snapshot: DataSnapshot) {
@@ -168,43 +178,76 @@ class ChatActivity : AppCompatActivity() {
 
     }
 
-     fun showReactionPopup(message: Message) {
-         val reactions = listOf("❤️", "😂", "👍", "😮", "😢", "👎") // 리액션 목록
-         val userId = FirebaseAuth.getInstance().currentUser?.uid
-         if (userId == null) {
-             Toast.makeText(this, "로그인 정보가 없습니다.", Toast.LENGTH_SHORT).show()
-             return
-         }
+    fun showReactionPopup(message: Message) {
+        val reactions = listOf("❤️", "😂", "👍", "😮", "😢", "👎") // 리액션 목록
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId == null) {
+            Toast.makeText(this, "로그인 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-         // LongClick 발생한 뷰를 기준으로 PopupMenu를 띄우기 위해 itemView를 사용
-         val popup = PopupMenu(this, findViewById(android.R.id.content)) // 대체로 안전한 기본 뷰 사용
-         reactions.forEach { reaction ->
-             popup.menu.add(reaction) // 리액션 목록 추가
-         }
+        // 현재 채팅방 경로 설정
+        val senderRoom = userId + receiverUid
+        val receiverRoom = receiverUid + userId
 
-         popup.setOnMenuItemClickListener { menuItem ->
-             val selectedReaction = menuItem.title.toString()
+        // AlertDialog로 팝업 메뉴 표시
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("리액션 추가")
+        builder.setItems(reactions.toTypedArray()) { dialog, which ->
+            val selectedReaction = reactions[which]
 
-             // Firebase Database 참조 설정
-             val messageRef = FirebaseDatabase.getInstance().getReference("messages/${message.message}")
-             val currentReactions =
-                 (message.reactions ?: hashMapOf()).toMutableMap() // reactions 초기화
+            // Firebase 참조
+            val senderMessagesRef = FirebaseDatabase.getInstance()
+                .getReference("chats")
+                .child(senderRoom)
+                .child("message")
+            val receiverMessagesRef = FirebaseDatabase.getInstance()
+                .getReference("chats")
+                .child(receiverRoom)
+                .child("message")
 
-             // 새로운 리액션 추가 (이미 있으면 덮어쓰기)
-             currentReactions[userId] = selectedReaction
+            // 메시지의 reactions 필드 업데이트
+            updateReactions(senderMessagesRef, message, userId, selectedReaction)
+            updateReactions(receiverMessagesRef, message, userId, selectedReaction)
 
-             // 업데이트된 리액션을 Firebase에 저장
-             messageRef.child("reactions").setValue(currentReactions)
-                 .addOnSuccessListener {
-                     Toast.makeText(this, "리액션이 추가되었습니다.", Toast.LENGTH_SHORT).show()
-                 }
-                 .addOnFailureListener {
-                     Toast.makeText(this, "리액션 추가 실패: ${it.message}", Toast.LENGTH_SHORT).show()
-                 }
+            Toast.makeText(this, "리액션이 추가되었습니다.", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+        }
+        builder.setNegativeButton("취소") { dialog, _ ->
+            dialog.dismiss()
+        }
+        builder.show()
+    }
 
-             true
-         }
-         popup.show()
+    private fun updateReactions(messagesRef: DatabaseReference, message: Message, userId: String, reaction: String) {
+        message.timestamp?.toDouble()?.let { timestamp ->
+            messagesRef.orderByChild("timestamp")
+                .equalTo(timestamp)
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        for (messageSnapshot in snapshot.children) {
+                            val currentReactions = (messageSnapshot.child("reactions").value as? HashMap<String, String>)
+                                ?: hashMapOf()
+
+                            // 리액션 추가
+                            currentReactions[userId] = reaction
+
+                            // 업데이트된 리액션을 Firebase에 저장
+                            messageSnapshot.ref.child("reactions").setValue(currentReactions)
+                                .addOnSuccessListener {
+                                    Log.d("updateReactions", "리액션이 성공적으로 추가되었습니다.")
+                                }
+                                .addOnFailureListener { error ->
+                                    Log.e("updateReactions", "리액션 추가 실패: ${error.message}")
+                                }
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        Log.e("updateReactions", "데이터베이스 오류: ${error.message}")
+                    }
+                })
+        }
     }
 
      fun showDeletePopup(message: Message) {

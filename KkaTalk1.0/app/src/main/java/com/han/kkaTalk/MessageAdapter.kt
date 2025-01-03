@@ -90,34 +90,32 @@ class MessageAdapter(private val context: Context,
                 true
             }
 
-        } else {
-            val viewHolder = holder as ReceiveViewHolder
+        } else if (holder is ReceiveViewHolder) {
             holder.nickName.text = receiverNick
-            viewHolder.receiveMessage.text = currentMessage.message
-            viewHolder.receiveTime.text = dateFormat.format(currentMessage.timestamp)
+            holder.receiveMessage.text = currentMessage.message
+            holder.receiveTime.text = dateFormat.format(currentMessage.timestamp)
 
-            val reactions = currentMessage.reactions
-            if (reactions != null && reactions.containsKey(FirebaseAuth.getInstance().currentUser?.uid)) {
-                holder.reactionIcon.text = reactions[FirebaseAuth.getInstance().currentUser?.uid] // 내 반응 표시
-            } else {
-                holder.reactionIcon.text = ""
+            // 리액션 설정
+            holder.reactionIcon.text = ""
+            holder.reactionIcon.visibility = View.GONE
+
+            val userReaction = currentMessage.reactions?.get(FirebaseAuth.getInstance().currentUser?.uid)
+            if (!userReaction.isNullOrEmpty()) {
+                holder.reactionIcon.text = userReaction
+                holder.reactionIcon.visibility = View.VISIBLE
             }
 
-            // 반응 추가 클릭 이벤트
             holder.itemView.setOnClickListener {
                 (context as ChatActivity).showReactionPopup(currentMessage)
-                true // 반응 팝업 메뉴 띄우기
+                true
             }
 
-            // 프로필 이미지를 설정하기 위해 Glide를 사용
             Glide.with(context)
-                .load(profileImageUrl) // 전달받은 프로필 이미지 URL 사용
-                .placeholder(R.drawable.profile_default) // 기본 이미지 설정
-                .into(holder.profileImage) // ReceiveViewHolder의 ImageView에 로드
+                .load(profileImageUrl)
+                .placeholder(R.drawable.profile_default)
+                .into(holder.profileImage)
 
-            // 프로필이미지 클릭
             profileClick(holder.profileImage)
-
         }
 
 
@@ -159,7 +157,7 @@ class MessageAdapter(private val context: Context,
         val receiveMessage: TextView = itemView.findViewById(R.id.tv_receive_msg)
         val receiveTime: TextView = itemView.findViewById(R.id.tv_receive_time)
         val profileImage: ImageView = itemView.findViewById(R.id.iv_profile)
-        val reactionIcon: TextView = itemView.findViewById(R.id.tv_reactions    )
+        val reactionIcon: TextView = itemView.findViewById(R.id.tv_reactions)
     }
 
 
