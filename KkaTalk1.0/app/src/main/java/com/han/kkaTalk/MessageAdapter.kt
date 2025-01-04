@@ -105,7 +105,7 @@ class MessageAdapter(private val context: Context,
                 holder.reactionIcon.visibility = View.VISIBLE
             }
 
-            holder.itemView.setOnClickListener {
+            holder.itemView.setOnLongClickListener {
                 (context as ChatActivity).showReactionPopup(currentMessage)
                 true
             }
