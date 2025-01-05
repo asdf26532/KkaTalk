@@ -186,25 +186,14 @@ class ChatActivity : AppCompatActivity() {
             return
         }
 
-        // 현재 채팅방 경로 설정
-        val senderRoom = userId + receiverUid
-        val receiverRoom = receiverUid + userId
-
         // AlertDialog로 팝업 메뉴 표시
         val builder = AlertDialog.Builder(this)
         builder.setTitle("리액션 추가")
         builder.setItems(reactions.toTypedArray()) { dialog, which ->
             val selectedReaction = reactions[which]
 
-            // Firebase 참조
-            val senderMessagesRef = FirebaseDatabase.getInstance()
-                .getReference("chats")
-                .child(senderRoom)
-                .child("message")
-            val receiverMessagesRef = FirebaseDatabase.getInstance()
-                .getReference("chats")
-                .child(receiverRoom)
-                .child("message")
+            val senderMessagesRef = mDbRef.child("chats").child(senderRoom).child("message")
+            val receiverMessagesRef = mDbRef.child("chats").child(receiverRoom).child("message")
 
             // 메시지의 reactions 필드 업데이트
             updateReactions(senderMessagesRef, message, userId, selectedReaction)
@@ -255,8 +244,6 @@ class ChatActivity : AppCompatActivity() {
         builder.setTitle("메시지 삭제")
         builder.setMessage("이 메시지를 삭제하시겠습니까?")
         builder.setPositiveButton("삭제") { dialog, _ ->
-            val senderRoom = FirebaseAuth.getInstance().currentUser?.uid + receiverUid
-            val receiverRoom = receiverUid + FirebaseAuth.getInstance().currentUser?.uid
 
             // 현재 사용자가 메시지를 보낸 사람인지 확인
             if (message.sendId == FirebaseAuth.getInstance().currentUser?.uid) {
@@ -415,17 +402,6 @@ class ChatActivity : AppCompatActivity() {
                     Log.e("ChatActivity", "Failed to fetch blocked users: ${error.message}")
                 }
             })
-        }
-    }
-
-    private fun addReactionToMessage(messageId: String, reaction: String) {
-        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val messageRef = mDbRef.child("chats").child(receiverRoom).child("message").child(messageId)
-
-        messageRef.child("reactions").child(currentUserId).setValue(reaction).addOnSuccessListener {
-            Log.d("ChatActivity", "Reaction added successfully")
-        }.addOnFailureListener {
-            Log.e("ChatActivity", "Failed to add reaction: ${it.message}")
         }
     }
 
