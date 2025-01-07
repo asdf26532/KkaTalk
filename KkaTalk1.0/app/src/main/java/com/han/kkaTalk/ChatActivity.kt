@@ -5,9 +5,12 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.LinearLayout
 import android.widget.PopupMenu
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -179,33 +182,48 @@ class ChatActivity : AppCompatActivity() {
     }
 
     fun showReactionPopup(message: Message) {
-        val reactions = listOf("❤️", "😂", "👍", "😮", "😢", "👎") // 리액션 목록
+
+        val reactions = listOf("❤️", "👍", "👎", "😂", "😮", "😢", "✔️") // 리액션 목록
         val userId = FirebaseAuth.getInstance().currentUser?.uid
         if (userId == null) {
             Toast.makeText(this, "로그인 정보가 없습니다.", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // AlertDialog로 팝업 메뉴 표시
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("리액션 추가")
-        builder.setItems(reactions.toTypedArray()) { dialog, which ->
-            val selectedReaction = reactions[which]
+        val senderMessagesRef = mDbRef.child("chats").child(senderRoom).child("message")
+        val receiverMessagesRef = mDbRef.child("chats").child(receiverRoom).child("message")
 
-            val senderMessagesRef = mDbRef.child("chats").child(senderRoom).child("message")
-            val receiverMessagesRef = mDbRef.child("chats").child(receiverRoom).child("message")
 
-            // 메시지의 reactions 필드 업데이트
-            updateReactions(senderMessagesRef, message, userId, selectedReaction)
-            updateReactions(receiverMessagesRef, message, userId, selectedReaction)
+        // 팝업을 위한 커스텀 레이아웃 초기화
+        val popupView = layoutInflater.inflate(R.layout.popup_reaction, null)
+        val reactionContainer = popupView.findViewById<LinearLayout>(R.id.reaction_container)
 
-            Toast.makeText(this, "리액션이 추가되었습니다.", Toast.LENGTH_SHORT).show()
-            dialog.dismiss()
+        // AlertDialog로 팝업 표시
+        val dialog = AlertDialog.Builder(this)
+            .setView(popupView)
+            .create()
+        dialog.show()
+
+        // 리액션 이모티콘 동적 추가
+        for (reaction in reactions) {
+            val textView = TextView(this).apply {
+                text = reaction
+                textSize = 24f
+                gravity = Gravity.CENTER
+                setPadding(22, 8, 22, 8)
+                setOnClickListener {
+                    updateReactions(senderMessagesRef, message, userId, reaction)
+                    updateReactions(receiverMessagesRef, message, userId, reaction)
+                    Toast.makeText(this@ChatActivity, "$reaction 리액션이 추가되었습니다.", Toast.LENGTH_SHORT).show()
+                    dialog.dismiss()
+                }
+            }
+            reactionContainer.addView(textView)
         }
-        builder.setNegativeButton("취소") { dialog, _ ->
-            dialog.dismiss()
-        }
-        builder.show()
+
+
+
+
     }
 
     private fun updateReactions(messagesRef: DatabaseReference, message: Message, userId: String, reaction: String) {
