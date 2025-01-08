@@ -2,6 +2,9 @@ package com.han.kkaTalk
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -197,6 +200,8 @@ class ChatActivity : AppCompatActivity() {
         // 팝업을 위한 커스텀 레이아웃 초기화
         val popupView = layoutInflater.inflate(R.layout.popup_reaction, null)
         val reactionContainer = popupView.findViewById<LinearLayout>(R.id.reaction_container)
+        val btnCopy = popupView.findViewById<TextView>(R.id.btn_copy) // 복사 버튼
+        val btnCancel = popupView.findViewById<TextView>(R.id.btn_cancel) // 취소 버튼
 
         // AlertDialog로 팝업 표시
         val dialog = AlertDialog.Builder(this)
@@ -221,7 +226,19 @@ class ChatActivity : AppCompatActivity() {
             reactionContainer.addView(textView)
         }
 
+        // 복사 버튼 클릭 이벤트
+        btnCopy.setOnClickListener {
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("Copied Message", message.message)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(this, "메시지가 복사되었습니다.", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+        }
 
+        // 취소 버튼 클릭 이벤트
+        btnCancel.setOnClickListener {
+            dialog.dismiss() // 팝업 닫기
+        }
 
 
     }
