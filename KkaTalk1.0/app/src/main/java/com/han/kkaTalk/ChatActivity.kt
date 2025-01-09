@@ -186,7 +186,7 @@ class ChatActivity : AppCompatActivity() {
 
     fun showReactionPopup(message: Message) {
 
-        val reactions = listOf("❤️", "👍", "👎", "😂", "😮", "😢", "✔️") // 리액션 목록
+        val reactions = listOf("❤️", "👍", "👎", "😂", "😮", "😢", "✅") // 리액션 목록
         val userId = FirebaseAuth.getInstance().currentUser?.uid
         if (userId == null) {
             Toast.makeText(this, "로그인 정보가 없습니다.", Toast.LENGTH_SHORT).show()
@@ -274,7 +274,44 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-     fun showDeletePopup(message: Message) {
+    fun showOptionsPopup(message: Message) {
+        // 다이얼로그 레이아웃 초기화
+        val dialogView = layoutInflater.inflate(R.layout.message_options, null)
+
+        val btnCopy = dialogView.findViewById<TextView>(R.id.btn_copy)
+        val btnDelete = dialogView.findViewById<TextView>(R.id.btn_delete)
+        val btnCancel = dialogView.findViewById<TextView>(R.id.btn_cancel)
+
+        // AlertDialog 생성
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        dialog.show()
+
+        // 복사 버튼 클릭
+        btnCopy.setOnClickListener {
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("Copied Message", message.message)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(this, "메시지가 복사되었습니다.", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+        }
+
+        // 삭제 버튼 클릭
+        btnDelete.setOnClickListener {
+            showDeletePopup(message) // 기존 삭제 다이얼로그 호출
+            dialog.dismiss()
+        }
+
+        // 취소 버튼 클릭
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+    }
+
+
+     private fun showDeletePopup(message: Message) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("메시지 삭제")
         builder.setMessage("이 메시지를 삭제하시겠습니까?")

@@ -86,7 +86,7 @@ class MessageAdapter(private val context: Context,
 
             // 메시지 꾹 눌렀을 때 (보내는 메시지에만 설정)
             holder.itemView.setOnLongClickListener {
-                (context as ChatActivity).showDeletePopup(currentMessage)
+                (context as ChatActivity).showOptionsPopup(currentMessage)
                 true
             }
 
