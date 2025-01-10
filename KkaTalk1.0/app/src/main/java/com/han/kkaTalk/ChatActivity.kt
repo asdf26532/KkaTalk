@@ -201,6 +201,7 @@ class ChatActivity : AppCompatActivity() {
         val popupView = layoutInflater.inflate(R.layout.popup_reaction, null)
         val reactionContainer = popupView.findViewById<LinearLayout>(R.id.reaction_container)
         val btnCopy = popupView.findViewById<TextView>(R.id.btn_copy) // 복사 버튼
+        val btnForward = popupView.findViewById<TextView>(R.id.btn_forward) // 전달 버튼
         val btnCancel = popupView.findViewById<TextView>(R.id.btn_cancel) // 취소 버튼
 
         // AlertDialog로 팝업 표시
@@ -235,12 +236,28 @@ class ChatActivity : AppCompatActivity() {
             dialog.dismiss()
         }
 
+        // 전달 버튼 클릭 이벤트
+        btnForward.setOnClickListener{
+            shareMessage(message)
+            dialog.dismiss()
+        }
+
         // 취소 버튼 클릭 이벤트
         btnCancel.setOnClickListener {
             dialog.dismiss() // 팝업 닫기
         }
 
+    }
 
+    // 메세지 전달 기능
+    private fun shareMessage(message: Message) {
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain" // 텍스트 데이터 유형
+            putExtra(Intent.EXTRA_TEXT, message.message) // Message 객체에서 메시지 내용만 추출
+        }
+        // 공유 가능한 앱 목록 보여주기
+        val chooser = Intent.createChooser(intent, "메시지 전달")
+        startActivity(chooser)
     }
 
     private fun updateReactions(messagesRef: DatabaseReference, message: Message, userId: String, reaction: String) {
