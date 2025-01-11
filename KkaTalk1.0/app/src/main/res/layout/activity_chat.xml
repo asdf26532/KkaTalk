@@ -12,7 +12,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/input_layout"
-        android:layout_alignParentTop="true"/>
+        android:layout_alignParentTop="true">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
 
     <LinearLayout
         android:id="@+id/input_layout"
@@ -22,6 +25,7 @@
         android:orientation="horizontal"
         android:layout_marginBottom="30dp"
         android:weightSum="100">
+
 
         <EditText
             android:id="@+id/edt_message"
@@ -45,8 +49,20 @@
             android:textSize="17sp"
             android:textColor="@color/white" />
 
-
     </LinearLayout>
 
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btn_scroll_to_bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="16dp"
+        app:maxImageSize="45dp"
+        android:contentDescription="Scroll to bottom"
+        android:src="@drawable/ic_arrow_down"
+        app:backgroundTint="@color/colorPrimary"
+        app:elevation="4dp" />
 
 </RelativeLayout>

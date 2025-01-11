@@ -17,6 +17,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
@@ -45,6 +47,8 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var messageList: ArrayList<Message>
 
     private val blockedUserIds: ArrayList<String> = ArrayList()
+
+    private lateinit var btnScrollToBottom: FloatingActionButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -181,6 +185,32 @@ class ChatActivity : AppCompatActivity() {
                     Log.e("DatabaseError", "Database error: $error")
                 }
             })
+
+        // FloatingActionButton 바인딩
+        binding.btnScrollToBottom.setOnClickListener {
+            if (messageList.isNotEmpty()) {
+                binding.rvChat.scrollToPosition(messageList.size - 1) // 가장 마지막 메시지로 스크롤
+            }
+        }
+
+        // RecyclerView 스크롤 리스너 추가
+        binding.rvChat.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                // 스크롤 상태에 따라 버튼 표시/숨김
+                val layoutManager = binding.rvChat.layoutManager as LinearLayoutManager
+                val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+
+                if (lastVisibleItemPosition < messageList.size - 1) {
+                    // 마지막 메시지가 화면에 보이지 않으면 버튼 표시
+                    binding.btnScrollToBottom.show()
+                } else {
+                    // 마지막 메시지가 화면에 보이면 버튼 숨김
+                    binding.btnScrollToBottom.hide()
+                }
+            }
+        })
 
     }
 
