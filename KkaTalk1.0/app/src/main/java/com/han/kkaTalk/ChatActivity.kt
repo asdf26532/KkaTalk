@@ -90,17 +90,23 @@ class ChatActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true) // 화살표 버튼 추가
 
         binding.btnSend.setOnClickListener {
+            val message = binding.edtMessage.text.toString().trim()
+            // 메시지가 비어 있는지 확인
+            if (message.isEmpty()) {
+                Toast.makeText(this, "내용을 입력하세요.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
             if (blockedUserIds.contains(receiverUid)) {
                 Toast.makeText(this, "차단한 사용자에게 메시지를 보낼 수 없습니다.", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
             }
 
-            val message = binding.edtMessage.text.toString()
             val timeStamp = System.currentTimeMillis()
             val mread = false
 
             val messageObject = Message(message, senderUid, receiverUid, timeStamp, mread)
+
 
             // 데이터 저장
             mDbRef.child("chats").child(senderRoom).child("message").push()
@@ -357,8 +363,7 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-
-     private fun showDeletePopup(message: Message) {
+    private fun showDeletePopup(message: Message) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("메시지 삭제")
         builder.setMessage("이 메시지를 삭제하시겠습니까?")
