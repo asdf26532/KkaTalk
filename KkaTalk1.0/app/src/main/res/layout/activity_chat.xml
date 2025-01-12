@@ -54,17 +54,16 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btn_scroll_to_bottom"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
         android:layout_above="@+id/input_layout"
-        android:layout_alignParentEnd="true"
+        android:layout_centerHorizontal="true"
         android:layout_margin="16dp"
         android:layout_marginBottom="16dp"
-        app:maxImageSize="35dp"
+        app:maxImageSize="42dp"
         android:contentDescription="Scroll to bottom"
-        android:src="@drawable/ic_arrow_down1"
+        android:src="@drawable/ic_arrow_down"
         app:tint="#FFFFFF"
-        android:backgroundTint="@color/skyblue"
-        app:elevation="4dp" />
+        android:backgroundTint="@color/skyblue"/>
 
 </RelativeLayout>
