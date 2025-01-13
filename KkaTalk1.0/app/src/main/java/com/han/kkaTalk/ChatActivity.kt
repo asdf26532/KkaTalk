@@ -72,6 +72,16 @@ class ChatActivity : AppCompatActivity() {
         binding.rvChat.layoutManager = LinearLayoutManager(this)
         binding.rvChat.adapter = messageAdapter
 
+        binding.edtMessage.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                binding.rvChat.postDelayed({
+                    (binding.rvChat.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                        messageList.size - 1, 0
+                    )
+                }, 200)
+            }
+        }
+
         // Firebase 설정
         mAuth = FirebaseAuth.getInstance()
         mDbRef = FirebaseDatabase.getInstance().reference
