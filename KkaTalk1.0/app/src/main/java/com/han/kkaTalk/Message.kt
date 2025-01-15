@@ -7,8 +7,9 @@ data class Message(
     val timestamp: Long?,
     val mread: Boolean? = null,
     var deleted: Boolean? = false,
+    var fileUrl: String? = null,
     var reactions: Map<String, String>? = null
 ){
-    constructor():this("","","",0L, false, false, null)
+    constructor():this("","","",0L, false, false, null, null)
 }
 

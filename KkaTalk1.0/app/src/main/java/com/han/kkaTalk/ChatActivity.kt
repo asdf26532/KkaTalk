@@ -6,6 +6,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
@@ -26,6 +27,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.storage.FirebaseStorage
 import com.han.kkaTalk.databinding.ActivityChatBinding
 
 
@@ -44,6 +46,7 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var senderRoom: String
 
     private var profileImageUrl: String? = null
+    private var senderUid: String? = null
     private lateinit var messageList: ArrayList<Message>
 
     private val blockedUserIds: ArrayList<String> = ArrayList()
@@ -228,7 +231,70 @@ class ChatActivity : AppCompatActivity() {
             }
         })
 
+        binding.btnAttach.setOnClickListener {
+            // Intent를 사용해 파일 선택
+            val intent = Intent(Intent.ACTION_GET_CONTENT)
+            intent.type = "*/*" // 모든 파일 타입을 허용
+            startActivityForResult(intent, REQUEST_CODE_SELECT_FILE)
+        }
+
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_CODE_SELECT_FILE && resultCode == Activity.RESULT_OK) {
+            // 선택된 파일의 URI 가져오기
+            val fileUri = data?.data
+            if (fileUri != null) {
+                uploadFileToFirebase(fileUri)
+            } else {
+                Toast.makeText(this, "파일 선택 실패", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // Firebase Storage에 파일 업로드
+    private fun uploadFileToFirebase(fileUri: Uri) {
+        val storageReference = FirebaseStorage.getInstance().reference.child("chat_files/${System.currentTimeMillis()}")
+        val uploadTask = storageReference.putFile(fileUri)
+
+        uploadTask.addOnSuccessListener { taskSnapshot ->
+            taskSnapshot.storage.downloadUrl.addOnSuccessListener { uri ->
+                val fileUrl = uri.toString()
+
+                // 파일 URL로 메시지 전송
+                sendMessageWithFile(fileUrl)
+            }
+        }.addOnFailureListener {
+            Toast.makeText(this, "파일 업로드 실패", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // 파일 메시지 전송 함수
+    private fun sendMessageWithFile(fileUrl: String) {
+        val timeStamp = System.currentTimeMillis()
+        val messageObject = Message(
+            message = null,         // 텍스트 메시지는 없음
+            sendId = senderUid,
+            receiverId = receiverUid,
+            timestamp = timeStamp,
+            fileUrl = fileUrl,      // 업로드된 파일 URL
+            mread = false
+        )
+
+        mDbRef.child("chats").child(senderRoom).child("message").push()
+            .setValue(messageObject).addOnSuccessListener {
+                mDbRef.child("chats").child(receiverRoom).child("message").push()
+                    .setValue(messageObject)
+            }
+    }
+
+    companion object {
+        const val REQUEST_CODE_SELECT_FILE = 401 // 파일 선택 요청 코드
+    }
+
+
 
     fun showReactionPopup(message: Message) {
 
