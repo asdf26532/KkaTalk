@@ -29,6 +29,13 @@
         android:text="받은 메시지"
         android:textSize="18sp" />
 
+    <ImageView
+        android:id="@+id/iv_send_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:scaleType="centerCrop" />
+
     <TextView
         android:id="@+id/tv_receive_time"
         android:layout_width="wrap_content"

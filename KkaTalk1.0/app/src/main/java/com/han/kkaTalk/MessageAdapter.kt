@@ -71,6 +71,32 @@ class MessageAdapter(private val context: Context,
             return
         }
 
+        // 이미지 첨부 메시지 처리
+        if (!currentMessage.fileUrl.isNullOrEmpty()) {
+            if (holder is SendViewHolder) {
+                Glide.with(context)
+                    .load(currentMessage.fileUrl)
+                    .placeholder(R.drawable.placeholder_image) // 로딩 중 기본 이미지
+                    .error(R.drawable.error_image) // 로딩 실패 시 표시 이미지
+                    .into(holder.itemView.findViewById(R.id.iv_send_image))
+
+                holder.sendMessage.visibility = View.GONE // 텍스트 메시지는 숨김
+                holder.itemView.findViewById<ImageView>(R.id.iv_send_image).visibility = View.VISIBLE
+            } else if (holder is ReceiveViewHolder) {
+                Glide.with(context)
+                    .load(currentMessage.fileUrl)
+                    .placeholder(R.drawable.placeholder_image)
+                    .error(R.drawable.error_image)
+                    .into(holder.itemView.findViewById(R.id.iv_receive_image))
+
+                holder.receiveMessage.visibility = View.GONE
+                holder.itemView.findViewById<ImageView>(R.id.iv_receive_image).visibility = View.VISIBLE
+
+                profileClick(holder.profileImage)
+            }
+            return
+        }
+
         // 보내는 데이터
         if(holder.javaClass == SendViewHolder::class.java) {
             val viewHolder = holder as SendViewHolder
