@@ -76,8 +76,8 @@ class MessageAdapter(private val context: Context,
             if (holder is SendViewHolder) {
                 Glide.with(context)
                     .load(currentMessage.fileUrl)
-                    .placeholder(R.drawable.placeholder_image) // 로딩 중 기본 이미지
-                    .error(R.drawable.error_image) // 로딩 실패 시 표시 이미지
+                    .placeholder(R.drawable.profile_default) // 로딩 중 기본 이미지
+                    .error(R.drawable.profile_default) // 로딩 실패 시 표시 이미지
                     .into(holder.itemView.findViewById(R.id.iv_send_image))
 
                 holder.sendMessage.visibility = View.GONE // 텍스트 메시지는 숨김
@@ -85,8 +85,8 @@ class MessageAdapter(private val context: Context,
             } else if (holder is ReceiveViewHolder) {
                 Glide.with(context)
                     .load(currentMessage.fileUrl)
-                    .placeholder(R.drawable.placeholder_image)
-                    .error(R.drawable.error_image)
+                    .placeholder(R.drawable.profile_default)
+                    .error(R.drawable.profile_default)
                     .into(holder.itemView.findViewById(R.id.iv_receive_image))
 
                 holder.receiveMessage.visibility = View.GONE
