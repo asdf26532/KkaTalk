@@ -71,18 +71,20 @@ class MessageAdapter(private val context: Context,
             return
         }
 
-        // 이미지 첨부 메시지 처리
+        // 이미지 메시지 처리
         if (!currentMessage.fileUrl.isNullOrEmpty()) {
             if (holder is SendViewHolder) {
+                // 보낸 이미지 메시지
                 Glide.with(context)
                     .load(currentMessage.fileUrl)
-                    .placeholder(R.drawable.profile_default) // 로딩 중 기본 이미지
-                    .error(R.drawable.profile_default) // 로딩 실패 시 표시 이미지
+                    .placeholder(R.drawable.profile_default) // 로딩 중
+                    .error(R.drawable.profile_default) // 실패 시
                     .into(holder.itemView.findViewById(R.id.iv_send_image))
 
-                holder.sendMessage.visibility = View.GONE // 텍스트 메시지는 숨김
+                holder.sendMessage.visibility = View.GONE
                 holder.itemView.findViewById<ImageView>(R.id.iv_send_image).visibility = View.VISIBLE
             } else if (holder is ReceiveViewHolder) {
+                // 받은 이미지 메시지
                 Glide.with(context)
                     .load(currentMessage.fileUrl)
                     .placeholder(R.drawable.profile_default)
@@ -164,8 +166,12 @@ class MessageAdapter(private val context: Context,
 
     override fun getItemViewType(position: Int): Int {
         val currentMessage = messageList[position]
+        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
 
-        return  if(FirebaseAuth.getInstance().currentUser?.uid.equals(currentMessage.sendId)){
+        Log.d("MessageAdapter", "currentMessage.sendId: ${currentMessage.sendId}")
+        Log.d("MessageAdapter", "currentUserUid: $currentUserUid")
+
+        return  if(FirebaseAuth.getInstance().currentUser?.uid == currentMessage.sendId){
             send
         } else {
             receive

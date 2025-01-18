@@ -4,19 +4,6 @@
     android:layout_height="wrap_content"
     android:layout_marginTop="18dp">
 
-    <ImageView
-        android:id="@+id/iv_send_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:scaleType="centerCrop" />
-
-    <ProgressBar
-        android:id="@+id/progress_send"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone" />
-
     <TextView
         android:id="@+id/tv_send_time"
         android:layout_width="wrap_content"
@@ -49,6 +36,17 @@
         android:text="보낸 메시지"
         android:textSize="18sp"
         android:textColor="@color/white"/>
+
+    <ImageView
+        android:id="@+id/iv_send_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="5dp"
+        android:background="@drawable/btn_background"
+        android:padding="10dp"
+        android:visibility="gone"
+        android:scaleType="centerCrop" />
 
 
 </RelativeLayout>
