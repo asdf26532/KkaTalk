@@ -164,6 +164,8 @@ class MessageAdapter(private val context: Context,
         return messageList.size
     }
 
+
+
     override fun getItemViewType(position: Int): Int {
         val currentMessage = messageList[position]
         val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
@@ -171,7 +173,7 @@ class MessageAdapter(private val context: Context,
         Log.d("MessageAdapter", "currentMessage.sendId: ${currentMessage.sendId}")
         Log.d("MessageAdapter", "currentUserUid: $currentUserUid")
 
-        return  if(FirebaseAuth.getInstance().currentUser?.uid == currentMessage.sendId){
+        return  if(currentUserUid == currentMessage.sendId){
             send
         } else {
             receive

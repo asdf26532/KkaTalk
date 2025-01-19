@@ -46,7 +46,6 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var senderRoom: String
 
     private var profileImageUrl: String? = null
-    private var senderUid: String? = null
     private lateinit var messageList: ArrayList<Message>
 
     private val blockedUserIds: ArrayList<String> = ArrayList()
@@ -132,6 +131,8 @@ class ChatActivity : AppCompatActivity() {
             // 입력 부분 초기화
             binding.edtMessage.setText("")
         }
+
+        Log.d("ChatActivity", "Sender UID: $senderUid")
 
         // 메시지 가져오기
         mDbRef.child("chats").child(senderRoom).child("message")
@@ -273,6 +274,7 @@ class ChatActivity : AppCompatActivity() {
 
     // 파일 메시지 전송 함수
     private fun sendMessageWithFile(fileUrl: String) {
+        val senderUid = mAuth.currentUser?.uid
         val timeStamp = System.currentTimeMillis()
         val messageObject = Message(
             message = null,         // 텍스트 메시지는 없음
@@ -282,6 +284,8 @@ class ChatActivity : AppCompatActivity() {
             fileUrl = fileUrl,      // 업로드된 파일 URL
             mread = false
         )
+
+        Log.d("ChatActivity", "sendMessageWithFile: Sender UID: $senderUid")
 
         mDbRef.child("chats").child(senderRoom).child("message").push()
             .setValue(messageObject).addOnSuccessListener {
