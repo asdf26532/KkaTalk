@@ -74,6 +74,9 @@ class MessageAdapter(private val context: Context,
         // 이미지 메시지 처리
         if (!currentMessage.fileUrl.isNullOrEmpty()) {
             if (holder is SendViewHolder) {
+                val viewHolder = holder as SendViewHolder
+                viewHolder.sendMessage.text = currentMessage.message
+                viewHolder.sendTime.text = dateFormat.format(currentMessage.timestamp)
                 // 보낸 이미지 메시지
                 Glide.with(context)
                     .load(currentMessage.fileUrl)
@@ -84,6 +87,9 @@ class MessageAdapter(private val context: Context,
                 holder.sendMessage.visibility = View.GONE
                 holder.itemView.findViewById<ImageView>(R.id.iv_send_image).visibility = View.VISIBLE
             } else if (holder is ReceiveViewHolder) {
+                holder.nickName.text = receiverNick
+                holder.receiveMessage.text = currentMessage.message
+                holder.receiveTime.text = dateFormat.format(currentMessage.timestamp)
                 // 받은 이미지 메시지
                 Glide.with(context)
                     .load(currentMessage.fileUrl)
@@ -93,6 +99,11 @@ class MessageAdapter(private val context: Context,
 
                 holder.receiveMessage.visibility = View.GONE
                 holder.itemView.findViewById<ImageView>(R.id.iv_receive_image).visibility = View.VISIBLE
+
+                Glide.with(context)
+                    .load(profileImageUrl)
+                    .placeholder(R.drawable.profile_default)
+                    .into(holder.profileImage)
 
                 profileClick(holder.profileImage)
             }
