@@ -49,6 +49,15 @@ class MessageAdapter(private val context: Context,
         val currentMessage = messageList[position]
         val dateFormat = SimpleDateFormat("a hh:mm", Locale.getDefault()) // 시간 형식 설정
 
+        // 텍스트 및 이미지 메시지 초기화
+        if (holder is SendViewHolder) {
+            holder.sendMessage.visibility = View.GONE
+            holder.itemView.findViewById<ImageView>(R.id.iv_send_image).visibility = View.GONE
+        } else if (holder is ReceiveViewHolder) {
+            holder.receiveMessage.visibility = View.GONE
+            holder.itemView.findViewById<ImageView>(R.id.iv_receive_image).visibility = View.GONE
+        }
+
         // 메시지가 삭제되었는지 확인
         if (currentMessage.deleted == true) {
             // 삭제된 메시지를 표시
@@ -77,6 +86,7 @@ class MessageAdapter(private val context: Context,
                 val viewHolder = holder as SendViewHolder
                 viewHolder.sendMessage.text = currentMessage.message
                 viewHolder.sendTime.text = dateFormat.format(currentMessage.timestamp)
+
                 // 보낸 이미지 메시지
                 Glide.with(context)
                     .load(currentMessage.fileUrl)
@@ -84,8 +94,8 @@ class MessageAdapter(private val context: Context,
                     .error(R.drawable.profile_default) // 실패 시
                     .into(holder.itemView.findViewById(R.id.iv_send_image))
 
-                holder.sendMessage.visibility = View.GONE
                 holder.itemView.findViewById<ImageView>(R.id.iv_send_image).visibility = View.VISIBLE
+                holder.readStatus.text = if (currentMessage.mread == true) " " else "1"
             } else if (holder is ReceiveViewHolder) {
                 holder.nickName.text = receiverNick
                 holder.receiveMessage.text = currentMessage.message
@@ -97,7 +107,7 @@ class MessageAdapter(private val context: Context,
                     .error(R.drawable.profile_default)
                     .into(holder.itemView.findViewById(R.id.iv_receive_image))
 
-                holder.receiveMessage.visibility = View.GONE
+
                 holder.itemView.findViewById<ImageView>(R.id.iv_receive_image).visibility = View.VISIBLE
 
                 Glide.with(context)
@@ -116,6 +126,8 @@ class MessageAdapter(private val context: Context,
             viewHolder.sendMessage.text = currentMessage.message
             viewHolder.sendTime.text = dateFormat.format(currentMessage.timestamp)
 
+            holder.sendMessage.visibility = View.VISIBLE
+
             // 읽음 상태 표시
             if (currentMessage.mread == true) {
                 viewHolder.readStatus.text = " "
@@ -133,6 +145,7 @@ class MessageAdapter(private val context: Context,
             holder.nickName.text = receiverNick
             holder.receiveMessage.text = currentMessage.message
             holder.receiveTime.text = dateFormat.format(currentMessage.timestamp)
+            holder.receiveMessage.visibility = View.VISIBLE
 
             // 리액션 설정
             holder.reactionIcon.text = ""
