@@ -120,54 +120,16 @@ class MessageAdapter(private val context: Context,
             return
         }
 
-        // 보내는 데이터
-        if(holder.javaClass == SendViewHolder::class.java) {
-            val viewHolder = holder as SendViewHolder
-            viewHolder.sendMessage.text = currentMessage.message
-            viewHolder.sendTime.text = dateFormat.format(currentMessage.timestamp)
-
+        // 텍스트 메시지 처리
+        if (holder is SendViewHolder) {
+            holder.sendMessage.text = currentMessage.message
             holder.sendMessage.visibility = View.VISIBLE
-
-            // 읽음 상태 표시
-            if (currentMessage.mread == true) {
-                viewHolder.readStatus.text = " "
-            } else {
-                viewHolder.readStatus.text = "1"
-            }
-
-            // 메시지 꾹 눌렀을 때 (보내는 메시지에만 설정)
-            holder.itemView.setOnLongClickListener {
-                (context as ChatActivity).showOptionsPopup(currentMessage)
-                true
-            }
-
+            holder.sendTime.text = dateFormat.format(currentMessage.timestamp)
+            holder.readStatus.text = if (currentMessage.mread == true) " " else "1"
         } else if (holder is ReceiveViewHolder) {
-            holder.nickName.text = receiverNick
             holder.receiveMessage.text = currentMessage.message
-            holder.receiveTime.text = dateFormat.format(currentMessage.timestamp)
             holder.receiveMessage.visibility = View.VISIBLE
-
-            // 리액션 설정
-            holder.reactionIcon.text = ""
-            holder.reactionIcon.visibility = View.GONE
-
-            val userReaction = currentMessage.reactions?.get(FirebaseAuth.getInstance().currentUser?.uid)
-            if (!userReaction.isNullOrEmpty()) {
-                holder.reactionIcon.text = userReaction
-                holder.reactionIcon.visibility = View.VISIBLE
-            }
-
-            holder.itemView.setOnLongClickListener {
-                (context as ChatActivity).showReactionPopup(currentMessage)
-                true
-            }
-
-            Glide.with(context)
-                .load(profileImageUrl)
-                .placeholder(R.drawable.profile_default)
-                .into(holder.profileImage)
-
-            profileClick(holder.profileImage)
+            holder.receiveTime.text = dateFormat.format(currentMessage.timestamp)
         }
 
 
