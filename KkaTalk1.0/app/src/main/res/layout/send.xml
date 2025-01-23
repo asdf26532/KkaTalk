@@ -12,7 +12,7 @@
         android:layout_margin="5dp"
         android:background="@drawable/btn_background"
         android:padding="10dp"
-        android:visibility="gone"
+
         android:scaleType="centerCrop" />
 
     <!-- 텍스트 메시지 -->
@@ -27,19 +27,7 @@
         android:text="보낸 메시지"
         android:textSize="18sp"
         android:textColor="@color/white"
-        android:visibility="gone" />
-
-    <!-- 시간 표시 -->
-    <TextView
-        android:id="@+id/tv_send_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="시간 표시"
-        android:textSize="12sp"
-        android:layout_below="@id/iv_send_image"
-        android:layout_toStartOf="@id/iv_send_image"
-        android:layout_marginTop="4dp"
-        android:textColor="#888888" />
+        />
 
     <!-- 읽음 상태 -->
     <TextView
@@ -48,10 +36,23 @@
         android:layout_height="wrap_content"
         android:text="읽음 표시"
         android:textSize="12sp"
-        android:layout_below="@id/tv_send_time"
-        android:layout_toStartOf="@id/tv_send_time"
-        android:layout_marginTop="4dp"
+        android:layout_toStartOf="@id/tv_send_msg"
+        android:layout_marginTop="11dp"
         android:textColor="#E53935" />
+
+    <!-- 시간 표시 -->
+    <TextView
+        android:id="@+id/tv_send_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="시간 표시"
+        android:textSize="12sp"
+        android:layout_below="@id/tv_read_status"
+        android:layout_toStartOf="@id/tv_send_msg"
+        android:layout_marginTop="4dp"
+        android:textColor="#888888" />
+
+
 
 
 </RelativeLayout>

@@ -38,7 +38,7 @@
         android:layout_marginTop="20dp"
         android:background="@drawable/edit_background"
         android:padding="10dp"
-        android:visibility="gone"
+
         android:scaleType="centerCrop" />
 
     <TextView

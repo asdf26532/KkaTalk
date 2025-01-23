@@ -96,6 +96,7 @@ class MessageAdapter(private val context: Context,
 
                 holder.itemView.findViewById<ImageView>(R.id.iv_send_image).visibility = View.VISIBLE
                 holder.readStatus.text = if (currentMessage.mread == true) " " else "1"
+
             } else if (holder is ReceiveViewHolder) {
                 holder.nickName.text = receiverNick
                 holder.receiveMessage.text = currentMessage.message
@@ -126,10 +127,37 @@ class MessageAdapter(private val context: Context,
             holder.sendMessage.visibility = View.VISIBLE
             holder.sendTime.text = dateFormat.format(currentMessage.timestamp)
             holder.readStatus.text = if (currentMessage.mread == true) " " else "1"
+
+            // 메시지 꾹 눌렀을 때 (보내는 메시지에만 설정)
+            holder.itemView.setOnLongClickListener {
+                (context as ChatActivity).showOptionsPopup(currentMessage)
+                true
+            }
+
+
         } else if (holder is ReceiveViewHolder) {
             holder.receiveMessage.text = currentMessage.message
             holder.receiveMessage.visibility = View.VISIBLE
             holder.receiveTime.text = dateFormat.format(currentMessage.timestamp)
+
+            // 리액션 설정
+            holder.reactionIcon.text = ""
+            holder.reactionIcon.visibility = View.GONE
+            val userReaction = currentMessage.reactions?.get(FirebaseAuth.getInstance().currentUser?.uid)
+            if (!userReaction.isNullOrEmpty()) {
+                holder.reactionIcon.text = userReaction
+                holder.reactionIcon.visibility = View.VISIBLE
+            }
+            holder.itemView.setOnLongClickListener {
+                (context as ChatActivity).showReactionPopup(currentMessage)
+                true
+            }
+            Glide.with(context)
+                .load(profileImageUrl)
+                .placeholder(R.drawable.profile_default)
+                .into(holder.profileImage)
+            profileClick(holder.profileImage)
+
         }
 
 
