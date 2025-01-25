@@ -62,7 +62,6 @@ class MessageAdapter(private val context: Context,
         if (currentMessage.deleted == true) {
             // 삭제된 메시지를 표시
             if (holder is SendViewHolder) {
-                holder.sendMessage.visibility = View.VISIBLE
                 holder.sendMessage.text = "삭제된 메시지입니다"
                 holder.sendTime.text = dateFormat.format(currentMessage.timestamp)
                 holder.readStatus.text = if (currentMessage.mread == true) " " else "1"
@@ -72,7 +71,6 @@ class MessageAdapter(private val context: Context,
                     .load(profileImageUrl) // 프로필 이미지 유지
                     .placeholder(R.drawable.profile_default)
                     .into(holder.profileImage)
-                holder.receiveMessage.visibility = View.VISIBLE
                 holder.receiveMessage.text = "삭제된 메시지입니다"
                 holder.receiveTime.text = dateFormat.format(currentMessage.timestamp)
 
@@ -85,9 +83,6 @@ class MessageAdapter(private val context: Context,
         // 이미지 메시지 처리
         if (!currentMessage.fileUrl.isNullOrEmpty()) {
             if (holder is SendViewHolder) {
-                holder.sendMessage.visibility = View.GONE
-                holder.itemView.findViewById<ImageView>(R.id.iv_send_image).visibility = View.VISIBLE
-                
                 holder.sendMessage.text = currentMessage.message
                 holder.sendTime.text = dateFormat.format(currentMessage.timestamp)
 
@@ -102,8 +97,6 @@ class MessageAdapter(private val context: Context,
                 holder.readStatus.text = if (currentMessage.mread == true) " " else "1"
 
             } else if (holder is ReceiveViewHolder) {
-                holder.receiveMessage.visibility = View.GONE
-                holder.itemView.findViewById<ImageView>(R.id.iv_receive_image).visibility = View.VISIBLE
                 holder.nickName.text = receiverNick
                 holder.receiveMessage.text = currentMessage.message
                 holder.receiveTime.text = dateFormat.format(currentMessage.timestamp)
@@ -129,9 +122,8 @@ class MessageAdapter(private val context: Context,
 
         // 텍스트 메시지 처리
         if (holder is SendViewHolder) {
-            holder.sendMessage.visibility = View.VISIBLE
-            holder.itemView.findViewById<ImageView>(R.id.iv_send_image).visibility = View.GONE
             holder.sendMessage.text = currentMessage.message
+            holder.sendMessage.visibility = View.VISIBLE
             holder.sendTime.text = dateFormat.format(currentMessage.timestamp)
             holder.readStatus.text = if (currentMessage.mread == true) " " else "1"
 
@@ -143,9 +135,8 @@ class MessageAdapter(private val context: Context,
 
 
         } else if (holder is ReceiveViewHolder) {
-            holder.receiveMessage.visibility = View.VISIBLE
-            holder.itemView.findViewById<ImageView>(R.id.iv_receive_image).visibility = View.GONE
             holder.receiveMessage.text = currentMessage.message
+            holder.receiveMessage.visibility = View.VISIBLE
             holder.receiveTime.text = dateFormat.format(currentMessage.timestamp)
 
             // 리액션 설정
