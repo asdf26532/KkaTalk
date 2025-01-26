@@ -135,6 +135,7 @@ class MessageAdapter(private val context: Context,
 
 
         } else if (holder is ReceiveViewHolder) {
+            holder.nickName.text = receiverNick
             holder.receiveMessage.text = currentMessage.message
             holder.receiveMessage.visibility = View.VISIBLE
             holder.receiveTime.text = dateFormat.format(currentMessage.timestamp)
