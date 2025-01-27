@@ -12,7 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/input_layout"
-        android:layout_alignParentTop="true">
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="5dp">
 
     </androidx.recyclerview.widget.RecyclerView>
 
@@ -23,7 +24,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal"
-        android:layout_marginBottom="30dp"
+        android:layout_marginBottom="20dp"
         android:weightSum="100">
 
         <ImageButton
@@ -70,6 +71,7 @@
         android:layout_margin="16dp"
         android:layout_marginBottom="16dp"
         app:maxImageSize="42dp"
+        android:visibility="gone"
         android:contentDescription="Scroll to bottom"
         android:src="@drawable/ic_arrow_down"
         app:tint="#FFFFFF"
