@@ -67,6 +67,9 @@ dependencies {
     implementation ("com.kakao.sdk:v2-user:2.20.3")
     implementation ("com.kakao.sdk:v2-all:2.20.3") // 전체 모듈 설치, 2.11.0 버전부터 지원
 
+    // 사진 확대
+    implementation ("com.github.chrisbanes:PhotoView:2.3.0")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

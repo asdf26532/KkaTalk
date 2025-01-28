@@ -218,12 +218,11 @@ class ChatActivity : AppCompatActivity() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
 
+                // 대화가 없으면 버튼 숨김
                 if (messageList.isEmpty()) {
                     binding.btnScrollToBottom.hide()
-                } else {
-                    binding.btnScrollToBottom.show()
+                    return // 추가 작업 없이 종료
                 }
-
 
                 // 스크롤 상태에 따라 버튼 표시/숨김
                 val layoutManager = binding.rvChat.layoutManager as LinearLayoutManager
