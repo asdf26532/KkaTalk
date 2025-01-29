@@ -116,6 +116,12 @@ class MessageAdapter(private val context: Context,
                     .into(holder.profileImage)
 
                 profileClick(holder.profileImage)
+
+                holder.itemView.findViewById<ImageView>(R.id.iv_receive_image).setOnClickListener {
+                    val intent = Intent(context, FullScreenImageActivity::class.java)
+                    intent.putExtra("IMAGE_URL", currentMessage.fileUrl) // 이미지 URL 전달
+                    context.startActivity(intent)
+                }
             }
             return
         }
