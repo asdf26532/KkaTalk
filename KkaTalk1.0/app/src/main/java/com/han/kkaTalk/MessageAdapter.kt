@@ -96,6 +96,13 @@ class MessageAdapter(private val context: Context,
                 holder.itemView.findViewById<ImageView>(R.id.iv_send_image).visibility = View.VISIBLE
                 holder.readStatus.text = if (currentMessage.mread == true) " " else "1"
 
+                // 메시지 꾹 눌렀을 때 (보내는 메시지에만 설정)
+                holder.itemView.setOnLongClickListener {
+                    (context as ChatActivity).showOptionsPopup(currentMessage)
+                    true
+                }
+
+
             } else if (holder is ReceiveViewHolder) {
                 holder.nickName.text = receiverNick
                 holder.receiveMessage.text = currentMessage.message
@@ -108,7 +115,8 @@ class MessageAdapter(private val context: Context,
                     .into(holder.itemView.findViewById(R.id.iv_receive_image))
 
 
-                holder.itemView.findViewById<ImageView>(R.id.iv_receive_image).visibility = View.VISIBLE
+                val imageView = holder.itemView.findViewById<ImageView>(R.id.iv_receive_image)
+                imageView.visibility  = View.VISIBLE
 
                 Glide.with(context)
                     .load(profileImageUrl)
@@ -117,7 +125,13 @@ class MessageAdapter(private val context: Context,
 
                 profileClick(holder.profileImage)
 
-                holder.itemView.findViewById<ImageView>(R.id.iv_receive_image).setOnClickListener {
+                // 이미지 롱클릭 시 리액션 팝업 띄우기
+                imageView.setOnLongClickListener {
+                    (context as ChatActivity).showReactionPopup(currentMessage)
+                    true
+                }
+
+                imageView.setOnClickListener {
                     val intent = Intent(context, FullScreenImageActivity::class.java)
                     intent.putExtra("IMAGE_URL", currentMessage.fileUrl) // 이미지 URL 전달
                     context.startActivity(intent)
