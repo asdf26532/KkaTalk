@@ -63,6 +63,7 @@ class MessageAdapter(private val context: Context,
             // 삭제된 메시지를 표시
             if (holder is SendViewHolder) {
                 holder.sendMessage.text = "삭제된 메시지입니다"
+                holder.sendMessage.visibility = View.VISIBLE
                 holder.sendTime.text = dateFormat.format(currentMessage.timestamp)
                 holder.readStatus.text = if (currentMessage.mread == true) " " else "1"
             } else if (holder is ReceiveViewHolder) {
@@ -72,8 +73,8 @@ class MessageAdapter(private val context: Context,
                     .placeholder(R.drawable.profile_default)
                     .into(holder.profileImage)
                 holder.receiveMessage.text = "삭제된 메시지입니다"
+                holder.receiveMessage.visibility = View.VISIBLE
                 holder.receiveTime.text = dateFormat.format(currentMessage.timestamp)
-
                 // 프로필이미지 클릭
                 profileClick(holder.profileImage)
             }
@@ -125,7 +126,15 @@ class MessageAdapter(private val context: Context,
 
                 profileClick(holder.profileImage)
 
-                // 이미지 롱클릭 시 리액션 팝업 띄우기
+                // 리액션 설정
+                holder.reactionIcon.text = ""
+                holder.reactionIcon.visibility = View.GONE
+                val userReaction = currentMessage.reactions?.get(FirebaseAuth.getInstance().currentUser?.uid)
+                if (!userReaction.isNullOrEmpty()) {
+                    holder.reactionIcon.text = userReaction
+                    holder.reactionIcon.visibility = View.VISIBLE
+                }
+
                 imageView.setOnLongClickListener {
                     (context as ChatActivity).showReactionPopup(currentMessage)
                     true
