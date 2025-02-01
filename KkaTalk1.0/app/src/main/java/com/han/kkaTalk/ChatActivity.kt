@@ -50,7 +50,6 @@ class ChatActivity : AppCompatActivity() {
 
     private val blockedUserIds: ArrayList<String> = ArrayList()
 
-    private lateinit var btnScrollToBottom: FloatingActionButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -142,33 +141,32 @@ class ChatActivity : AppCompatActivity() {
                     val message = snapshot.getValue(Message::class.java)
 
                     if (message != null) {
-                        // 차단된 사용자의 메시지는 필터링
+                        // 차단된 사용자에게서 온 메시지라면 필터링
                         if (blockedUserIds.contains(message.sendId)) {
                             Log.d("ChatActivity", "차단된 사용자의 메시지 필터링: ${message.sendId}")
-                            return // 차단된 사용자 메시지 무시
+                            return  // 차단된 사용자의 메시지는 추가하지 않음
                         }
 
+                        // 차단된 메시지가 아니면 기존 메시지 처리
                         if (message.deleted == true) {
                             message.message = "삭제된 메시지입니다."
-
                         }
-
                         messageList.add(message)
+
+                        // RecyclerView 갱신
                         binding.rvChat.post {
                             messageAdapter.notifyDataSetChanged()
                             binding.rvChat.scrollToPosition(messageList.size - 1)
                         }
-
-
                     }
-
                 }
+
                 override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+                    // 변경된 메시지 처리
                     val changedMessage = snapshot.getValue(Message::class.java)
                     if (changedMessage != null) {
                         val index = messageList.indexOfFirst { it.timestamp == changedMessage.timestamp }
                         if (index != -1) {
-                            // 메시지가 삭제된 경우에만 처리
                             if (changedMessage.deleted == true && messageList[index].deleted != true) {
                                 messageList[index].message = "삭제된 메시지입니다."
                                 messageList[index].deleted = true
@@ -180,9 +178,7 @@ class ChatActivity : AppCompatActivity() {
                                     }
                                 }
                             } else if (changedMessage.reactions != messageList[index].reactions) {
-                                // 리액션이 추가된 경우 메시지 목록 업데이트
                                 messageList[index].reactions = changedMessage.reactions
-
                                 runOnUiThread {
                                     binding.rvChat.post {
                                         messageAdapter.notifyItemChanged(index)
@@ -614,8 +610,28 @@ class ChatActivity : AppCompatActivity() {
             })
         }
     }
+/*
+    // 차단된 사용자 목록 가져오기
+    fun fetchBlockedUsers() {
+        mDbRef.child("users").child(mAuth.currentUser?.uid ?: "").child("blockedUsers")
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    blockedUserIds.clear()
+                    for (blockedUserSnapshot in snapshot.children) {
+                        val blockedUserId = blockedUserSnapshot.key
+                        blockedUserId?.let {
+                            blockedUserIds.add(it)
+                        }
+                    }
+                    Log.d("ChatActivity", "Blocked Users: $blockedUserIds")
+                }
 
-
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("DatabaseError", "Failed to fetch blocked users: $error")
+                }
+            })
+    }
+*/
     override fun onResume() {
         super.onResume()
         // 메시지 읽음 상태 업데이트
