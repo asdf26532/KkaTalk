@@ -587,7 +587,7 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    private fun fetchBlockedUsers() {
+   /* private fun fetchBlockedUsers() {
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
         if (currentUserId != null) {
             val userRef = FirebaseDatabase.getInstance().reference.child("user").child(currentUserId).child("blockedUsers")
@@ -609,29 +609,34 @@ class ChatActivity : AppCompatActivity() {
                 }
             })
         }
-    }
-/*
+    }*/
     // 차단된 사용자 목록 가져오기
-    fun fetchBlockedUsers() {
-        mDbRef.child("users").child(mAuth.currentUser?.uid ?: "").child("blockedUsers")
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    blockedUserIds.clear()
-                    for (blockedUserSnapshot in snapshot.children) {
-                        val blockedUserId = blockedUserSnapshot.key
-                        blockedUserId?.let {
-                            blockedUserIds.add(it)
-                        }
-                    }
-                    Log.d("ChatActivity", "Blocked Users: $blockedUserIds")
-                }
+   private fun fetchBlockedUsers() {
+       val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
 
-                override fun onCancelled(error: DatabaseError) {
-                    Log.e("DatabaseError", "Failed to fetch blocked users: $error")
-                }
-            })
-    }
-*/
+       if (currentUserId != null) {
+           val userRef = FirebaseDatabase.getInstance().reference.child("user").child(currentUserId)
+               .child("blockedUsers")
+
+           userRef.addValueEventListener(object : ValueEventListener { //
+               override fun onDataChange(snapshot: DataSnapshot) {
+                   blockedUserIds.clear()
+                   for (child in snapshot.children) {
+                       val blockedUserId = child.key
+                       blockedUserId?.let {
+                           blockedUserIds.add(blockedUserId)
+                       }
+                   }
+                   Log.d("ChatActivity", "Blocked Users: $blockedUserIds")
+               }
+
+               override fun onCancelled(error: DatabaseError) {
+                   Log.e("DatabaseError", "Failed to fetch blocked users: $error")
+               }
+           })
+       }
+   }
+
     override fun onResume() {
         super.onResume()
         // 메시지 읽음 상태 업데이트
