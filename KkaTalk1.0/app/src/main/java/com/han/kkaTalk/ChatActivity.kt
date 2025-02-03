@@ -49,6 +49,7 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var messageList: ArrayList<Message>
 
     private val blockedUserIds: ArrayList<String> = ArrayList()
+    private var blockTimeStamp: Long = Long.MAX_VALUE
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -141,8 +142,10 @@ class ChatActivity : AppCompatActivity() {
                     val message = snapshot.getValue(Message::class.java)
 
                     if (message != null) {
+                        val messageTime = message.timestamp ?: 0
+
                         // 차단된 사용자에게서 온 메시지라면 필터링
-                        if (blockedUserIds.contains(message.sendId)) {
+                        if (blockedUserIds.contains(message.sendId) && messageTime > blockTimeStamp) {
                             Log.d("ChatActivity", "차단된 사용자의 메시지 필터링: ${message.sendId}")
                             return  // 차단된 사용자의 메시지는 추가하지 않음
                         }
@@ -566,11 +569,17 @@ class ChatActivity : AppCompatActivity() {
         })
     }
 
-    private fun blockUser(blockedUserId: String) {
+    fun blockUser(blockedUserId: String) {
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+        val blockTime = System.currentTimeMillis()
+
         if (currentUserId != null) {
-            val userRef = FirebaseDatabase.getInstance().reference.child("user").child(currentUserId).child("blockedUsers")
-            userRef.child(blockedUserId).setValue(true).addOnSuccessListener {
+            val userRef = FirebaseDatabase.getInstance().reference
+                .child("user").child(currentUserId).child("blockedUsers").child(blockedUserId)
+
+            val blockData = mapOf("timestamp" to blockTime)
+
+            userRef.setValue(blockData).addOnSuccessListener {
                 Toast.makeText(this, "사용자를 차단했습니다.", Toast.LENGTH_SHORT).show()
 
                 // 차단 성공 시 결과 전달
@@ -587,29 +596,6 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-   /* private fun fetchBlockedUsers() {
-        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
-        if (currentUserId != null) {
-            val userRef = FirebaseDatabase.getInstance().reference.child("user").child(currentUserId).child("blockedUsers")
-
-            userRef.addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    blockedUserIds.clear() // 기존 데이터를 초기화
-                    for (child in snapshot.children) {
-                        val blockedUserId = child.key
-                        if (blockedUserId != null) {
-                            blockedUserIds.add(blockedUserId)
-                        }
-                    }
-                    Log.d("ChatActivity", "Blocked Users: $blockedUserIds") // 차단된 사용자 확인
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Log.e("ChatActivity", "Failed to fetch blocked users: ${error.message}")
-                }
-            })
-        }
-    }*/
     // 차단된 사용자 목록 가져오기
    private fun fetchBlockedUsers() {
        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
@@ -621,10 +607,15 @@ class ChatActivity : AppCompatActivity() {
            userRef.addValueEventListener(object : ValueEventListener { //
                override fun onDataChange(snapshot: DataSnapshot) {
                    blockedUserIds.clear()
+                   blockTimeStamp = Long.MAX_VALUE
+
                    for (child in snapshot.children) {
                        val blockedUserId = child.key
+                       val blockTime = child.child("timestamp").getValue(Long::class.java) ?: System.currentTimeMillis()
+
                        blockedUserId?.let {
                            blockedUserIds.add(blockedUserId)
+                           blockTimeStamp = minOf(blockTimeStamp, blockTime)
                        }
                    }
                    Log.d("ChatActivity", "Blocked Users: $blockedUserIds")
