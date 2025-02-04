@@ -172,16 +172,13 @@
                                 val lastMessage = lastMessageSnapshot.getValue(Message::class.java)
                                 val isBlocked = blockedUserIds.contains(receiverUid)
 
-                                val messageContent: String = if (isBlocked) {
-                                    // 차단된 사용자 메시지 처리
-                                    "(차단된 사용자입니다)"
-                                } else if (lastMessage?.deleted == true) {
-                                    // 삭제된 메시지 처리
-                                    "삭제된 메시지입니다"
-                                } else {
-                                    // 일반 메시지 처리
-                                    lastMessage?.message ?: ""
+                                val messageContent: String = when {
+                                    isBlocked -> "(차단된 사용자입니다)"
+                                    lastMessage?.deleted == true -> "삭제된 메시지입니다"
+                                    lastMessage?.fileUrl != null -> "(사진)" // 이미지 메시지일 경우
+                                    else -> lastMessage?.message ?: ""
                                 }
+
 
                                 val unreadCount = if (isBlocked) {
                                     0 // 차단된 사용자 메시지는 항상 0으로 설정
