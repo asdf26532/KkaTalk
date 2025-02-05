@@ -596,6 +596,41 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    private fun checkIfBlocked(blockedUserId: String, callback: (Boolean) -> Unit) {
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        val userRef = FirebaseDatabase.getInstance().reference
+            .child("user").child(currentUserId).child("blockedUsers").child(blockedUserId)
+
+        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val isBlocked = snapshot.exists()  // 데이터가 있으면 차단된 상태
+                callback(isBlocked)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("ChatActivity", "Failed to check block status: ${error.message}")
+                callback(false)
+            }
+        })
+    }
+
+    // 차단 해제 기능
+    private fun unblockUser(blockedUserId: String) {
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        FirebaseDatabase.getInstance().reference
+            .child("user").child(currentUserId).child("blockedUsers").child(blockedUserId)
+            .removeValue()
+            .addOnSuccessListener {
+                Toast.makeText(this, "차단을 해제했습니다.", Toast.LENGTH_SHORT).show()
+                invalidateOptionsMenu() // 메뉴 다시 로드해서 "차단"으로 변경
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "차단 해제에 실패했습니다.", Toast.LENGTH_SHORT).show()
+            }
+    }
+
     // 차단된 사용자 목록 가져오기
    private fun fetchBlockedUsers() {
        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
@@ -637,6 +672,15 @@ class ChatActivity : AppCompatActivity() {
     // 사용자 차단하기 구현
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.chat_menu, menu)
+        val blockMenuItem = menu?.findItem(R.id.menu_block_user)
+
+        // 메뉴가 생성된 후 null 체크 후 차단 여부 확인
+        if (blockMenuItem != null && receiverUid != null) {
+            checkIfBlocked(receiverUid!!) { isBlocked ->
+                blockMenuItem.title = if (isBlocked) "차단 해제" else "차단"
+            }
+        }
+
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -651,23 +695,38 @@ class ChatActivity : AppCompatActivity() {
                 onBackPressed()
                 true
             }
-
-            R.id.menu_block_user -> { // 오른쪽 위 차단하기 버튼
-                    AlertDialog.Builder(this)
-                    .setTitle("사용자 차단")
-                    .setMessage("대화 상대를 차단하시겠습니까?")
-                    .setPositiveButton("차단하기") { dialog, _ ->
-                        blockUser(receiverUid) // 차단 실행
-                        dialog.dismiss()
+            // 차단하기/해제 버튼
+            R.id.menu_block_user -> {
+                checkIfBlocked(receiverUid) { isBlocked ->
+                    if (isBlocked) {
+                        // ✅ 차단 해제 로직
+                        AlertDialog.Builder(this)
+                            .setTitle("사용자 차단 해제")
+                            .setMessage("대화 상대의 차단을 해제하시겠습니까?")
+                            .setPositiveButton("해제") { dialog, _ ->
+                                unblockUser(receiverUid) // 차단 해제 실행
+                                dialog.dismiss()
+                            }
+                            .setNegativeButton("취소") { dialog, _ -> dialog.dismiss() }
+                            .show()
+                    } else {
+                        // ✅ 차단 실행
+                        AlertDialog.Builder(this)
+                            .setTitle("사용자 차단")
+                            .setMessage("대화 상대를 차단하시겠습니까?")
+                            .setPositiveButton("차단하기") { dialog, _ ->
+                                blockUser(receiverUid) // 차단 실행
+                                dialog.dismiss()
+                            }
+                            .setNegativeButton("취소") { dialog, _ -> dialog.dismiss() }
+                            .show()
                     }
-                    .setNegativeButton("취소") { dialog, _ ->
-                        dialog.dismiss() // 다이얼로그 닫기
-                    }
-                    .show()
+                }
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
-    }
 
+    }
 }
