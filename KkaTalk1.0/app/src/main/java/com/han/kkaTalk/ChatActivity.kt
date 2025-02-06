@@ -91,8 +91,8 @@ class ChatActivity : AppCompatActivity() {
         // 접속자 Uid
         val senderUid = mAuth.currentUser?.uid
 
-        senderRoom = receiverUid + senderUid
-        receiverRoom = senderUid + receiverUid
+        senderRoom = senderUid + receiverUid
+        receiverRoom = receiverUid + senderUid
 
         // 차단된 사용자 목록 가져오기
         fetchBlockedUsers()
@@ -586,8 +586,7 @@ class ChatActivity : AppCompatActivity() {
                 val intent = Intent()
                 intent.putExtra("refreshRequired", true) // 새로고침 필요 플래그
                 setResult(Activity.RESULT_OK, intent)
-                // 차단 후 채팅방 종료
-                finish()
+
             }.addOnFailureListener {
                 Toast.makeText(this, "차단에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
             }
@@ -701,7 +700,7 @@ class ChatActivity : AppCompatActivity() {
                     if (isBlocked) {
                         // ✅ 차단 해제 로직
                         AlertDialog.Builder(this)
-                            .setTitle("사용자 차단 해제")
+                            .setTitle("차단 해제")
                             .setMessage("대화 상대의 차단을 해제하시겠습니까?")
                             .setPositiveButton("해제") { dialog, _ ->
                                 unblockUser(receiverUid) // 차단 해제 실행

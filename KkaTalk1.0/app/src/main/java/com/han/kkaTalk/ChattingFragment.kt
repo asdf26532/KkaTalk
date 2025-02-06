@@ -99,22 +99,19 @@
 
         private fun deleteChatRoom(chatPreview: ChatPreview) {
             val currentUserId = mAuth.currentUser?.uid ?: return
-            val chatKey1 = currentUserId + chatPreview.userUid
-            val chatKey2 = chatPreview.userUid + currentUserId
+            val chatKey = currentUserId + chatPreview.userUid
 
-            Log.d("ChatKeys", "chatKey1: $chatKey1, chatKey2: $chatKey2")
+
+            Log.d("ChatKeys", "chatKey1: $chatKey")
 
             // 확인 다이얼로그 표시
             val builder = AlertDialog.Builder(requireContext())
             builder.setTitle("채팅방 삭제")
             builder.setMessage("채팅방을 정말 삭제하시겠습니까?")
             builder.setPositiveButton("삭제") { _, _ ->
-                // Firebase에서 두 개의 키 삭제
-                val updates = mapOf(
-                    "/chats/$chatKey1" to null,
-                    "/chats/$chatKey2" to null
-                )
-                mDbRef.updateChildren(updates).addOnSuccessListener {
+                mDbRef.child("chats").child(chatKey)
+                    .removeValue()
+                    .addOnSuccessListener {
                     // UI 업데이트
                     chatList.remove(chatPreview)
                     chatListAdapter.notifyDataSetChanged()
