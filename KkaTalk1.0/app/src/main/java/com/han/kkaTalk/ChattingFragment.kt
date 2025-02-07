@@ -89,8 +89,20 @@
                 }
 
                 override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {}
-                override fun onChildRemoved(snapshot: DataSnapshot) {}
+
+                override fun onChildRemoved(snapshot: DataSnapshot) {
+                    Log.d("ChattingFragment", "Chat removed: ${snapshot.key}")
+
+                    // 삭제된 채팅방 목록에서 제거
+                    val chatKey = snapshot.key ?: return
+                    val receiverUid = chatKey.replace(currentUserId, "")
+
+                    chatList.removeAll { it.userUid == receiverUid }
+                    chatListAdapter.notifyDataSetChanged()
+                }
+
                 override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+
                 override fun onCancelled(error: DatabaseError) {
                     Log.e("ChattingFragment", "Chat update listener cancelled: ${error.message}")
                 }
@@ -102,7 +114,7 @@
             val chatKey = currentUserId + chatPreview.userUid
 
 
-            Log.d("ChatKeys", "chatKey1: $chatKey")
+            Log.d("ChatKeys", "Deleting chatKey: $chatKey")
 
             // 확인 다이얼로그 표시
             val builder = AlertDialog.Builder(requireContext())
@@ -116,6 +128,10 @@
                     chatList.remove(chatPreview)
                     chatListAdapter.notifyDataSetChanged()
                     Log.d("ChattingFragment", "Both chat keys deleted successfully")
+                        binding.rvChat.postDelayed({
+                            loadChatPreviews()
+                        }, 300)  // 0.3초 후 실행
+
                 }.addOnFailureListener { e ->
                     Log.e("ChattingFragment", "Failed to delete chat keys: ${e.message}")
                 }
@@ -163,11 +179,23 @@
                             if (!chatKey.contains(currentUserId)) continue
 
                             val receiverUid = chatKey.replace(currentUserId, "")
-                            val lastMessageSnapshot = chatSnapshot.child("message").children.lastOrNull()
 
+                            // 삭제된 채팅방이면 목록에서 제외
+                            if (chatSnapshot.childrenCount == 0L) {
+                                continue
+                            }
+
+                            val lastMessageSnapshot = chatSnapshot.child("message").children.lastOrNull()
                             if (lastMessageSnapshot != null) {
                                 val lastMessage = lastMessageSnapshot.getValue(Message::class.java)
+
+                                val lastMessageSender = lastMessageSnapshot.child("senderId").value.toString()
                                 val isBlocked = blockedUserIds.contains(receiverUid)
+
+                                // 차단된 유저가 보낸 메시지가 마지막 메시지라면, 채팅방을 목록에서 제외
+                                if (isBlocked && lastMessageSender == receiverUid) {
+                                    continue
+                                }
 
                                 val messageContent: String = when {
                                     isBlocked -> "(차단된 사용자입니다)"
