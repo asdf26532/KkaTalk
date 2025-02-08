@@ -127,7 +127,6 @@
                     // UI 업데이트
                     chatList.remove(chatPreview)
                     chatListAdapter.notifyDataSetChanged()
-                    Log.d("ChattingFragment", "Both chat keys deleted successfully")
                         binding.rvChat.postDelayed({
                             loadChatPreviews()
                         }, 300)  // 0.3초 후 실행
@@ -174,16 +173,20 @@
 
                         for (chatSnapshot in snapshot.children) {
                             val chatKey = chatSnapshot.key ?: continue
+                            Log.d("ChatDebug", "Found chatKey: $chatKey")
 
-                            // 현재 사용자가 포함되지 않은 채팅방은 건너뛴다
-                            if (!chatKey.contains(currentUserId)) continue
+                            if (!chatKey.startsWith(currentUserId)) continue
+
+                            mDbRef.child("chats").child(chatKey).get().addOnSuccessListener { chatData ->
+                                if (!chatData.exists() || chatData.childrenCount == 0L) {
+                                    Log.d("ChatDebug", "ChatKey $chatKey has no messages, skipping")
+                                    return@addOnSuccessListener
+                                }
+                            }
+                            Log.d("ChatDebug", "Checking if chatKey $chatKey is empty: ${chatSnapshot.childrenCount}")
+
 
                             val receiverUid = chatKey.replace(currentUserId, "")
-
-                            // 삭제된 채팅방이면 목록에서 제외
-                            if (chatSnapshot.childrenCount == 0L) {
-                                continue
-                            }
 
                             val lastMessageSnapshot = chatSnapshot.child("message").children.lastOrNull()
                             if (lastMessageSnapshot != null) {
