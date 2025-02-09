@@ -195,8 +195,8 @@
                                 val lastMessageSender = lastMessageSnapshot.child("senderId").value.toString()
                                 val isBlocked = blockedUserIds.contains(receiverUid)
 
-                                // 차단된 유저가 보낸 메시지가 마지막 메시지라면, 채팅방을 목록에서 제외
-                                if (isBlocked && lastMessageSender == receiverUid) {
+                                if (blockedUserIds.contains(receiverUid) && lastMessageSender == receiverUid) {
+                                    Log.d("ChattingFragment", "Blocked user sent last message, hiding chat: $receiverUid")
                                     continue
                                 }
 

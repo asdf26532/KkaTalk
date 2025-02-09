@@ -26,6 +26,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.han.kkaTalk.databinding.ActivityChatBinding
@@ -119,14 +120,39 @@ class ChatActivity : AppCompatActivity() {
 
             val messageObject = Message(message, senderUid, receiverUid, timeStamp, mread)
 
+            // Firebase에서 차단 여부 확인
+            mDbRef.child("users").child(receiverUid).child("blockedUsers")
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val blockedUsers = snapshot.getValue(object : GenericTypeIndicator<List<String>>() {}) ?: emptyList()
+
+                        // ✅ receiverUid(유저1)가 senderUid(유저2)를 차단한 경우
+                        if (blockedUsers.contains(senderUid)) {
+                            // 차단당한 유저의 메시지는 receiverRoom에 저장되지 않음 ❌
+                            mDbRef.child("chats").child(senderRoom).child("message").push()
+                                .setValue(messageObject)
+                        } else {
+                            // 차단이 안 된 경우 기존 방식대로 저장 ✅
+                            mDbRef.child("chats").child(senderRoom).child("message").push()
+                                .setValue(messageObject).addOnSuccessListener {
+                                    mDbRef.child("chats").child(receiverRoom).child("message").push()
+                                        .setValue(messageObject)
+                                }
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        Log.e("ChatActivity", "차단 여부 확인 중 에러 발생: $error")
+                    }
+                })
 
             // 데이터 저장
-            mDbRef.child("chats").child(senderRoom).child("message").push()
+            /*mDbRef.child("chats").child(senderRoom).child("message").push()
                 .setValue(messageObject).addOnSuccessListener {
                     // 저장 성공시
                     mDbRef.child("chats").child(receiverRoom).child("message").push()
                         .setValue(messageObject)
-                }
+                }*/
 
             // 입력 부분 초기화
             binding.edtMessage.setText("")
