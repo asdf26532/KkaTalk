@@ -124,9 +124,31 @@ class ChatActivity : AppCompatActivity() {
             mDbRef.child("users").child(receiverUid).child("blockedUsers")
                 .addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        val blockedUsers = snapshot.getValue(object : GenericTypeIndicator<List<String>>() {}) ?: emptyList()
+                        val blockedUsers = snapshot.getValue(object : GenericTypeIndicator<Map<String, Long>>() {}) ?: emptyMap()
 
-                        // ✅ receiverUid(유저1)가 senderUid(유저2)를 차단한 경우
+                        Log.d("ChatActivity", "차단된 유저 목록: $blockedUsers")  // ✅ 차단 목록 확인
+                        Log.d("ChatActivity", "현재 메시지 보낸 사람(senderUid): $senderUid")  // ✅ 보낸 유저 확인
+
+                        val isBlocked = blockedUsers.containsKey(senderUid)  // senderUid가 차단 리스트에 있는지 확인
+                        Log.d("ChatActivity", "🚀 차단 여부 확인: $senderUid → ${if (isBlocked) "차단됨" else "차단 안 됨"}")
+
+                        if (isBlocked) {
+                            Log.d("ChatActivity", "유저 $senderUid 는 차단당했음! receiverRoom에 메시지 저장 안 함.") // ✅ 확인 로그
+
+                            // 차단당한 유저의 메시지는 receiverRoom에 저장되지 않음 ❌
+                            mDbRef.child("chats").child(senderRoom).child("message").push()
+                                .setValue(messageObject)
+                        } else {
+                            Log.d("ChatActivity", "✅ 정상 저장됨.")
+                            mDbRef.child("chats").child(senderRoom).child("message").push()
+                                .setValue(messageObject).addOnSuccessListener {
+                                    mDbRef.child("chats").child(receiverRoom).child("message").push()
+                                        .setValue(messageObject)
+                                }
+                        }
+                    }
+
+                       /* // ✅ receiverUid(유저1)가 senderUid(유저2)를 차단한 경우
                         if (blockedUsers.contains(senderUid)) {
                             // 차단당한 유저의 메시지는 receiverRoom에 저장되지 않음 ❌
                             mDbRef.child("chats").child(senderRoom).child("message").push()
@@ -139,7 +161,7 @@ class ChatActivity : AppCompatActivity() {
                                         .setValue(messageObject)
                                 }
                         }
-                    }
+                    }*/
 
                     override fun onCancelled(error: DatabaseError) {
                         Log.e("ChatActivity", "차단 여부 확인 중 에러 발생: $error")
