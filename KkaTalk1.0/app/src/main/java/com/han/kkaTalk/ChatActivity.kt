@@ -121,25 +121,30 @@ class ChatActivity : AppCompatActivity() {
             val messageObject = Message(message, senderUid, receiverUid, timeStamp, mread)
 
             // Firebase에서 차단 여부 확인
-            mDbRef.child("users").child(receiverUid).child("blockedUsers")
+            mDbRef.child("user").child(receiverUid).child("blockedUsers")
                 .addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        val blockedUsers = snapshot.getValue(object : GenericTypeIndicator<Map<String, Long>>() {}) ?: emptyMap()
+                        Log.d("ChatActivity", " Firebase에서 차단 리스트 불러옴: ${snapshot.value}")
 
-                        Log.d("ChatActivity", "차단된 유저 목록: $blockedUsers")  // ✅ 차단 목록 확인
-                        Log.d("ChatActivity", "현재 메시지 보낸 사람(senderUid): $senderUid")  // ✅ 보낸 유저 확인
+                        //  blockedUsers를 Map<String, Map<String, Long>> 형태로 가져오기
+                        val blockedUsersMap = snapshot.getValue(object : GenericTypeIndicator<Map<String, Map<String, Long>>>() {}) ?: emptyMap()
 
-                        val isBlocked = blockedUsers.containsKey(senderUid)  // senderUid가 차단 리스트에 있는지 확인
-                        Log.d("ChatActivity", "🚀 차단 여부 확인: $senderUid → ${if (isBlocked) "차단됨" else "차단 안 됨"}")
+                        Log.d("ChatActivity", " 차단된 유저 목록 (Map 형태): $blockedUsersMap")
 
+                        // 차단된 유저 ID만 리스트로 변환
+                        val blockedUserIds = blockedUsersMap.keys.toList()
+                        Log.d("ChatActivity", " 차단된 유저 ID 리스트: $blockedUserIds")
+
+                        val isBlocked = blockedUserIds.contains(senderUid)
+                        Log.d("ChatActivity", " 차단 여부 확인: $senderUid → ${if (isBlocked) "차단됨" else "차단 안 됨"}")
                         if (isBlocked) {
                             Log.d("ChatActivity", "유저 $senderUid 는 차단당했음! receiverRoom에 메시지 저장 안 함.") // ✅ 확인 로그
 
-                            // 차단당한 유저의 메시지는 receiverRoom에 저장되지 않음 ❌
+                            // 차단당한 유저의 메시지는 receiverRoom에 저장되지 않음
                             mDbRef.child("chats").child(senderRoom).child("message").push()
                                 .setValue(messageObject)
                         } else {
-                            Log.d("ChatActivity", "✅ 정상 저장됨.")
+                            Log.d("ChatActivity", " 정상 저장됨.")
                             mDbRef.child("chats").child(senderRoom).child("message").push()
                                 .setValue(messageObject).addOnSuccessListener {
                                     mDbRef.child("chats").child(receiverRoom).child("message").push()
@@ -147,34 +152,12 @@ class ChatActivity : AppCompatActivity() {
                                 }
                         }
                     }
-
-                       /* // ✅ receiverUid(유저1)가 senderUid(유저2)를 차단한 경우
-                        if (blockedUsers.contains(senderUid)) {
-                            // 차단당한 유저의 메시지는 receiverRoom에 저장되지 않음 ❌
-                            mDbRef.child("chats").child(senderRoom).child("message").push()
-                                .setValue(messageObject)
-                        } else {
-                            // 차단이 안 된 경우 기존 방식대로 저장 ✅
-                            mDbRef.child("chats").child(senderRoom).child("message").push()
-                                .setValue(messageObject).addOnSuccessListener {
-                                    mDbRef.child("chats").child(receiverRoom).child("message").push()
-                                        .setValue(messageObject)
-                                }
-                        }
-                    }*/
 
                     override fun onCancelled(error: DatabaseError) {
                         Log.e("ChatActivity", "차단 여부 확인 중 에러 발생: $error")
                     }
                 })
 
-            // 데이터 저장
-            /*mDbRef.child("chats").child(senderRoom).child("message").push()
-                .setValue(messageObject).addOnSuccessListener {
-                    // 저장 성공시
-                    mDbRef.child("chats").child(receiverRoom).child("message").push()
-                        .setValue(messageObject)
-                }*/
 
             // 입력 부분 초기화
             binding.edtMessage.setText("")
