@@ -173,7 +173,6 @@
 
                         for (chatSnapshot in snapshot.children) {
                             val chatKey = chatSnapshot.key ?: continue
-                            Log.d("ChatDebug", "Found chatKey: $chatKey")
 
                             if (!chatKey.startsWith(currentUserId)) continue
 

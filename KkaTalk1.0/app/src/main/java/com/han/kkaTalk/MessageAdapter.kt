@@ -213,9 +213,6 @@ class MessageAdapter(private val context: Context,
         val currentMessage = messageList[position]
         val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
 
-        Log.d("MessageAdapter", "currentMessage.sendId: ${currentMessage.sendId}")
-        Log.d("MessageAdapter", "currentUserUid: $currentUserUid")
-
         return  if(currentUserUid == currentMessage.sendId){
             send
         } else {
