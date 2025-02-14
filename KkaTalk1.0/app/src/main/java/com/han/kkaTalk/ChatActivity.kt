@@ -149,6 +149,10 @@ class ChatActivity : AppCompatActivity() {
                                 .setValue(messageObject).addOnSuccessListener {
                                     mDbRef.child("chats").child(receiverRoom).child("message").push()
                                         .setValue(messageObject)
+                                        .addOnSuccessListener {
+                                            // FCM 푸시 알림 보내기
+                                            FCMService.sendNotification(receiverUid, message)
+                                        }
                                 }
                         }
                     }
