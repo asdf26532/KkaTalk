@@ -20,7 +20,7 @@ object FCMService {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val token = snapshot.getValue(String::class.java)
                 if (!token.isNullOrEmpty()) {
-                    sendPushNotification(token, message)
+
                 } else {
                     Log.e("FCMService", "❌ FCM 토큰이 없음")
                 }
@@ -32,43 +32,6 @@ object FCMService {
         })
     }
 
-    // ✅ 2. FCM 서버에 푸시 알림 요청
-    private fun sendPushNotification(token: String, message: String) {
-        val client = OkHttpClient()
 
-        val json = JSONObject().apply {
-            put("to", token)
-            put("priority", "high")
 
-            val notification = JSONObject().apply {
-                put("title", "새로운 메시지 도착 📩")
-                put("body", message)
-            }
-            put("notification", notification)
-        }
-
-        val mediaType = "application/json; charset=utf-8".toMediaType()
-        val requestBody = json.toString().toRequestBody(mediaType)
-
-        val request = Request.Builder()
-            .url(FCM_API_URL)
-            .post(requestBody)
-            .addHeader("Authorization", "key=$FCM_SERVER_KEY")
-            .addHeader("Content-Type", "application/json")
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                Log.e("FCMService", "❌ FCM 전송 실패: ${e.message}")
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                if (response.isSuccessful) {
-                    Log.d("FCMService", "✅ FCM 푸시 알림 전송 성공!")
-                } else {
-                    Log.e("FCMService", "❌ FCM 전송 실패: ${response.code}")
-                }
-            }
-        })
-    }
 }
