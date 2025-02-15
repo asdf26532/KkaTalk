@@ -55,7 +55,6 @@ dependencies {
     implementation ("com.firebaseui:firebase-ui-auth:8.0.0")
     implementation(libs.firebase.database)
     implementation("com.google.firebase:firebase-storage")
-    implementation("com.google.firebase:firebase-messaging")
 
     // admob
     implementation("com.google.android.gms:play-services-ads:23.3.0")
