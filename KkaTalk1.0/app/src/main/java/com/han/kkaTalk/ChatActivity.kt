@@ -702,22 +702,44 @@ class ChatActivity : AppCompatActivity() {
         markMessagesAsRead(senderRoom, receiverRoom)
     }
 
-    // 사용자 차단하기 구현
+    private fun searchMessage(query: String) {
+        val filteredList = messageList.filter { it.message.contains(query, ignoreCase = true) }
+        chatAdapter.updateList(filteredList)
+    }
+
+    // 액션바 버튼 기능 구현
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.chat_menu, menu)
-        val blockMenuItem = menu?.findItem(R.id.menu_block_user)
 
-        // 메뉴가 생성된 후 null 체크 후 차단 여부 확인
+        // 차단 버튼 관련 처리
+        val blockMenuItem = menu?.findItem(R.id.menu_block_user)
         if (blockMenuItem != null && receiverUid != null) {
             checkIfBlocked(receiverUid!!) { isBlocked ->
                 blockMenuItem.title = if (isBlocked) "차단 해제" else "차단"
             }
         }
 
+        // 검색 버튼 설정
+        val searchItem = menu?.findItem(R.id.menu_search)
+        val searchView = searchItem?.actionView as androidx.appcompat.widget.SearchView
+
+        // 검색 이벤트 처리
+        searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                query?.let {
+                    searchMessage(it)  // 검색어로 메시지 검색
+                }
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return false
+            }
+        })
+
         return super.onCreateOptionsMenu(menu)
     }
 
-    // 뒤로 가기 버튼 동작 구현
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
