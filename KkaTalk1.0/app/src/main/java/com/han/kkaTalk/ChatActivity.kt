@@ -35,6 +35,8 @@ import com.han.kkaTalk.databinding.ActivityChatBinding
 
 class ChatActivity : AppCompatActivity() {
 
+    private lateinit var messageAdapter: MessageAdapter
+
     private lateinit var receiverNick: String
     private lateinit var receiverUid: String
 
@@ -69,7 +71,7 @@ class ChatActivity : AppCompatActivity() {
         Log.d("ChatActivity", "Profile Image URL: $profileImageUrl")
 
         messageList = ArrayList()
-        val messageAdapter = MessageAdapter(this, messageList, profileImageUrl, receiverNick, receiverUid)
+        messageAdapter = MessageAdapter(this, messageList, profileImageUrl, receiverNick, receiverUid)
 
         // RecyclerView
         binding.rvChat.layoutManager = LinearLayoutManager(this)
@@ -703,8 +705,9 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun searchMessage(query: String) {
-        val filteredList = messageList.filter { it.message.contains(query, ignoreCase = true) }
-        chatAdapter.updateList(filteredList)
+        val filteredList = messageList.filter { it.message?.contains(query, ignoreCase = true) == true }
+        messageAdapter.updateList(filteredList)
+
     }
 
     // 액션바 버튼 기능 구현
@@ -713,8 +716,8 @@ class ChatActivity : AppCompatActivity() {
 
         // 차단 버튼 관련 처리
         val blockMenuItem = menu?.findItem(R.id.menu_block_user)
-        if (blockMenuItem != null && receiverUid != null) {
-            checkIfBlocked(receiverUid!!) { isBlocked ->
+        if (blockMenuItem != null) {
+            checkIfBlocked(receiverUid) { isBlocked ->
                 blockMenuItem.title = if (isBlocked) "차단 해제" else "차단"
             }
         }
@@ -750,6 +753,8 @@ class ChatActivity : AppCompatActivity() {
                 onBackPressed()
                 true
             }
+
+
             // 차단하기/해제 버튼
             R.id.menu_block_user -> {
                 checkIfBlocked(receiverUid) { isBlocked ->
@@ -779,6 +784,7 @@ class ChatActivity : AppCompatActivity() {
                 }
                 true
             }
+
 
             else -> super.onOptionsItemSelected(item)
         }

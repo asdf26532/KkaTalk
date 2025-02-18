@@ -220,6 +220,14 @@ class MessageAdapter(private val context: Context,
         }
     }
 
+    fun updateList(newList: List<Message>) {
+        (messageList as? ArrayList<Message>)?.apply {
+            clear()
+            addAll(newList)
+        }
+        notifyDataSetChanged()
+    }
+
     class SendViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         val sendMessage: TextView = itemView.findViewById(R.id.tv_send_msg)
         val sendTime: TextView = itemView.findViewById(R.id.tv_send_time)
