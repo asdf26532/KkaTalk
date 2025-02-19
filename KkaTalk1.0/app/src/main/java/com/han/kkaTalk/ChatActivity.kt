@@ -12,6 +12,7 @@ import android.util.Log
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.TextView
@@ -703,6 +704,24 @@ class ChatActivity : AppCompatActivity() {
         // 메시지 읽음 상태 업데이트
         markMessagesAsRead(senderRoom, receiverRoom)
     }
+    
+    // 메세지 검색 기능
+    private fun showSearchDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("메시지 검색")
+
+        val input = EditText(this)
+        input.hint = "검색어 입력"
+        builder.setView(input)
+
+        builder.setPositiveButton("검색") { _, _ ->
+            val query = input.text.toString()
+            searchMessage(query) // 검색 기능 실행
+        }
+        builder.setNegativeButton("취소", null)
+
+        builder.show()
+    }
 
     private fun searchMessage(query: String) {
         val filteredList = messageList.filter { it.message?.contains(query, ignoreCase = true) == true }
@@ -722,30 +741,12 @@ class ChatActivity : AppCompatActivity() {
             }
         }
 
-        // 검색 버튼 설정
-        val searchItem = menu?.findItem(R.id.menu_search)
-        val searchView = searchItem?.actionView as androidx.appcompat.widget.SearchView
-
-        // 검색 이벤트 처리
-        searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                query?.let {
-                    searchMessage(it)  // 검색어로 메시지 검색
-                }
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                return false
-            }
-        })
-
         return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            android.R.id.home -> {
+            R.id.home -> {
                 val intent = Intent()
                 intent.putExtra("chatUpdated", true) // 결과 값으로 '갱신 필요' 플래그 전달
                 setResult(Activity.RESULT_OK, intent)
@@ -754,6 +755,10 @@ class ChatActivity : AppCompatActivity() {
                 true
             }
 
+            R.id.menu_search -> {
+                showSearchDialog()
+                true
+            }
 
             // 차단하기/해제 버튼
             R.id.menu_block_user -> {
