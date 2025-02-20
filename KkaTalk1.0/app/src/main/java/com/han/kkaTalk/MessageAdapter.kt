@@ -2,6 +2,7 @@ package com.han.kkaTalk
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -48,6 +49,7 @@ class MessageAdapter(private val context: Context,
         // 현재 메시지
         val currentMessage = messageList[position]
         val dateFormat = SimpleDateFormat("a hh:mm", Locale.getDefault()) // 시간 형식 설정
+        val isHighlighted = currentMessage.isHighlighted
 
         // 텍스트 및 이미지 메시지 초기화
         if (holder is SendViewHolder) {
@@ -57,6 +59,7 @@ class MessageAdapter(private val context: Context,
             holder.receiveMessage.visibility = View.GONE
             holder.itemView.findViewById<ImageView>(R.id.iv_receive_image).visibility = View.GONE
         }
+
 
         // 메시지가 삭제되었는지 확인
         if (currentMessage.deleted == true) {
@@ -162,6 +165,11 @@ class MessageAdapter(private val context: Context,
                 true
             }
 
+            if (isHighlighted) {
+                holder.sendMessage.setBackgroundColor(Color.YELLOW)
+                holder.sendMessage.setTextColor(Color.RED)
+            }
+
 
         } else if (holder is ReceiveViewHolder) {
             holder.nickName.text = receiverNick
@@ -187,8 +195,12 @@ class MessageAdapter(private val context: Context,
                 .into(holder.profileImage)
             profileClick(holder.profileImage)
 
-        }
+            if (isHighlighted) {
+                holder.receiveMessage.setBackgroundColor(Color.YELLOW)
+                holder.receiveMessage.setTextColor(Color.RED)
+            }
 
+        }
 
 
     }

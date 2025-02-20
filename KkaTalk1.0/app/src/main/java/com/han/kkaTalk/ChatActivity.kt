@@ -724,8 +724,14 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun searchMessage(query: String) {
-        val filteredList = messageList.filter { it.message?.contains(query, ignoreCase = true) == true }
-        messageAdapter.updateList(filteredList)
+        // 검색어를 포함하는 메시지는 isHighlighted = true
+        messageList.forEach { message ->
+            message.isHighlighted = message.message?.contains(query, ignoreCase = true) == true
+        }
+        messageAdapter.notifyDataSetChanged() // RecyclerView 갱신
+
+        /*val filteredList = messageList.filter { it.message?.contains(query, ignoreCase = true) == true }
+        messageAdapter.updateList(filteredList)*/
 
     }
 
