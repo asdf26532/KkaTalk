@@ -170,6 +170,11 @@ class MessageAdapter(private val context: Context,
                 holder.sendMessage.setTextColor(Color.RED)
             }
 
+            else {
+                holder.itemView.setBackgroundColor(Color.TRANSPARENT)
+                holder.sendMessage.setTextColor(Color.BLACK)
+            }
+
 
         } else if (holder is ReceiveViewHolder) {
             holder.nickName.text = receiverNick

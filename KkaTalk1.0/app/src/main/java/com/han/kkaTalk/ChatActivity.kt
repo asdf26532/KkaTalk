@@ -55,6 +55,8 @@ class ChatActivity : AppCompatActivity() {
     private val blockedUserIds: ArrayList<String> = ArrayList()
     private var blockTimeStamp: Long = Long.MAX_VALUE
 
+    private var originalList: List<Message>? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -724,15 +726,23 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun searchMessage(query: String) {
+        if (originalList == null) {
+            originalList = ArrayList(messageList) // 원본 대화 저장
+        }
+
         // 검색어를 포함하는 메시지는 isHighlighted = true
         messageList.forEach { message ->
             message.isHighlighted = message.message?.contains(query, ignoreCase = true) == true
         }
         messageAdapter.notifyDataSetChanged() // RecyclerView 갱신
 
-        /*val filteredList = messageList.filter { it.message?.contains(query, ignoreCase = true) == true }
-        messageAdapter.updateList(filteredList)*/
+    }
 
+    private fun restoreOriginalList() {
+        originalList?.let {
+            messageAdapter.updateList(it)
+            originalList = null // 원본 초기화
+        }
     }
 
     // 액션바 버튼 기능 구현
@@ -757,8 +767,14 @@ class ChatActivity : AppCompatActivity() {
                 intent.putExtra("chatUpdated", true) // 결과 값으로 '갱신 필요' 플래그 전달
                 setResult(Activity.RESULT_OK, intent)
                 Log.d("ChatActivity", "setResult 호출됨") // 로그 추가
-                onBackPressed()
+
+                if (originalList != null) {
+                    restoreOriginalList() // 검색 전 리스트 복원
+                }
+
+                finish()
                 true
+
             }
 
             R.id.menu_search -> {
