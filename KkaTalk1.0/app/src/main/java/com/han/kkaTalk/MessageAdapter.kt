@@ -165,14 +165,20 @@ class MessageAdapter(private val context: Context,
                 true
             }
 
-            if (isHighlighted) {
-                holder.sendMessage.setBackgroundColor(Color.YELLOW)
-                holder.sendMessage.setTextColor(Color.RED)
+            val messageView = when (holder) {
+                is SendViewHolder -> holder.sendMessage
+                is ReceiveViewHolder -> holder.receiveMessage
+                else -> null
             }
 
-            else {
-                holder.itemView.setBackgroundColor(Color.TRANSPARENT)
-                holder.sendMessage.setTextColor(Color.BLACK)
+            messageView?.let {
+                if (isHighlighted) {
+                    it.setBackgroundColor(Color.YELLOW)
+                    it.setTextColor(Color.RED)
+                } else {
+                    it.setBackgroundColor(Color.TRANSPARENT)
+                    it.setTextColor(Color.WHITE)
+                }
             }
 
 

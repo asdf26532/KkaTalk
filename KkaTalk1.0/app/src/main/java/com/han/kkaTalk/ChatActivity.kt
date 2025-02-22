@@ -762,7 +762,7 @@ class ChatActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.home -> {
+            android.R.id.home -> {
                 val intent = Intent()
                 intent.putExtra("chatUpdated", true) // 결과 값으로 '갱신 필요' 플래그 전달
                 setResult(Activity.RESULT_OK, intent)
