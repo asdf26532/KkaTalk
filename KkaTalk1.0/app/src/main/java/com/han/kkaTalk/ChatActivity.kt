@@ -726,7 +726,9 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun searchMessage(query: String) {
-        if (originalList == null) {
+        messageAdapter.highlightMessages(query)
+
+        /*if (originalList == null) {
             originalList = ArrayList(messageList) // 원본 대화 저장
         }
 
@@ -734,7 +736,7 @@ class ChatActivity : AppCompatActivity() {
         messageList.forEach { message ->
             message.isHighlighted = message.message?.contains(query, ignoreCase = true) == true
         }
-        messageAdapter.notifyDataSetChanged() // RecyclerView 갱신
+        messageAdapter.notifyDataSetChanged() // RecyclerView 갱신*/
 
     }
 

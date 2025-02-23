@@ -175,9 +175,6 @@ class MessageAdapter(private val context: Context,
                 if (isHighlighted) {
                     it.setBackgroundColor(Color.YELLOW)
                     it.setTextColor(Color.RED)
-                } else {
-                    it.setBackgroundColor(Color.TRANSPARENT)
-                    it.setTextColor(Color.WHITE)
                 }
             }
 
@@ -225,6 +222,15 @@ class MessageAdapter(private val context: Context,
             context.startActivity(intent)
         }
     }
+
+    fun highlightMessages(query: String) {
+        messageList.forEachIndexed { index, message ->
+            val isHighlighted = message.message?.contains(query, ignoreCase = true) == true
+            messageList[index] = message.copy(isHighlighted = isHighlighted) // 리스트 갱신
+            notifyItemChanged(index)
+        }
+    }
+
 
     override fun getItemCount(): Int {
         return messageList.size
