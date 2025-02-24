@@ -226,7 +226,7 @@ class MessageAdapter(private val context: Context,
     fun highlightMessages(query: String) {
         messageList.forEachIndexed { index, message ->
             val isHighlighted = message.message?.contains(query, ignoreCase = true) == true
-            messageList[index] = message.copy(isHighlighted = isHighlighted) // 리스트 갱신
+            messageList[index] = message.copy(isHighlighted = isHighlighted)
             notifyItemChanged(index)
         }
     }

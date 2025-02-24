@@ -728,16 +728,6 @@ class ChatActivity : AppCompatActivity() {
     private fun searchMessage(query: String) {
         messageAdapter.highlightMessages(query)
 
-        /*if (originalList == null) {
-            originalList = ArrayList(messageList) // 원본 대화 저장
-        }
-
-        // 검색어를 포함하는 메시지는 isHighlighted = true
-        messageList.forEach { message ->
-            message.isHighlighted = message.message?.contains(query, ignoreCase = true) == true
-        }
-        messageAdapter.notifyDataSetChanged() // RecyclerView 갱신*/
-
     }
 
     private fun restoreOriginalList() {
