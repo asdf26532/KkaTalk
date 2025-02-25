@@ -1,8 +1,10 @@
 package com.han.kkaTalk
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import com.han.kkaTalk.databinding.ActivityMainBinding
 
@@ -11,6 +13,17 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        // SharedPreferences에서 다크 모드 설정 확인
+        val sharedPreferences = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+        val isDarkModeEnabled = sharedPreferences.getBoolean("DARK_MODE", false)
+
+        if (isDarkModeEnabled) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
+
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)

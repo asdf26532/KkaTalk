@@ -49,7 +49,7 @@ class MessageAdapter(private val context: Context,
         // 현재 메시지
         val currentMessage = messageList[position]
         val dateFormat = SimpleDateFormat("a hh:mm", Locale.getDefault()) // 시간 형식 설정
-        val isHighlighted = currentMessage.isHighlighted
+        val Highlighted = currentMessage.Highlighted
 
         // 텍스트 및 이미지 메시지 초기화
         if (holder is SendViewHolder) {
@@ -172,7 +172,7 @@ class MessageAdapter(private val context: Context,
             }
 
             messageView?.let {
-                if (isHighlighted) {
+                if (Highlighted) {
                     it.setBackgroundColor(Color.YELLOW)
                     it.setTextColor(Color.RED)
                 }
@@ -203,7 +203,7 @@ class MessageAdapter(private val context: Context,
                 .into(holder.profileImage)
             profileClick(holder.profileImage)
 
-            if (isHighlighted) {
+            if (Highlighted) {
                 holder.receiveMessage.setBackgroundColor(Color.YELLOW)
                 holder.receiveMessage.setTextColor(Color.RED)
             }
@@ -225,8 +225,8 @@ class MessageAdapter(private val context: Context,
 
     fun highlightMessages(query: String) {
         messageList.forEachIndexed { index, message ->
-            val isHighlighted = message.message?.contains(query, ignoreCase = true) == true
-            messageList[index] = message.copy(isHighlighted = isHighlighted)
+            val Highlighted = message.message?.contains(query, ignoreCase = true) == true
+            messageList[index] = message.copy(Highlighted = Highlighted)
             notifyItemChanged(index)
         }
     }

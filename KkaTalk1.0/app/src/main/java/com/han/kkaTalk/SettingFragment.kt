@@ -2,6 +2,7 @@ package com.han.kkaTalk
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -18,6 +19,8 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
@@ -146,7 +149,38 @@ class SettingFragment : Fragment() {
             deleteProfileImage()
         }
 
+        // 다크 모드 토글 추가
+        val switchDarkMode: SwitchCompat = view.findViewById(R.id.switch_dark_mode)
+
+        // SharedPreferences에서 다크 모드 상태 가져오기
+        val sharedPreferences = requireActivity().getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+        val isDarkModeEnabled = sharedPreferences.getBoolean("DARK_MODE", false)
+
+        // 토글 상태 적용
+        switchDarkMode.isChecked = isDarkModeEnabled
+
+        // 현재 다크 모드 적용
+        applyDarkMode(isDarkModeEnabled)
+
+        // 다크 모드 토글 변경 이벤트 처리
+        switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
+            val editor = sharedPreferences.edit()
+            editor.putBoolean("DARK_MODE", isChecked)
+            editor.apply()
+
+            applyDarkMode(isChecked)
+        }
+
+
         return view
+    }
+
+    private fun applyDarkMode(enabled: Boolean) {
+        if (enabled) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
     }
 
     private fun loadCurrentProfile() {
