@@ -717,8 +717,12 @@ class ChatActivity : AppCompatActivity() {
         builder.setView(input)
 
         builder.setPositiveButton("검색") { _, _ ->
-            val query = input.text.toString()
-            searchMessage(query) // 검색 기능 실행
+            val query = input.text.toString().trim() // 앞뒤 공백 제거
+            if (query.isNotEmpty()) { // 빈 검색어 방지
+                searchMessage(query)
+            } else {
+                Toast.makeText(this, "검색어를 입력하세요.", Toast.LENGTH_SHORT).show()
+            }
         }
         builder.setNegativeButton("취소", null)
 
@@ -726,6 +730,7 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun searchMessage(query: String) {
+        if (query.isBlank()) return // 검색어가 비어 있으면 리턴
         messageAdapter.highlightMessages(query)
 
     }
