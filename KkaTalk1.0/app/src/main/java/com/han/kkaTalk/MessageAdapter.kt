@@ -12,10 +12,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -49,7 +45,7 @@ class MessageAdapter(private val context: Context,
         // 현재 메시지
         val currentMessage = messageList[position]
         val dateFormat = SimpleDateFormat("a hh:mm", Locale.getDefault()) // 시간 형식 설정
-        val Highlighted = currentMessage.Highlighted
+        val highlighted = currentMessage.highlighted
 
         // 텍스트 및 이미지 메시지 초기화
         if (holder is SendViewHolder) {
@@ -172,7 +168,7 @@ class MessageAdapter(private val context: Context,
             }
 
             messageView?.let {
-                if (Highlighted) {
+                if (highlighted) {
                     it.setBackgroundColor(Color.YELLOW)
                     it.setTextColor(Color.RED)
                 }
@@ -203,7 +199,7 @@ class MessageAdapter(private val context: Context,
                 .into(holder.profileImage)
             profileClick(holder.profileImage)
 
-            if (Highlighted) {
+            if (highlighted) {
                 holder.receiveMessage.setBackgroundColor(Color.YELLOW)
                 holder.receiveMessage.setTextColor(Color.RED)
             }
@@ -224,11 +220,14 @@ class MessageAdapter(private val context: Context,
     }
 
     fun highlightMessages(query: String) {
+        Log.d("SearchDebug", "highlightMessages 호출됨: 검색어 = $query")
         messageList.forEachIndexed { index, message ->
-            val Highlighted = message.message?.contains(query, ignoreCase = true) == true
-            messageList[index] = message.copy(Highlighted = Highlighted)
+            val highlighted = message.message?.contains(query, ignoreCase = true) == true
+            Log.d("SearchDebug", "메시지: ${message.message}, 하이라이트 여부: $highlighted")
+            messageList[index] = message.copy(highlighted = highlighted)
             notifyItemChanged(index)
         }
+
     }
 
 

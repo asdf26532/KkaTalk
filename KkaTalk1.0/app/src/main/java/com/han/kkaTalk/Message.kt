@@ -9,7 +9,7 @@ data class Message(
     var deleted: Boolean? = false,
     var fileUrl: String? = null,
     var reactions: Map<String, String>? = null,
-    var Highlighted: Boolean = false
+    var highlighted: Boolean = false
 ){
     constructor():this("","","",0L, false, false, null, null, false)
 }

@@ -15,6 +15,7 @@ import android.view.MenuItem
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.PopupMenu
+import android.widget.SearchView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -608,6 +609,7 @@ class ChatActivity : AppCompatActivity() {
         })
     }
 
+    // 차단 기능
     fun blockUser(blockedUserId: String) {
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
         val blockTime = System.currentTimeMillis()
@@ -706,8 +708,7 @@ class ChatActivity : AppCompatActivity() {
         // 메시지 읽음 상태 업데이트
         markMessagesAsRead(senderRoom, receiverRoom)
     }
-    
-    // 메세지 검색 기능
+   /* // 메세지 검색 기능
     private fun showSearchDialog() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("메시지 검색")
@@ -727,10 +728,17 @@ class ChatActivity : AppCompatActivity() {
         builder.setNegativeButton("취소", null)
 
         builder.show()
-    }
+    }*/
 
     private fun searchMessage(query: String) {
-        if (query.isBlank()) return // 검색어가 비어 있으면 리턴
+        Log.d("SearchDebug", "검색어 입력됨: $query")
+
+        if (query.isBlank()){
+            Log.d("SearchDebug", "검색어가 비어있음 -> 원래 리스트로 복원")
+            restoreOriginalList()
+            return // 검색어가 비어 있으면 리턴
+        }
+
         messageAdapter.highlightMessages(query)
 
     }
@@ -745,6 +753,38 @@ class ChatActivity : AppCompatActivity() {
     // 액션바 버튼 기능 구현
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.chat_menu, menu)
+
+        // 검색 버튼 설정
+        val searchItem = menu?.findItem(R.id.menu_search)
+        val searchView = searchItem?.actionView as? SearchView
+
+        Log.d("SearchDebug", "onCreateOptionsMenu 실행됨")
+
+        if (searchView != null) {
+            // 로그 추가: SearchView가 제대로 액세스되었는지 확인
+            Log.d("SearchDebug", "SearchView가 액세스됨!")
+        searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                Log.d("SearchDebug", "onQueryTextSubmit 호출됨! 검색어: $query")
+                query?.let { searchMessage(it) } // 검색 실행
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                Log.d("SearchDebug", "onQueryTextChange 호출됨! 현재 입력값: $newText")
+                newText?.let { searchMessage(it) } // 실시간 검색 실행
+                return true
+            }
+        })
+    } else {
+        Log.d("SearchDebug", "SearchView가 null임!") // 디버깅 로그 추가
+    }
+
+        //  검색 닫을 때 원래 리스트 복원
+        searchView?.setOnCloseListener {
+            restoreOriginalList()
+            false
+        }
 
         // 차단 버튼 관련 처리
         val blockMenuItem = menu?.findItem(R.id.menu_block_user)
@@ -765,19 +805,19 @@ class ChatActivity : AppCompatActivity() {
                 setResult(Activity.RESULT_OK, intent)
                 Log.d("ChatActivity", "setResult 호출됨") // 로그 추가
 
-                if (originalList != null) {
+                /*if (originalList != null) {
                     restoreOriginalList() // 검색 전 리스트 복원
-                }
+                }*/
 
                 finish()
                 true
 
             }
 
-            R.id.menu_search -> {
+            /*R.id.menu_search -> {
                 showSearchDialog()
                 true
-            }
+            }*/
 
             // 차단하기/해제 버튼
             R.id.menu_block_user -> {
