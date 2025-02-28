@@ -12,13 +12,12 @@ import android.util.Log
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.EditText
 import android.widget.LinearLayout
-import android.widget.PopupMenu
-import android.widget.SearchView
+
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -756,26 +755,47 @@ class ChatActivity : AppCompatActivity() {
 
         // 검색 버튼 설정
         val searchItem = menu?.findItem(R.id.menu_search)
-        val searchView = searchItem?.actionView as? SearchView
+        if (searchItem == null) {
+            Log.e("SearchDebug", "❌ searchItem (검색 버튼) 자체가 null임!")
+        } else {
+            Log.d("SearchDebug", "✅ searchItem 찾음!")
+        }
 
-        Log.d("SearchDebug", "onCreateOptionsMenu 실행됨")
+        val searchView = searchItem?.actionView as? SearchView
+        if (searchView == null) {
+            Log.e("SearchDebug", "❌ searchView가 null임! (캐스팅 실패 가능성)")
+        } else {
+            Log.d("SearchDebug", "✅ searchView 가져옴!")
+        }
+
+
+            Log.d("SearchDebug", "onCreateOptionsMenu 실행됨")
 
         if (searchView != null) {
             // 로그 추가: SearchView가 제대로 액세스되었는지 확인
             Log.d("SearchDebug", "SearchView가 액세스됨!")
-        searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                Log.d("SearchDebug", "onQueryTextSubmit 호출됨! 검색어: $query")
-                query?.let { searchMessage(it) } // 검색 실행
-                return true
+            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    Log.d("SearchDebug", "onQueryTextSubmit 호출됨! 검색어: $query")
+                    query?.let { searchMessage(it) } // 검색 실행
+                    return true
+                }
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    Log.d("SearchDebug", "onQueryTextChange 호출됨! 현재 입력값: $newText")
+                    newText?.let { searchMessage(it) } // 실시간 검색 실행
+                    return true
+                }
+            })
+
+            searchView?.setOnQueryTextFocusChangeListener { _, hasFocus ->
+                if (hasFocus) {
+                    Log.d("SearchDebug", "🔍 검색창이 포커스를 받음!")
+                } else {
+                    Log.d("SearchDebug", "❌ 검색창에서 포커스가 사라짐!")
+                }
             }
 
-            override fun onQueryTextChange(newText: String?): Boolean {
-                Log.d("SearchDebug", "onQueryTextChange 호출됨! 현재 입력값: $newText")
-                newText?.let { searchMessage(it) } // 실시간 검색 실행
-                return true
-            }
-        })
     } else {
         Log.d("SearchDebug", "SearchView가 null임!") // 디버깅 로그 추가
     }
@@ -814,10 +834,12 @@ class ChatActivity : AppCompatActivity() {
 
             }
 
-            /*R.id.menu_search -> {
-                showSearchDialog()
+            R.id.menu_search -> {
+                Log.d("SearchDebug", "🔍 검색 버튼이 클릭됨 (onOptionsItemSelected)")
                 true
-            }*/
+            }
+
+
 
             // 차단하기/해제 버튼
             R.id.menu_block_user -> {
