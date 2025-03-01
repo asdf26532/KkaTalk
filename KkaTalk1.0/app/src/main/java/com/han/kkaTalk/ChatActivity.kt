@@ -707,27 +707,6 @@ class ChatActivity : AppCompatActivity() {
         // 메시지 읽음 상태 업데이트
         markMessagesAsRead(senderRoom, receiverRoom)
     }
-   /* // 메세지 검색 기능
-    private fun showSearchDialog() {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("메시지 검색")
-
-        val input = EditText(this)
-        input.hint = "검색어 입력"
-        builder.setView(input)
-
-        builder.setPositiveButton("검색") { _, _ ->
-            val query = input.text.toString().trim() // 앞뒤 공백 제거
-            if (query.isNotEmpty()) { // 빈 검색어 방지
-                searchMessage(query)
-            } else {
-                Toast.makeText(this, "검색어를 입력하세요.", Toast.LENGTH_SHORT).show()
-            }
-        }
-        builder.setNegativeButton("취소", null)
-
-        builder.show()
-    }*/
 
     private fun searchMessage(query: String) {
         Log.d("SearchDebug", "검색어 입력됨: $query")
@@ -755,50 +734,27 @@ class ChatActivity : AppCompatActivity() {
 
         // 검색 버튼 설정
         val searchItem = menu?.findItem(R.id.menu_search)
-        if (searchItem == null) {
-            Log.e("SearchDebug", "❌ searchItem (검색 버튼) 자체가 null임!")
-        } else {
-            Log.d("SearchDebug", "✅ searchItem 찾음!")
-        }
-
         val searchView = searchItem?.actionView as? SearchView
-        if (searchView == null) {
-            Log.e("SearchDebug", "❌ searchView가 null임! (캐스팅 실패 가능성)")
-        } else {
-            Log.d("SearchDebug", "✅ searchView 가져옴!")
-        }
-
-
-            Log.d("SearchDebug", "onCreateOptionsMenu 실행됨")
 
         if (searchView != null) {
-            // 로그 추가: SearchView가 제대로 액세스되었는지 확인
-            Log.d("SearchDebug", "SearchView가 액세스됨!")
+            Log.d("SearchDebug", "SearchView 액세스")
             searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
-                    Log.d("SearchDebug", "onQueryTextSubmit 호출됨! 검색어: $query")
+                    Log.d("SearchDebug", "onQueryTextSubmit 호출 검색어: $query")
                     query?.let { searchMessage(it) } // 검색 실행
                     return true
                 }
 
                 override fun onQueryTextChange(newText: String?): Boolean {
-                    Log.d("SearchDebug", "onQueryTextChange 호출됨! 현재 입력값: $newText")
+                    Log.d("SearchDebug", "onQueryTextChange 호출. 현재 입력값: $newText")
                     newText?.let { searchMessage(it) } // 실시간 검색 실행
                     return true
                 }
             })
 
-            searchView?.setOnQueryTextFocusChangeListener { _, hasFocus ->
-                if (hasFocus) {
-                    Log.d("SearchDebug", "🔍 검색창이 포커스를 받음!")
-                } else {
-                    Log.d("SearchDebug", "❌ 검색창에서 포커스가 사라짐!")
-                }
-            }
-
-    } else {
-        Log.d("SearchDebug", "SearchView가 null임!") // 디버깅 로그 추가
-    }
+        } else {
+            Log.d("SearchDebug", "SearchView null")
+        }
 
         //  검색 닫을 때 원래 리스트 복원
         searchView?.setOnCloseListener {
@@ -824,28 +780,15 @@ class ChatActivity : AppCompatActivity() {
                 intent.putExtra("chatUpdated", true) // 결과 값으로 '갱신 필요' 플래그 전달
                 setResult(Activity.RESULT_OK, intent)
                 Log.d("ChatActivity", "setResult 호출됨") // 로그 추가
-
-                /*if (originalList != null) {
-                    restoreOriginalList() // 검색 전 리스트 복원
-                }*/
-
                 finish()
                 true
-
             }
-
-            R.id.menu_search -> {
-                Log.d("SearchDebug", "🔍 검색 버튼이 클릭됨 (onOptionsItemSelected)")
-                true
-            }
-
-
 
             // 차단하기/해제 버튼
             R.id.menu_block_user -> {
                 checkIfBlocked(receiverUid) { isBlocked ->
                     if (isBlocked) {
-                        // ✅ 차단 해제 로직
+                        // 차단 해제 로직
                         AlertDialog.Builder(this)
                             .setTitle("차단 해제")
                             .setMessage("대화 상대의 차단을 해제하시겠습니까?")
@@ -856,7 +799,7 @@ class ChatActivity : AppCompatActivity() {
                             .setNegativeButton("취소") { dialog, _ -> dialog.dismiss() }
                             .show()
                     } else {
-                        // ✅ 차단 실행
+                        // 차단 실행
                         AlertDialog.Builder(this)
                             .setTitle("사용자 차단")
                             .setMessage("대화 상대를 차단하시겠습니까?")
@@ -870,7 +813,6 @@ class ChatActivity : AppCompatActivity() {
                 }
                 true
             }
-
 
             else -> super.onOptionsItemSelected(item)
         }
