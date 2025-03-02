@@ -342,8 +342,7 @@ class ChatActivity : AppCompatActivity() {
         const val REQUEST_CODE_SELECT_FILE = 401 // 파일 선택 요청 코드
     }
 
-
-
+    // 리액션 표시 (받은 메세지만 적용)
     fun showReactionPopup(message: Message) {
 
         val reactions = listOf("❤️", "👍", "👎", "😂", "😮", "😢", "✅") // 리액션 목록
@@ -451,8 +450,8 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    // 보낸 메세지 팝업 옵션
     fun showOptionsPopup(message: Message) {
-        // 다이얼로그 레이아웃 초기화
         val dialogView = layoutInflater.inflate(R.layout.message_options, null)
 
         val btnCopy = dialogView.findViewById<TextView>(R.id.btn_copy)
@@ -487,6 +486,7 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    // 메세지 삭제 팝업
     private fun showDeletePopup(message: Message) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("메시지 삭제")
@@ -509,6 +509,7 @@ class ChatActivity : AppCompatActivity() {
         alertDialog.show()
     }
 
+    // 보낸 메세지 삭제 기능
     private fun deleteMessage(senderRoom: String, receiverRoom: String, message: Message) {
         val senderMessagesRef = mDbRef.child("chats").child(senderRoom).child("message")
         val receiverMessagesRef = mDbRef.child("chats").child(receiverRoom).child("message")

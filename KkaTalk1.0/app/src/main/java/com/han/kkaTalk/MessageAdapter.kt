@@ -26,7 +26,7 @@ class MessageAdapter(private val context: Context,
 
     private val send = 2
 
-
+    // 뷰 타입에 따라 서로 다른 ViewHolder를 생성
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 
         return if(viewType == 1) {
@@ -36,9 +36,9 @@ class MessageAdapter(private val context: Context,
             val view: View = LayoutInflater.from(context).inflate(R.layout.send, parent, false)
             SendViewHolder(view)
         }
-
     }
 
+    // 메시지를 UI에 바인딩
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (position >= messageList.size) return
 
@@ -55,7 +55,6 @@ class MessageAdapter(private val context: Context,
             holder.receiveMessage.visibility = View.GONE
             holder.itemView.findViewById<ImageView>(R.id.iv_receive_image).visibility = View.GONE
         }
-
 
         // 메시지가 삭제되었는지 확인
         if (currentMessage.deleted == true) {
@@ -101,8 +100,6 @@ class MessageAdapter(private val context: Context,
                     (context as ChatActivity).showOptionsPopup(currentMessage)
                     true
                 }
-
-
             } else if (holder is ReceiveViewHolder) {
                 holder.nickName.text = receiverNick
                 holder.receiveMessage.text = currentMessage.message
@@ -161,20 +158,18 @@ class MessageAdapter(private val context: Context,
                 true
             }
 
+            // 검색된 메시지 강조
             val messageView = when (holder) {
                 is SendViewHolder -> holder.sendMessage
                 is ReceiveViewHolder -> holder.receiveMessage
                 else -> null
             }
-
             messageView?.let {
                 if (highlighted) {
                     it.setBackgroundColor(Color.YELLOW)
                     it.setTextColor(Color.RED)
                 }
             }
-
-
         } else if (holder is ReceiveViewHolder) {
             holder.nickName.text = receiverNick
             holder.receiveMessage.text = currentMessage.message
@@ -203,12 +198,10 @@ class MessageAdapter(private val context: Context,
                 holder.receiveMessage.setBackgroundColor(Color.YELLOW)
                 holder.receiveMessage.setTextColor(Color.RED)
             }
-
         }
-
-
     }
 
+    // 프로필 이미지 클릭 시 상대방 프로필 화면으로 이동
     private fun profileClick(imageView: ImageView) {
         imageView.setOnClickListener {
             val intent = Intent(context, ProfileActivity::class.java)
@@ -219,6 +212,7 @@ class MessageAdapter(private val context: Context,
         }
     }
 
+    // 검색된 메시지 강조
     fun highlightMessages(query: String) {
         Log.d("SearchDebug", "highlightMessages 호출됨: 검색어 = $query")
         messageList.forEachIndexed { index, message ->

@@ -72,7 +72,7 @@ class HomeFragment : Fragment() {
         }
     }
 
-
+    // 차단 유저 목록
     private fun fetchBlockedUsers(callback: () -> Unit) {
         val currentUserId = mAuth.currentUser?.uid ?: return
         val blockedUsersRef = mDbRef.child("user").child(currentUserId).child("blockedUsers")
@@ -177,6 +177,7 @@ class HomeFragment : Fragment() {
             .show()
     }
 
+    // 유저 차단
     private fun blockUser(user: User) {
         val currentUserId = mAuth.currentUser?.uid ?: return
         val blockedUsersRef = mDbRef.child("user").child(currentUserId).child("blockedUsers")

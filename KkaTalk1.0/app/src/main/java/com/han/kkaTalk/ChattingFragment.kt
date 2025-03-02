@@ -109,6 +109,7 @@
             })
         }
 
+        // 채팅방 삭제
         private fun deleteChatRoom(chatPreview: ChatPreview) {
             val currentUserId = mAuth.currentUser?.uid ?: return
             val chatKey = currentUserId + chatPreview.userUid
@@ -139,6 +140,7 @@
             builder.show()
         }
 
+        // 차단 유저목록
         private fun fetchBlockedUsers(onComplete: () -> Unit) {
             val currentUserId = mAuth.currentUser?.uid ?: return
 
@@ -161,8 +163,7 @@
             })
         }
 
-
-
+        // 마지막 채팅 미리보기
         private fun loadChatPreviews() {
             val currentUserId = mAuth.currentUser?.uid ?: return
 
@@ -250,7 +251,6 @@
                             }
                         }
                     }
-
 
                 override fun onCancelled(error: DatabaseError) {
                     Log.e("ChattingFragment", "Chat data load cancelled: $error")
