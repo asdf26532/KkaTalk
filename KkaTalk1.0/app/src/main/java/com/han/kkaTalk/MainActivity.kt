@@ -44,6 +44,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    // 프래그먼트 설정
     private fun replaceFragment(fragment: Fragment) {
 
         val fragmentManager = supportFragmentManager

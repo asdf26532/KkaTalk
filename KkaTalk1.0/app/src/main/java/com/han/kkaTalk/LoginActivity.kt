@@ -131,6 +131,7 @@ class LoginActivity : AppCompatActivity() {
         finish()
     }
 
+    // 자체 로그인
     private fun login(email: String, password: String) {
         mAuth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
@@ -148,6 +149,7 @@ class LoginActivity : AppCompatActivity() {
             }
     }
 
+    // 구글 로그인
     private fun googleSignIn() {
         val signInIntent = googleSignInClient.signInIntent
         startActivityForResult(signInIntent, RC_SIGN_IN)
@@ -201,6 +203,7 @@ class LoginActivity : AppCompatActivity() {
             }
     }
 
+    // 카카오 로그인
     private fun kakaoSignIn() {
         Log.d("KakaoLogin", "카카오 로그인 시작")
         // 카카오톡 설치 여부에 따라 로그인 방식 결정

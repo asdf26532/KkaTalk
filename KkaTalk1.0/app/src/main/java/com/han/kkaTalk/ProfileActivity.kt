@@ -69,7 +69,7 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
-
+    // 프로필 사진 불러오기
     private fun loadProfileImage() {
         val userRef = FirebaseDatabase.getInstance().getReference("user").child(userId)
         userRef.get().addOnSuccessListener { snapshot ->
@@ -92,6 +92,7 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
+    // 상태 메세지 불러오기
     private fun loadStatusMessage() {
         val userRef = FirebaseDatabase.getInstance().getReference("user").child(userId)
         userRef.get().addOnSuccessListener { snapshot ->

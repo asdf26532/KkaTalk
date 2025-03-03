@@ -96,8 +96,8 @@ class HomeFragment : Fragment() {
         })
     }
 
+    // 사용자 UID 가져오기
     private fun fetchUserData() {
-        // 현재 로그인한 사용자의 UID를 가져옴
         val currentUserId = mAuth.currentUser?.uid ?: return
 
         // Firebase에서 사용자 데이터를 가져오기
@@ -128,6 +128,7 @@ class HomeFragment : Fragment() {
         }
     }
 
+    // 유저 선택(클릭) 팝업
     private fun showPopupDialog(user: User) {
         val options = arrayOf("프로필 보기", "대화하기", "차단하기", "취소")
 
@@ -165,8 +166,8 @@ class HomeFragment : Fragment() {
         dialog.show()
     }
 
+    // 차단 확인 다이얼로그 표시
     private fun showBlockConfirmationDialog(user: User) {
-        // 차단 확인 다이얼로그 표시
         AlertDialog.Builder(requireContext())
             .setTitle("차단하기")
             .setMessage("${user.nick} 님을 차단하시겠습니까?")

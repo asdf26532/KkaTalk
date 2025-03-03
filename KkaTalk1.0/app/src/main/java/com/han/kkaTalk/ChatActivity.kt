@@ -561,6 +561,7 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    // 메세지 읽음 표시
     private fun markMessagesAsRead(senderRoom: String, receiverRoom: String) {
         val senderMessagesRef = mDbRef.child("chats").child(senderRoom).child("message")
         val receiverMessagesRef = mDbRef.child("chats").child(receiverRoom).child("message")
@@ -636,6 +637,7 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    // 차단 유저 확인
     private fun checkIfBlocked(blockedUserId: String, callback: (Boolean) -> Unit) {
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
@@ -709,6 +711,7 @@ class ChatActivity : AppCompatActivity() {
         markMessagesAsRead(senderRoom, receiverRoom)
     }
 
+    // 메세지 검색 기능(하이라이트)
     private fun searchMessage(query: String) {
         Log.d("SearchDebug", "검색어 입력됨: $query")
 
@@ -722,10 +725,11 @@ class ChatActivity : AppCompatActivity() {
 
     }
 
+    // 검색 후 원본 대화 복구
     private fun restoreOriginalList() {
         originalList?.let {
             messageAdapter.updateList(it)
-            originalList = null // 원본 초기화
+            originalList = null
         }
     }
 
@@ -774,6 +778,7 @@ class ChatActivity : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
+    // 버튼(옵션) 선택
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {

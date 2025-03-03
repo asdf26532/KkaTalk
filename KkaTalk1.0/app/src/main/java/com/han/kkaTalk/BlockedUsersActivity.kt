@@ -53,6 +53,7 @@ class BlockedUsersActivity : AppCompatActivity() {
         }
     }
 
+    // 전체 유저 목록
     private fun fetchAllUsers() {
         val userRef = mDbRef.child("user")
         userRef.addValueEventListener(object : ValueEventListener {
@@ -73,6 +74,7 @@ class BlockedUsersActivity : AppCompatActivity() {
         })
     }
 
+    // 차단 유저 목록
     private fun fetchBlockedUsers() {
         val currentUserId = mAuth.currentUser?.uid
         if (currentUserId != null) {
@@ -102,6 +104,7 @@ class BlockedUsersActivity : AppCompatActivity() {
         userAdapter.updateList(blockedUserIds, allUsers)
     }
 
+    // 차단 해제 다이얼로그
     private fun showUnblockDialog(user: User) {
         MaterialAlertDialogBuilder(this)
             .setTitle("차단 해제")
@@ -113,6 +116,7 @@ class BlockedUsersActivity : AppCompatActivity() {
             .show()
     }
 
+    // 차단 해제 기능
     private fun unblockUser(user: User) {
         val currentUserId = mAuth.currentUser?.uid ?: return
         val blockedUsersRef = mDbRef.child("user").child(currentUserId).child("blockedUsers")
@@ -125,9 +129,7 @@ class BlockedUsersActivity : AppCompatActivity() {
             }
         }
     }
-
-
-
+    
     // 뒤로 가기 버튼
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {

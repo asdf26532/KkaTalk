@@ -175,6 +175,7 @@ class SettingFragment : Fragment() {
         return view
     }
 
+    // 다크 모드 토글
     private fun applyDarkMode(enabled: Boolean) {
         if (enabled) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
@@ -183,6 +184,7 @@ class SettingFragment : Fragment() {
         }
     }
 
+    // 사용자 프로필 로드
     private fun loadCurrentProfile() {
         val userId = mAuth.currentUser?.uid.toString()
 
@@ -296,6 +298,7 @@ class SettingFragment : Fragment() {
         }
     }
 
+    // 프로필 사진 선택
     private fun displaySelectedImage(uri: Uri) {
         Log.d(TAG, "Displaying selected image: $uri")
         Glide.with(this)
@@ -311,6 +314,7 @@ class SettingFragment : Fragment() {
         private const val REQUEST_CODE_SELECT_PHOTOS = 2001
     }
 
+    // 갤러리 권한
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -338,6 +342,7 @@ class SettingFragment : Fragment() {
         startActivityForResult(intent, REQUEST_CODE_SELECT_PHOTOS)
     }
 
+    // 프로필 사진 삭제
     private fun deleteProfileImage() {
         val userId = mAuth.currentUser?.uid.toString()
         if (userId.isNotEmpty()) {
@@ -373,6 +378,7 @@ class SettingFragment : Fragment() {
         }
     }
 
+    // 사용자 닉네임
     private fun loadCurrentNick() {
         val userId = mAuth.currentUser?.uid.toString()
         if (userId != null) {
@@ -383,6 +389,7 @@ class SettingFragment : Fragment() {
         }
     }
 
+    // 닉네임 변경
     private fun updateNickname(newNick: String) {
         val userId = mAuth.currentUser?.uid.toString()
         if (userId != null) {
