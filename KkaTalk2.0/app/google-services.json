@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "913118348730",
+    "project_id": "kkatalk2",
+    "storage_bucket": "kkatalk2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:913118348730:android:1c9ad1d7f09ad3bd870983",
+        "android_client_info": {
+          "package_name": "com.han.kkatalk2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEmd_6RhKqiTUp1PHYdbfOOgT1LBwhiHI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
