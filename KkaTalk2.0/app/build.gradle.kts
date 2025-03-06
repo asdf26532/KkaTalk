@@ -34,6 +34,9 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    viewBinding {
+        enable = true
+    }
 }
 
 dependencies {
@@ -45,7 +48,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
 
     // Firebase
-    /*implementation(libs.firebase.database)*/
+    implementation("com.google.firebase:firebase-database")
     implementation(platform("com.google.firebase:firebase-bom:33.2.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")
