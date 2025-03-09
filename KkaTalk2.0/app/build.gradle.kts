@@ -50,14 +50,14 @@ dependencies {
     // Firebase
     implementation(libs.firebase.database)
     implementation(platform("com.google.firebase:firebase-bom:33.2.0"))
-    /*implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation ("com.firebaseui:firebase-ui-auth:8.0.0")
     implementation("com.google.firebase:firebase-storage")
 
     // admob
-    implementation("com.google.android.gms:play-services-ads:23.3.0")*/
+    implementation("com.google.android.gms:play-services-ads:23.3.0")
 
     // glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
