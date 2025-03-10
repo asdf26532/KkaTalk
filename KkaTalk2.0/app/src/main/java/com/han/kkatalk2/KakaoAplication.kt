@@ -8,7 +8,7 @@ class KakaoAplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        KakaoSdk.init(this, "native appkey")
+        KakaoSdk.init(this, "e1f85b54fe44743544ababbf3255d7bf")
     }
 
 }
