@@ -56,8 +56,8 @@ dependencies {
     implementation ("com.firebaseui:firebase-ui-auth:8.0.0")
     implementation("com.google.firebase:firebase-storage")
 
-    // admob
-    implementation("com.google.android.gms:play-services-ads:23.3.0")
+    /*// admob
+    implementation("com.google.android.gms:play-services-ads:23.3.0")*/
 
     // glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
