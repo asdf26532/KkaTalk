@@ -1,4 +1,4 @@
-package com.han.kkaTalk
+package com.han.kkatalk2
 
 import android.content.Context
 import android.content.Intent

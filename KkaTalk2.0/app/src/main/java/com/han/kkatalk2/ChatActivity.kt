@@ -1,4 +1,4 @@
-package com.han.kkaTalk
+package com.han.kkatalk2
 
 import android.app.Activity
 import android.app.AlertDialog
@@ -30,7 +30,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
-import com.han.kkaTalk.databinding.ActivityChatBinding
+import com.han.kkatalk2.databinding.ActivityChatBinding
 
 
 

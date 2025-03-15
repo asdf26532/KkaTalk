@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="18dp">
+
+    <!-- 메시지 영역: 이미지와 텍스트를 같은 위치에 배치 -->
+    <FrameLayout
+        android:id="@+id/message_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="5dp">
+
+        <!-- 이미지 메시지 -->
+        <ImageView
+            android:id="@+id/iv_send_image"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:visibility="gone"
+            android:background="@drawable/btn_background"
+            android:padding="10dp"
+            android:scaleType="centerCrop" />
+
+        <!-- 텍스트 메시지 -->
+        <TextView
+            android:id="@+id/tv_send_msg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_background"
+            android:padding="10dp"
+            android:text="보낸 메시지"
+            android:textSize="18sp"
+            android:textColor="@color/white"
+            android:visibility="gone"/>
+
+    </FrameLayout>
+
+    <!-- 읽음 상태 -->
+    <TextView
+        android:id="@+id/tv_read_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="읽음 표시"
+        android:textSize="11sp"
+        android:layout_toStartOf="@id/message_container"
+        android:layout_marginRight="7dp"
+        android:layout_above="@+id/tv_send_time"
+        android:textColor="#E53935" />
+
+    <!-- 시간 표시 -->
+    <TextView
+        android:id="@+id/tv_send_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="시간 표시"
+        android:textSize="11sp"
+        android:layout_toStartOf="@id/message_container"
+        android:layout_alignBottom="@id/message_container"
+        android:layout_marginRight="7dp"
+        android:textColor="#888888" />
+
+
+
+
+</RelativeLayout>
