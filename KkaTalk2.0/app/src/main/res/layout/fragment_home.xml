@@ -10,15 +10,11 @@
     tools:context=".HomeFragment">
 
     <EditText
+        android:id="@+id/edt_city"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="대화 상대 목록"
-        android:textSize="25sp">
-
-
-
-
-    </EditText>
+        android:text="지역 선택"
+        android:textSize="25sp"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_user"
