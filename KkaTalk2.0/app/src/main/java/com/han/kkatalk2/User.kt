@@ -5,7 +5,7 @@ data class User(
     var email: String,
     var uId: String,
     var nick: String,
-    val profileImageUrl: String,
+    var profileImageUrl: String,
     var statusMessage: String? = null
 ){
     constructor(): this("", "", "", "","",null)

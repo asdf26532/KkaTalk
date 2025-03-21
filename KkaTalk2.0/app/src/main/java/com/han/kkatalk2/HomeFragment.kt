@@ -43,8 +43,8 @@ class HomeFragment : Fragment() {
         userList = ArrayList()
         adapter = UserAdapter(requireContext(), userList)
 
-        binding.rvUser.layoutManager = LinearLayoutManager(requireContext())
-        binding.rvUser.adapter = adapter
+        binding.rvGuide.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvGuide.adapter = adapter
 
 
         // 차단된 사용자 데이터 먼저 가져오기

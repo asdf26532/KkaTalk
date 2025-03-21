@@ -13,14 +13,14 @@
         android:id="@+id/edt_city"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="지역 선택"
+        android:text="지역"
         android:textSize="25sp"/>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_user"
+        android:id="@+id/rv_guide"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        tools:listitem="@layout/user_layout"/>
+        tools:listitem="@layout/guide_card"/>
 
 </LinearLayout>
