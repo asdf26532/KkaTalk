@@ -30,7 +30,7 @@ class GuideAdapter(private val guideList: List<Guide>) : RecyclerView.Adapter<Gu
 
         holder.guideName.text = guide.name
         holder.guideLocation.text = guide.content  // 거주 지역 대신 내용 사용
-        holder.guideRate.text = guide.phoneNumber  // 연락처 표시 (예제)
+        holder.guideRate.text = guide.phoneNumber  // 연락처 표시
 
         // Glide 사용하여 프로필 이미지 로드
         Glide.with(holder.itemView.context)

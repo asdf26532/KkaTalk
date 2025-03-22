@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.bottomNav.setOnItemSelectedListener {
             when (it.itemId) {
-                R.id.home -> replaceFragment(HomeFragment())
+                R.id.home -> replaceFragment(HomeFragment2())
                 R.id.chatting -> replaceFragment(ChattingFragment())
                 R.id.setting -> replaceFragment(SettingFragment())
 

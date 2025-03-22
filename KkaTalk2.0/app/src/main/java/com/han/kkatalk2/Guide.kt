@@ -5,10 +5,12 @@ data class Guide(
     var email: String,
     var uId: String,
     var phoneNumber: String,
+    var locate: String,
+    var rate: String,
     var content: String,
     var profileImageUrl: String
 )
 {
-    constructor(): this("", "", "", "","", "")
+    constructor(): this("", "", "", "","", "","","")
 }
 
