@@ -70,6 +70,8 @@ class HomeFragment2 : Fragment() {
         }
 
 
+
+
         return view
     }
 }

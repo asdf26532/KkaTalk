@@ -37,7 +37,7 @@ class RegisterGuideActivity : AppCompatActivity() {
             val userId = auth.currentUser?.uid ?: ""
 
             if (name.isNotEmpty() && location.isNotEmpty() && rate.isNotEmpty() && phone.isNotEmpty()) {
-                val guide = Guide(name, auth.currentUser?.email ?: "", userId, phone, location, rate, content, "")
+                val guide = Guide(name, userId, phone, location, rate, content, "")
 
                 database.child(userId).setValue(guide).addOnCompleteListener {
                     if (it.isSuccessful) {

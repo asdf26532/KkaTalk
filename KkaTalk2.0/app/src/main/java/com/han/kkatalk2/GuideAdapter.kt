@@ -1,5 +1,6 @@
 package com.han.kkatalk2
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,12 +31,26 @@ class GuideAdapter(private val guideList: List<Guide>) : RecyclerView.Adapter<Gu
 
         holder.guideName.text = guide.name
         holder.guideLocation.text = guide.content  // 거주 지역 대신 내용 사용
-        holder.guideRate.text = guide.phoneNumber  // 연락처 표시
+        holder.guideRate.text = guide.rate // 연락처 표시
+
 
         // Glide 사용하여 프로필 이미지 로드
         Glide.with(holder.itemView.context)
             .load(guide.profileImageUrl)
             .into(holder.guideImage)
+
+        holder.itemView.setOnClickListener {
+            val context = holder.itemView.context
+            val intent = Intent(context, GuideDetailActivity::class.java).apply {
+                putExtra("name", guide.name)
+                putExtra("locate", guide.locate)
+                putExtra("rate", guide.rate)
+                putExtra("phoneNumber", guide.phoneNumber.toString())  // phoneNumber를 String으로 변환
+                putExtra("content", guide.content)
+                putExtra("profileImageUrl", guide.profileImageUrl)
+            }
+            context.startActivity(intent)
+        }
     }
 
     override fun getItemCount(): Int = guideList.size

@@ -2,7 +2,6 @@ package com.han.kkatalk2
 
 data class Guide(
     var name: String,
-    var email: String,
     var uId: String,
     var phoneNumber: String,
     var locate: String,
@@ -11,6 +10,6 @@ data class Guide(
     var profileImageUrl: String
 )
 {
-    constructor(): this("", "", "", "","", "","","")
+    constructor(): this("", "", "","", "","","")
 }
 
