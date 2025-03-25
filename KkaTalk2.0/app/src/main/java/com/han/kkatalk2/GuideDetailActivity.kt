@@ -27,7 +27,7 @@ class GuideDetailActivity : AppCompatActivity() {
         // 인텐트에서 가이드 정보 가져오기
         val guideId = intent.getStringExtra("guideId") ?: return
 
-        database = FirebaseDatabase.getInstance().getReference("guides").child(guideId)
+        database = FirebaseDatabase.getInstance().getReference("guide").child(guideId)
 
         database.get().addOnSuccessListener { snapshot ->
             val guide = snapshot.getValue(Guide::class.java)

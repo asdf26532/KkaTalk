@@ -18,9 +18,7 @@
         <activity
             android:name=".RegisterGuideActivity"
             android:exported="false" />
-        <activity
-            android:name=".AddFriend"
-            android:exported="false" />
+        
         <activity
             android:name=".SignUpActivity"
             android:exported="false" />
