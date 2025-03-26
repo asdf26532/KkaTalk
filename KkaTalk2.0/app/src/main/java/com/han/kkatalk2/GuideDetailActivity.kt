@@ -3,6 +3,7 @@ package com.han.kkatalk2
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.google.firebase.database.DatabaseReference
@@ -25,26 +26,49 @@ class GuideDetailActivity : AppCompatActivity() {
         val txtContent = findViewById<TextView>(R.id.txt_content)
 
         // 인텐트에서 가이드 정보 가져오기
-        val guideId = intent.getStringExtra("guideId") ?: return
+        val guideId = intent.getStringExtra("guideId")
+
+        if (guideId.isNullOrEmpty()) {
+            Toast.makeText(this, "잘못된 접근입니다.", Toast.LENGTH_SHORT).show()
+            finish() // guideId가 없으면 액티비티 종료
+            return
+        }
 
         database = FirebaseDatabase.getInstance().getReference("guide").child(guideId)
+        database.get()
+            .addOnSuccessListener { snapshot ->
+                if (!snapshot.exists()) {
+                    showErrorAndExit("해당 가이드를 찾을 수 없습니다.")
+                    return@addOnSuccessListener
+                }
 
-        database.get().addOnSuccessListener { snapshot ->
-            val guide = snapshot.getValue(Guide::class.java)
-            if (guide != null) {
-                txtName.text = guide.name
-                txtLocation.text = "지역: ${guide.locate}"
-                txtRate.text = "요금: ${guide.rate}"
-                txtPhone.text = "전화번호: ${guide.phoneNumber}"
-                txtContent.text = guide.content
+                val guide = snapshot.getValue(Guide::class.java)
+                if (guide != null) {
+                    txtName.text = guide.name
+                    txtLocation.text = "지역: ${guide.locate}"
+                    txtRate.text = "요금: ${guide.rate}"
+                    txtPhone.text = "전화번호: ${guide.phoneNumber}"
+                    txtContent.text = guide.content
 
-                // 프로필 이미지가 있다면 Glide로 로드
-                if (guide.profileImageUrl.isNotEmpty()) {
-                    Glide.with(this).load(guide.profileImageUrl).into(imgProfile)
+                    // 프로필 이미지 로드
+                    if (!guide.profileImageUrl.isNullOrEmpty()) {
+                        Glide.with(this).load(guide.profileImageUrl).into(imgProfile)
+                    } else {
+                        imgProfile.setImageResource(R.drawable.profile_default)
+                    }
                 } else {
-                    imgProfile.setImageResource(R.drawable.profile_default)
+                    showErrorAndExit("데이터를 불러오는 중 오류가 발생했습니다.")
                 }
             }
-        }
+            .addOnFailureListener { exception ->
+                showErrorAndExit("네트워크 오류가 발생했습니다. 다시 시도해주세요.")
+            }
     }
+
+    // 오류 발생 시 Toast 메시지를 띄우고 액티비티 종료
+    private fun showErrorAndExit(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        finish()
+    }
+
 }

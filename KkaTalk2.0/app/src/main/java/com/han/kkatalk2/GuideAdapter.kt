@@ -43,12 +43,6 @@ class GuideAdapter(private val guideList: List<Guide>) : RecyclerView.Adapter<Gu
             val context = holder.itemView.context
             val intent = Intent(context, GuideDetailActivity::class.java).apply {
                 putExtra("guideId", guide.uId)
-                putExtra("name", guide.name)
-                putExtra("locate", guide.locate)
-                putExtra("rate", guide.rate)
-                putExtra("phoneNumber", guide.phoneNumber.toString())  // phoneNumber를 String으로 변환
-                putExtra("content", guide.content)
-                putExtra("profileImageUrl", guide.profileImageUrl)
             }
             context.startActivity(intent)
         }
