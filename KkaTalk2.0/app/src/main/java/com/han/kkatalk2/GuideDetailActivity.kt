@@ -1,6 +1,11 @@
 package com.han.kkatalk2
 
+import android.app.Activity
+import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -63,12 +68,33 @@ class GuideDetailActivity : AppCompatActivity() {
             .addOnFailureListener { exception ->
                 showErrorAndExit("네트워크 오류가 발생했습니다. 다시 시도해주세요.")
             }
+
+        // 액션바 설정
+        supportActionBar?.title = ""
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
     // 오류 발생 시 Toast 메시지를 띄우고 액티비티 종료
     private fun showErrorAndExit(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         finish()
+    }
+
+    // 버튼(옵션) 선택
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                val intent = Intent()
+                intent.putExtra("chatUpdated", true) // 결과 값으로 '갱신 필요' 플래그 전달
+                setResult(Activity.RESULT_OK, intent)
+                Log.d("ChatActivity", "setResult 호출됨") // 로그 추가
+                finish()
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
+
     }
 
 }
