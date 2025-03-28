@@ -91,7 +91,6 @@ class GuideDetailActivity : AppCompatActivity() {
                 finish()
                 true
             }
-
             else -> super.onOptionsItemSelected(item)
         }
 
