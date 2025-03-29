@@ -13,14 +13,18 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.han.kkatalk2.databinding.ActivityGuideDetailBinding
+import com.han.kkatalk2.databinding.ActivityProfileBinding
 
 class GuideDetailActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityGuideDetailBinding
     private lateinit var database: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_guide_detail)
+        binding = ActivityGuideDetailBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // UI 요소 찾기
         val imgProfile = findViewById<ImageView>(R.id.img_profile)
@@ -68,6 +72,14 @@ class GuideDetailActivity : AppCompatActivity() {
             .addOnFailureListener { exception ->
                 showErrorAndExit("네트워크 오류가 발생했습니다. 다시 시도해주세요.")
             }
+
+        // 대화하기 버튼 클릭 이벤트
+        binding.btnChat.setOnClickListener {
+            val intent = Intent(this, ChatActivity::class.java)
+            intent.putExtra("uId", guideId)
+            startActivity(intent)
+        }
+
 
         // 액션바 설정
         supportActionBar?.title = ""
