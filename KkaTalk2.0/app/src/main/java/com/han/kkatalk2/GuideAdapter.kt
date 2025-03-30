@@ -43,6 +43,8 @@ class GuideAdapter(private val guideList: List<Guide>) : RecyclerView.Adapter<Gu
             val context = holder.itemView.context
             val intent = Intent(context, GuideDetailActivity::class.java).apply {
                 putExtra("guideId", guide.uId)
+                putExtra("nick", guide.nick)
+                putExtra("profileImageUrl", guide.profileImageUrl)
             }
             context.startActivity(intent)
         }

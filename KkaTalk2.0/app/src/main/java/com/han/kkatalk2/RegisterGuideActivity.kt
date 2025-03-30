@@ -11,8 +11,8 @@ import com.google.firebase.database.FirebaseDatabase
 
 class RegisterGuideActivity : AppCompatActivity() {
 
-    private lateinit var database: DatabaseReference
     private lateinit var auth: FirebaseAuth
+    private lateinit var database: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,28 +28,37 @@ class RegisterGuideActivity : AppCompatActivity() {
         val edtContent = findViewById<EditText>(R.id.edt_content)
         val btnRegister = findViewById<Button>(R.id.btn_register)
 
-        btnRegister.setOnClickListener {
-            val name = edtName.text.toString()
-            val location = edtLocation.text.toString()
-            val rate = edtRate.text.toString()
-            val phone = edtPhone.text.toString()
-            val content = edtContent.text.toString()
-            val userId = auth.currentUser?.uid ?: ""
+        val userId = auth.currentUser?.uid ?: ""
 
-            if (name.isNotEmpty() && location.isNotEmpty() && rate.isNotEmpty() && phone.isNotEmpty()) {
-                val guide = Guide(name, userId, phone, location, rate, content, "")
+        database.child(userId).child("nick").get().addOnSuccessListener { snapshot ->
+            val nick = snapshot.value as? String ?: ""
 
-                database.child(userId).setValue(guide).addOnCompleteListener {
-                    if (it.isSuccessful) {
-                        Toast.makeText(this, "가이드 등록 완료!", Toast.LENGTH_SHORT).show()
-                        finish() // 액티비티 종료
-                    } else {
-                        Toast.makeText(this, "등록 실패", Toast.LENGTH_SHORT).show()
+            btnRegister.setOnClickListener {
+                val name = edtName.text.toString()
+                val location = edtLocation.text.toString()
+                val rate = edtRate.text.toString()
+                val phone = edtPhone.text.toString()
+                val content = edtContent.text.toString()
+
+
+                if (name.isNotEmpty() && location.isNotEmpty() && rate.isNotEmpty() && phone.isNotEmpty()) {
+                    val guide = Guide(name, userId, nick, phone, location, rate, content, "")
+
+                    database.child(userId).setValue(guide).addOnCompleteListener {
+                        if (it.isSuccessful) {
+                            Toast.makeText(this, "가이드 등록 완료!", Toast.LENGTH_SHORT).show()
+                            finish() // 액티비티 종료
+                        } else {
+                            Toast.makeText(this, "등록 실패", Toast.LENGTH_SHORT).show()
+                        }
                     }
+                } else {
+                    Toast.makeText(this, "모든 필드를 입력하세요!", Toast.LENGTH_SHORT).show()
                 }
-            } else {
-                Toast.makeText(this, "모든 필드를 입력하세요!", Toast.LENGTH_SHORT).show()
             }
+        }.addOnFailureListener {
+            Toast.makeText(this, "닉네임 정보를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
         }
     }
 }
+

@@ -36,6 +36,8 @@ class GuideDetailActivity : AppCompatActivity() {
 
         // 인텐트에서 가이드 정보 가져오기
         val guideId = intent.getStringExtra("guideId")
+        val nick = intent.getStringExtra("nick")
+        val profileImageUrl = intent.getStringExtra("profileImageUrl")
 
         if (guideId.isNullOrEmpty()) {
             Toast.makeText(this, "잘못된 접근입니다.", Toast.LENGTH_SHORT).show()
@@ -65,6 +67,7 @@ class GuideDetailActivity : AppCompatActivity() {
                     } else {
                         imgProfile.setImageResource(R.drawable.profile_default)
                     }
+
                 } else {
                     showErrorAndExit("데이터를 불러오는 중 오류가 발생했습니다.")
                 }
@@ -77,6 +80,8 @@ class GuideDetailActivity : AppCompatActivity() {
         binding.btnChat.setOnClickListener {
             val intent = Intent(this, ChatActivity::class.java)
             intent.putExtra("uId", guideId)
+            intent.putExtra("nick",nick)
+            intent.putExtra("profileImageUrl",profileImageUrl)
             startActivity(intent)
         }
 
