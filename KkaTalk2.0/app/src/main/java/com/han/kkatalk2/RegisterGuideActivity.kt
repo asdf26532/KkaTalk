@@ -12,14 +12,16 @@ import com.google.firebase.database.FirebaseDatabase
 class RegisterGuideActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
-    private lateinit var database: DatabaseReference
+    private lateinit var guideDatabase: DatabaseReference
+    private lateinit var userDatabase: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register_guide)
 
         auth = FirebaseAuth.getInstance()
-        database = FirebaseDatabase.getInstance().getReference("guide")
+        guideDatabase = FirebaseDatabase.getInstance().getReference("guide")
+        userDatabase = FirebaseDatabase.getInstance().getReference("user")
 
         val edtName = findViewById<EditText>(R.id.edt_name)
         val edtLocation = findViewById<EditText>(R.id.edt_location)
@@ -30,7 +32,7 @@ class RegisterGuideActivity : AppCompatActivity() {
 
         val userId = auth.currentUser?.uid ?: ""
 
-        database.child(userId).child("nick").get().addOnSuccessListener { snapshot ->
+        userDatabase.child(userId).child("nick").get().addOnSuccessListener { snapshot ->
             val nick = snapshot.value as? String ?: ""
 
             btnRegister.setOnClickListener {
@@ -44,7 +46,7 @@ class RegisterGuideActivity : AppCompatActivity() {
                 if (name.isNotEmpty() && location.isNotEmpty() && rate.isNotEmpty() && phone.isNotEmpty()) {
                     val guide = Guide(name, userId, nick, phone, location, rate, content, "")
 
-                    database.child(userId).setValue(guide).addOnCompleteListener {
+                    guideDatabase.child(userId).setValue(guide).addOnCompleteListener {
                         if (it.isSuccessful) {
                             Toast.makeText(this, "가이드 등록 완료!", Toast.LENGTH_SHORT).show()
                             finish() // 액티비티 종료

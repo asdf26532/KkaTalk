@@ -1,6 +1,7 @@
 package com.han.kkatalk2
 
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,6 +47,8 @@ class GuideAdapter(private val guideList: List<Guide>) : RecyclerView.Adapter<Gu
                 putExtra("nick", guide.nick)
                 putExtra("profileImageUrl", guide.profileImageUrl)
             }
+            // 보내는 데이터 확인
+            Log.d("GuideAdapter", "guideId: ${guide.uId}, nick: ${guide.nick}, profileImageUrl: ${guide.profileImageUrl}")
             context.startActivity(intent)
         }
     }

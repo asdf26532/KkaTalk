@@ -39,6 +39,9 @@ class GuideDetailActivity : AppCompatActivity() {
         val nick = intent.getStringExtra("nick")
         val profileImageUrl = intent.getStringExtra("profileImageUrl")
 
+        // 받은 데이터 확인
+        Log.d("GuideDetailActivity", "Received Data - guideId: $guideId, nick: $nick, profileImageUrl: $profileImageUrl")
+
         if (guideId.isNullOrEmpty()) {
             Toast.makeText(this, "잘못된 접근입니다.", Toast.LENGTH_SHORT).show()
             finish() // guideId가 없으면 액티비티 종료
@@ -78,15 +81,18 @@ class GuideDetailActivity : AppCompatActivity() {
 
         // 대화하기 버튼 클릭 이벤트
         binding.btnChat.setOnClickListener {
-            val intent = Intent(this, ChatActivity::class.java)
-            intent.putExtra("uId", guideId)
-            intent.putExtra("nick",nick)
-            intent.putExtra("profileImageUrl",profileImageUrl)
+            val intent = Intent(this, ChatActivity::class.java).apply {
+                putExtra("uId", guideId)
+                putExtra("nick", nick)
+                putExtra("profileImageUrl", profileImageUrl)
+            }
+
+            Log.d("GuideDetailActivity", "uId: $guideId, nick: $nick, profileImageUrl: $profileImageUrl")
+
             startActivity(intent)
         }
 
-
-        // 액션바 설정
+        // 액션바 설정ㅅ
         supportActionBar?.title = ""
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
