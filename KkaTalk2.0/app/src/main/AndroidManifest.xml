@@ -18,7 +18,9 @@
         <activity
             android:name=".RegisterGuideActivity"
             android:exported="false" />
-        
+        <activity
+            android:name=".ChatActivity"
+            android:exported="false" />
         <activity
             android:name=".SignUpActivity"
             android:exported="false" />

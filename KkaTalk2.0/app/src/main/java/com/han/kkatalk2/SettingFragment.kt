@@ -28,6 +28,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 
 class SettingFragment : Fragment() {
@@ -198,7 +199,9 @@ class SettingFragment : Fragment() {
 
                 if (!profileImageUrl.isNullOrEmpty()) {
                     // Firebase Storage 참조 생성
-                    val storageRef = Firebase.storage.getReferenceFromUrl(profileImageUrl)
+                    val storage = FirebaseStorage.getInstance("gs://kkatalk-cf3fd.appspot.com")
+                    val storageRef = storage.getReferenceFromUrl(profileImageUrl)
+                    //val storageRef = Firebase.storage.getReferenceFromUrl(profileImageUrl)
 
                     // Firebase Storage에서 이미지 URL 다운로드
                     storageRef.downloadUrl.addOnSuccessListener { uri ->

@@ -11,6 +11,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.han.kkatalk2.databinding.ActivityGuideDetailBinding
@@ -20,11 +21,15 @@ class GuideDetailActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityGuideDetailBinding
     private lateinit var database: DatabaseReference
+    private lateinit var auth: FirebaseAuth
+    private var writerUid: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityGuideDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        auth = FirebaseAuth.getInstance()
 
         // UI 요소 찾기
         val imgProfile = findViewById<ImageView>(R.id.img_profile)
@@ -69,6 +74,30 @@ class GuideDetailActivity : AppCompatActivity() {
                         Glide.with(this).load(guide.profileImageUrl).into(imgProfile)
                     } else {
                         imgProfile.setImageResource(R.drawable.profile_default)
+                    }
+
+                    // 현재 로그인한 사용자 UID 가져오기
+                    val currentUserUid = auth.currentUser?.uid
+
+                    // 본인이 작성한 글이면 "수정하기", 아니면 "대화하기"
+                    if (currentUserUid == writerUid) {
+                        binding.btnChat.text = "수정하기"
+                        binding.btnChat.setOnClickListener {
+                            val intent = Intent(this, EditGuideActivity::class.java)
+                            intent.putExtra("guideId", guideId)
+                            startActivity(intent)
+                        }
+                    } else {
+                        binding.btnChat.text = "대화하기"
+                        binding.btnChat.setOnClickListener {
+                            val intent = Intent(this, ChatActivity::class.java).apply {
+                                putExtra("uId", guideId)
+                                putExtra("nick", nick)
+                                putExtra("profileImageUrl", profileImageUrl)
+                            }
+                            Log.d("GuideDetailActivity", "uId: $guideId, nick: $nick, profileImageUrl: $profileImageUrl")
+                            startActivity(intent)
+                        }
                     }
 
                 } else {
