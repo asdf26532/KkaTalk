@@ -83,7 +83,7 @@ class GuideDetailActivity : AppCompatActivity() {
                     if (currentUserUid == writerUid) {
                         binding.btnChat.text = "수정하기"
                         binding.btnChat.setOnClickListener {
-                            val intent = Intent(this, EditGuideActivity::class.java)
+                            val intent = Intent(this, RegisterGuideActivity::class.java)
                             intent.putExtra("guideId", guideId)
                             startActivity(intent)
                         }
@@ -121,7 +121,7 @@ class GuideDetailActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // 액션바 설정ㅅ
+        // 액션바 설정
         supportActionBar?.title = ""
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }

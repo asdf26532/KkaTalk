@@ -15,6 +15,9 @@ class RegisterGuideActivity : AppCompatActivity() {
     private lateinit var guideDatabase: DatabaseReference
     private lateinit var userDatabase: DatabaseReference
 
+    // intent에서 guideId를 받아오면 수정 모드, guideId가 없으면 새로운 가이드 등록
+    private var guideId: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register_guide)
@@ -32,6 +35,14 @@ class RegisterGuideActivity : AppCompatActivity() {
 
         val userId = auth.currentUser?.uid ?: ""
 
+        // 수정 모드인지 확인
+        guideId = intent.getStringExtra("guideId")
+
+        if (guideId != null) {
+            // 기존 데이터 불러오기 (수정 모드)
+            loadGuideData(guideId!!, edtName, edtLocation, edtRate, edtPhone, edtContent, btnRegister)
+        }
+
         userDatabase.child(userId).child("nick").get().addOnSuccessListener { snapshot ->
             val nick = snapshot.value as? String ?: ""
 
@@ -44,14 +55,36 @@ class RegisterGuideActivity : AppCompatActivity() {
 
 
                 if (name.isNotEmpty() && location.isNotEmpty() && rate.isNotEmpty() && phone.isNotEmpty()) {
-                    val guide = Guide(name, userId, nick, phone, location, rate, content, "")
+                    if (guideId == null) {
+                        // 새 가이드 등록
+                        val newGuideId = guideDatabase.push().key ?: return@setOnClickListener
+                        val guide = Guide(name, userId, nick, phone, location, rate, content, "")
 
-                    guideDatabase.child(userId).setValue(guide).addOnCompleteListener {
-                        if (it.isSuccessful) {
-                            Toast.makeText(this, "가이드 등록 완료!", Toast.LENGTH_SHORT).show()
-                            finish() // 액티비티 종료
-                        } else {
-                            Toast.makeText(this, "등록 실패", Toast.LENGTH_SHORT).show()
+                        guideDatabase.child(newGuideId).setValue(guide).addOnCompleteListener {
+                            if (it.isSuccessful) {
+                                Toast.makeText(this, "가이드 등록 완료!", Toast.LENGTH_SHORT).show()
+                                finish()
+                            } else {
+                                Toast.makeText(this, "등록 실패", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    } else {
+                        // 기존 가이드 수정
+                        val updates = mapOf(
+                            "name" to name,
+                            "locate" to location,
+                            "rate" to rate,
+                            "phoneNumber" to phone,
+                            "content" to content
+                        )
+
+                        guideDatabase.child(guideId!!).updateChildren(updates).addOnCompleteListener {
+                            if (it.isSuccessful) {
+                                Toast.makeText(this, "가이드 수정 완료!", Toast.LENGTH_SHORT).show()
+                                finish()
+                            } else {
+                                Toast.makeText(this, "수정 실패", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }
                 } else {
@@ -62,5 +95,29 @@ class RegisterGuideActivity : AppCompatActivity() {
             Toast.makeText(this, "닉네임 정보를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
         }
     }
+
+        private fun loadGuideData(
+            guideId: String,
+            edtName: EditText,
+            edtLocation: EditText,
+            edtRate: EditText,
+            edtPhone: EditText,
+            edtContent: EditText,
+            btnRegister: Button
+        ) {
+            guideDatabase.child(guideId).get().addOnSuccessListener { snapshot ->
+                val guide = snapshot.getValue(Guide::class.java)
+                if (guide != null) {
+                    edtName.setText(guide.name)
+                    edtLocation.setText(guide.locate)
+                    edtRate.setText(guide.rate)
+                    edtPhone.setText(guide.phoneNumber)
+                    edtContent.setText(guide.content)
+                    btnRegister.text = "수정하기"
+                }
+            }.addOnFailureListener {
+                Toast.makeText(this, "가이드 정보를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
 }
 
