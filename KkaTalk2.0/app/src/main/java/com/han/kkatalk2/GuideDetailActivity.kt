@@ -30,6 +30,8 @@ class GuideDetailActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         auth = FirebaseAuth.getInstance()
+        // 현재 로그인한 사용자 UID 가져오기
+        val currentUserUid = auth.currentUser?.uid
 
         // UI 요소 찾기
         val imgProfile = findViewById<ImageView>(R.id.img_profile)
@@ -63,6 +65,8 @@ class GuideDetailActivity : AppCompatActivity() {
 
                 val guide = snapshot.getValue(Guide::class.java)
                 if (guide != null) {
+                    writerUid = guide.uId  // 작성자 UID 가져오기
+
                     txtName.text = guide.name
                     txtLocation.text = "지역: ${guide.locate}"
                     txtRate.text = "요금: ${guide.rate}"
@@ -76,11 +80,11 @@ class GuideDetailActivity : AppCompatActivity() {
                         imgProfile.setImageResource(R.drawable.profile_default)
                     }
 
-                    // 현재 로그인한 사용자 UID 가져오기
-                    val currentUserUid = auth.currentUser?.uid
+                    Log.d("GuideDetailActivity", "Current User ID: $currentUserUid, Writer ID: $writerUid")
 
                     // 본인이 작성한 글이면 "수정하기", 아니면 "대화하기"
                     if (currentUserUid == writerUid) {
+                        Log.d("GuideDetailActivity", "This is the user's own post. Showing 'Edit' button.")
                         binding.btnChat.text = "수정하기"
                         binding.btnChat.setOnClickListener {
                             val intent = Intent(this, RegisterGuideActivity::class.java)
@@ -88,6 +92,7 @@ class GuideDetailActivity : AppCompatActivity() {
                             startActivity(intent)
                         }
                     } else {
+                        Log.d("GuideDetailActivity", "This is another user's post. Showing 'Chat' button.")
                         binding.btnChat.text = "대화하기"
                         binding.btnChat.setOnClickListener {
                             val intent = Intent(this, ChatActivity::class.java).apply {
@@ -107,19 +112,6 @@ class GuideDetailActivity : AppCompatActivity() {
             .addOnFailureListener { exception ->
                 showErrorAndExit("네트워크 오류가 발생했습니다. 다시 시도해주세요.")
             }
-
-        // 대화하기 버튼 클릭 이벤트
-        binding.btnChat.setOnClickListener {
-            val intent = Intent(this, ChatActivity::class.java).apply {
-                putExtra("uId", guideId)
-                putExtra("nick", nick)
-                putExtra("profileImageUrl", profileImageUrl)
-            }
-
-            Log.d("GuideDetailActivity", "uId: $guideId, nick: $nick, profileImageUrl: $profileImageUrl")
-
-            startActivity(intent)
-        }
 
         // 액션바 설정
         supportActionBar?.title = ""

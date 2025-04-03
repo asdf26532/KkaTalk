@@ -57,10 +57,12 @@ class RegisterGuideActivity : AppCompatActivity() {
                 if (name.isNotEmpty() && location.isNotEmpty() && rate.isNotEmpty() && phone.isNotEmpty()) {
                     if (guideId == null) {
                         // 새 가이드 등록
-                        val newGuideId = guideDatabase.push().key ?: return@setOnClickListener
+                        val userId = auth.currentUser?.uid ?: return@setOnClickListener
+                        val guideRef = guideDatabase.child(userId)  // 🔥 guide/{userId} 로 저장되도록 변경!
+
                         val guide = Guide(name, userId, nick, phone, location, rate, content, "")
 
-                        guideDatabase.child(newGuideId).setValue(guide).addOnCompleteListener {
+                        guideRef.setValue(guide).addOnCompleteListener {
                             if (it.isSuccessful) {
                                 Toast.makeText(this, "가이드 등록 완료!", Toast.LENGTH_SHORT).show()
                                 finish()
