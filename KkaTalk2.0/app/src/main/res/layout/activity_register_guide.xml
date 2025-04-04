@@ -33,12 +33,24 @@
     <EditText
         android:id="@+id/edt_content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="소개 (내용)"/>
+        android:layout_height="150dp"
+        android:background="@drawable/edittext_border"
+        android:padding="12dp"
+        android:textSize="14sp"
+        android:gravity="top|start"
+        android:hint="자세한 설명을 입력하세요." />
 
     <Button
         android:id="@+id/btn_register"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
         android:text="등록하기"/>
+
+    <Button
+        android:id="@+id/btn_back"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="취소"/>
+
 </LinearLayout>

@@ -32,6 +32,7 @@ class RegisterGuideActivity : AppCompatActivity() {
         val edtPhone = findViewById<EditText>(R.id.edt_phone)
         val edtContent = findViewById<EditText>(R.id.edt_content)
         val btnRegister = findViewById<Button>(R.id.btn_register)
+        val btnBack = findViewById<Button>(R.id.btn_back)
 
         val userId = auth.currentUser?.uid ?: ""
 
@@ -95,6 +96,10 @@ class RegisterGuideActivity : AppCompatActivity() {
             }
         }.addOnFailureListener {
             Toast.makeText(this, "닉네임 정보를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+        }
+
+        btnBack.setOnClickListener {
+            finish()  // 액티비티 종료 (이전 화면으로 돌아감)
         }
     }
 
