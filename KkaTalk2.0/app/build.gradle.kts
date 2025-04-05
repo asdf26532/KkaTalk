@@ -37,6 +37,9 @@ android {
     viewBinding {
         enable = true
     }
+    dataBinding {
+        enable = true
+    }
 }
 
 dependencies {
@@ -46,6 +49,8 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+
+    implementation ("io.github.ParkSangGwon:tedimagepicker:1.6.1")
 
     // Firebase
     implementation(libs.firebase.database)

@@ -1,19 +1,28 @@
 package com.han.kkatalk2
 
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import gun0912.tedimagepicker.builder.TedImagePicker
 
 class RegisterGuideActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var guideDatabase: DatabaseReference
     private lateinit var userDatabase: DatabaseReference
+
+    private lateinit var imageContainer: LinearLayout
+    private lateinit var btnAddImages: Button
+    private val selectedImageUris = mutableListOf<Uri>()
 
     // intent에서 guideId를 받아오면 수정 모드, guideId가 없으면 새로운 가이드 등록
     private var guideId: String? = null
@@ -33,6 +42,9 @@ class RegisterGuideActivity : AppCompatActivity() {
         val edtContent = findViewById<EditText>(R.id.edt_content)
         val btnRegister = findViewById<Button>(R.id.btn_register)
         val btnBack = findViewById<Button>(R.id.btn_back)
+
+        imageContainer = findViewById(R.id.image_container)
+        btnAddImages = findViewById(R.id.btn_add_images)
 
         val userId = auth.currentUser?.uid ?: ""
 
@@ -100,6 +112,30 @@ class RegisterGuideActivity : AppCompatActivity() {
 
         btnBack.setOnClickListener {
             finish()  // 액티비티 종료 (이전 화면으로 돌아감)
+        }
+
+        btnAddImages.setOnClickListener {
+            TedImagePicker.with(this)
+                .max(10, "사진은 최대 10장까지 선택 가능합니다.")
+                .startMultiImage { uriList ->
+                    selectedImageUris.clear()
+                    selectedImageUris.addAll(uriList)
+                    displaySelectedImages()
+                }
+        }
+    }
+
+    private fun displaySelectedImages() {
+        imageContainer.removeAllViews()
+        for (uri in selectedImageUris) {
+            val imageView = ImageView(this).apply {
+                layoutParams = LinearLayout.LayoutParams(300, 300).apply {
+                    setMargins(8, 0, 8, 0)
+                }
+                scaleType = ImageView.ScaleType.CENTER_CROP
+            }
+            Glide.with(this).load(uri).into(imageView)
+            imageContainer.addView(imageView)
         }
     }
 
