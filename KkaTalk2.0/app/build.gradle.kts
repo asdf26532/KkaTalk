@@ -50,7 +50,9 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
 
-    implementation ("io.github.ParkSangGwon:tedimagepicker:1.6.1")
+    // 사진 관련
+    implementation ("com.github.chrisbanes:PhotoView:2.3.0")
+    implementation ("com.github.Dhaval2404:ImagePicker:2.1")
 
     // Firebase
     implementation(libs.firebase.database)
@@ -72,8 +74,7 @@ dependencies {
     implementation ("com.kakao.sdk:v2-user:2.20.3")
     implementation ("com.kakao.sdk:v2-all:2.20.3") // 전체 모듈 설치, 2.11.0 버전부터 지원
 
-    // 사진 확대
-    implementation ("com.github.chrisbanes:PhotoView:2.3.0")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

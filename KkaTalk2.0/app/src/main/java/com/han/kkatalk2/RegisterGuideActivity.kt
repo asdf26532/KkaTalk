@@ -12,7 +12,7 @@ import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import gun0912.tedimagepicker.builder.TedImagePicker
+import com.github.dhaval2404.imagepicker.ImagePicker
 
 class RegisterGuideActivity : AppCompatActivity() {
 
@@ -54,6 +54,17 @@ class RegisterGuideActivity : AppCompatActivity() {
         if (guideId != null) {
             // 기존 데이터 불러오기 (수정 모드)
             loadGuideData(guideId!!, edtName, edtLocation, edtRate, edtPhone, edtContent, btnRegister)
+        }
+
+        // "사진 추가" 버튼 클릭 시 이미지 선택
+        btnAddImages.setOnClickListener {
+            ImagePicker.with(this)
+                .galleryOnly()
+                .maxResultSize(1080, 1080)
+                .galleryMimeTypes(arrayOf("image/*"))
+                .createIntent { intent ->
+                    startActivityForResult(intent, 101) // ✅ 여러 이미지 선택이 아닌 단일 이미지 방식이라 반복 사용 (개별 클릭 또는 반복 구현 필요)
+                }
         }
 
         userDatabase.child(userId).child("nick").get().addOnSuccessListener { snapshot ->
@@ -113,18 +124,20 @@ class RegisterGuideActivity : AppCompatActivity() {
         btnBack.setOnClickListener {
             finish()  // 액티비티 종료 (이전 화면으로 돌아감)
         }
+    }
 
-        btnAddImages.setOnClickListener {
-            TedImagePicker.with(this)
-                .max(10, "사진은 최대 10장까지 선택 가능합니다.")
-                .startMultiImage { uriList ->
-                    selectedImageUris.clear()
-                    selectedImageUris.addAll(uriList)
-                    displaySelectedImages()
-                }
+    // 이미지 선택 결과 처리 (ImagePicker 결과 수신)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode == RESULT_OK && requestCode == 101) {
+            val uri: Uri = data?.data ?: return
+            selectedImageUris.add(uri)
+            displaySelectedImages()
         }
     }
 
+    // 선택된 이미지 리스트 보여주기
     private fun displaySelectedImages() {
         imageContainer.removeAllViews()
         for (uri in selectedImageUris) {
