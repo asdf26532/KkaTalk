@@ -1,7 +1,10 @@
 package com.han.kkatalk2
 
+import android.app.ProgressDialog
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -9,23 +12,24 @@ import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import com.github.dhaval2404.imagepicker.ImagePicker
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
+import com.google.firebase.storage.FirebaseStorage
 
 class RegisterGuideActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var guideDatabase: DatabaseReference
     private lateinit var userDatabase: DatabaseReference
+    private lateinit var storage: FirebaseStorage
 
     private lateinit var imageContainer: LinearLayout
     private lateinit var btnAddImages: Button
     private val selectedImageUris = mutableListOf<Uri>()
 
-    // intent에서 guideId를 받아오면 수정 모드, guideId가 없으면 새로운 가이드 등록
     private var guideId: String? = null
+    private val uploadedUrls = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +38,7 @@ class RegisterGuideActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         guideDatabase = FirebaseDatabase.getInstance().getReference("guide")
         userDatabase = FirebaseDatabase.getInstance().getReference("user")
+        storage = FirebaseStorage.getInstance()
 
         val edtName = findViewById<EditText>(R.id.edt_name)
         val edtLocation = findViewById<EditText>(R.id.edt_location)
@@ -46,29 +51,27 @@ class RegisterGuideActivity : AppCompatActivity() {
         imageContainer = findViewById(R.id.image_container)
         btnAddImages = findViewById(R.id.btn_add_images)
 
-        val userId = auth.currentUser?.uid ?: ""
+        val userId = auth.currentUser?.uid ?: return
 
-        // 수정 모드인지 확인
         guideId = intent.getStringExtra("guideId")
-
         if (guideId != null) {
-            // 기존 데이터 불러오기 (수정 모드)
             loadGuideData(guideId!!, edtName, edtLocation, edtRate, edtPhone, edtContent, btnRegister)
         }
 
-        // "사진 추가" 버튼 클릭 시 이미지 선택
         btnAddImages.setOnClickListener {
             ImagePicker.with(this)
                 .galleryOnly()
                 .maxResultSize(1080, 1080)
                 .galleryMimeTypes(arrayOf("image/*"))
                 .createIntent { intent ->
-                    startActivityForResult(intent, 101) // ✅ 여러 이미지 선택이 아닌 단일 이미지 방식이라 반복 사용 (개별 클릭 또는 반복 구현 필요)
+                    startActivityForResult(intent, 101)
                 }
         }
 
-        userDatabase.child(userId).child("nick").get().addOnSuccessListener { snapshot ->
-            val nick = snapshot.value as? String ?: ""
+        userDatabase.child(userId).get().addOnSuccessListener { snapshot ->
+            val nick = snapshot.child("nick").value as? String ?: ""
+            val profileImageUrl = snapshot.child("profileImageUrl").value as? String ?: "" // ✅ 프로필 이미지 URL 가져오기
+            Log.d("RegisterGuide", "닉네임: $nick / 프로필 URL: $profileImageUrl")
 
             btnRegister.setOnClickListener {
                 val name = edtName.text.toString()
@@ -77,67 +80,100 @@ class RegisterGuideActivity : AppCompatActivity() {
                 val phone = edtPhone.text.toString()
                 val content = edtContent.text.toString()
 
+                Log.d("RegisterGuide", "입력값 - name: $name, location: $location, rate: $rate, phone: $phone, content: $content")
 
                 if (name.isNotEmpty() && location.isNotEmpty() && rate.isNotEmpty() && phone.isNotEmpty()) {
-                    if (guideId == null) {
-                        // 새 가이드 등록
-                        val userId = auth.currentUser?.uid ?: return@setOnClickListener
-                        val guideRef = guideDatabase.child(userId)  // 🔥 guide/{userId} 로 저장되도록 변경!
+                    val progressDialog = ProgressDialog(this).apply {
+                        setMessage("이미지 업로드 중...")
+                        setCancelable(false)
+                        show()
+                    }
 
-                        val guide = Guide(name, userId, nick, phone, location, rate, content, "")
-
-                        guideRef.setValue(guide).addOnCompleteListener {
-                            if (it.isSuccessful) {
-                                Toast.makeText(this, "가이드 등록 완료!", Toast.LENGTH_SHORT).show()
-                                finish()
-                            } else {
-                                Toast.makeText(this, "등록 실패", Toast.LENGTH_SHORT).show()
-                            }
+                    if (selectedImageUris.isNotEmpty()) {
+                        uploadedUrls.clear()
+                        Log.d("RegisterGuide", "선택된 이미지 수: ${selectedImageUris.size}")
+                        uploadImagesToFirebase(userId, progressDialog) {
+                            Log.d("RegisterGuide", "이미지 업로드 완료, URL 목록: $uploadedUrls")
+                            registerGuide(name, userId, nick, phone, location, rate, content, profileImageUrl, uploadedUrls)
                         }
                     } else {
-                        // 기존 가이드 수정
-                        val updates = mapOf(
-                            "name" to name,
-                            "locate" to location,
-                            "rate" to rate,
-                            "phoneNumber" to phone,
-                            "content" to content
-                        )
-
-                        guideDatabase.child(guideId!!).updateChildren(updates).addOnCompleteListener {
-                            if (it.isSuccessful) {
-                                Toast.makeText(this, "가이드 수정 완료!", Toast.LENGTH_SHORT).show()
-                                finish()
-                            } else {
-                                Toast.makeText(this, "수정 실패", Toast.LENGTH_SHORT).show()
-                            }
-                        }
+                        Log.d("RegisterGuide", "이미지 없이 가이드 등록 시도")
+                        registerGuide(name, userId, nick, phone, location, rate, content, profileImageUrl, listOf())
+                        progressDialog.dismiss()
                     }
                 } else {
                     Toast.makeText(this, "모든 필드를 입력하세요!", Toast.LENGTH_SHORT).show()
                 }
             }
         }.addOnFailureListener {
-            Toast.makeText(this, "닉네임 정보를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+            Log.e("RegisterGuide", "유저 정보 로드 실패: ${it.message}")
+            Toast.makeText(this, "유저 정보를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
         }
 
-        btnBack.setOnClickListener {
-            finish()  // 액티비티 종료 (이전 화면으로 돌아감)
+        btnBack.setOnClickListener { finish() }
+    }
+
+    private fun uploadImagesToFirebase(userId: String, progressDialog: ProgressDialog, onComplete: () -> Unit) {
+        var uploadCount = 0
+
+        for ((index, uri) in selectedImageUris.withIndex()) {
+            val fileName = "guide_images/$userId/${System.currentTimeMillis()}_$index.jpg"
+            val storageRef = storage.reference.child(fileName)
+
+            storageRef.putFile(uri).addOnSuccessListener {
+                storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
+                    Log.d("RegisterGuide", "업로드 성공: $downloadUrl")
+                    uploadedUrls.add(downloadUrl.toString())
+                    uploadCount++
+                    if (uploadCount == selectedImageUris.size) {
+                        progressDialog.dismiss()
+                        onComplete()
+                    }
+                }
+            }.addOnFailureListener {
+                progressDialog.dismiss()
+                Toast.makeText(this, "이미지 업로드 실패", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
-    // 이미지 선택 결과 처리 (ImagePicker 결과 수신)
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+    private fun registerGuide(
+        name: String,
+        userId: String,
+        nick: String,
+        phone: String,
+        location: String,
+        rate: String,
+        content: String,
+        profileImageUrl: String, // ✅ 프로필 이미지도 포함
+        imageUrls: List<String>
+    ) {
+        val guideRef = guideDatabase.child(userId)
+        val guide = Guide(name, userId, nick, phone, location, rate, content, profileImageUrl, imageUrls)
+        Log.d("RegisterGuide", "파이어베이스에 등록할 Guide 객체: $guide")
 
+        guideRef.setValue(guide).addOnCompleteListener {
+            if (it.isSuccessful) {
+                Log.d("RegisterGuide", "가이드 등록 성공")
+                Toast.makeText(this, "가이드 등록 완료!", Toast.LENGTH_SHORT).show()
+                finish()
+            } else {
+                Log.e("RegisterGuide", "가이드 등록 실패: ${it.exception?.message}")
+                Toast.makeText(this, "등록 실패", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK && requestCode == 101) {
             val uri: Uri = data?.data ?: return
+            Log.d("RegisterGuide", "이미지 선택됨: $uri")
             selectedImageUris.add(uri)
             displaySelectedImages()
         }
     }
 
-    // 선택된 이미지 리스트 보여주기
     private fun displaySelectedImages() {
         imageContainer.removeAllViews()
         for (uri in selectedImageUris) {
@@ -152,28 +188,29 @@ class RegisterGuideActivity : AppCompatActivity() {
         }
     }
 
-        private fun loadGuideData(
-            guideId: String,
-            edtName: EditText,
-            edtLocation: EditText,
-            edtRate: EditText,
-            edtPhone: EditText,
-            edtContent: EditText,
-            btnRegister: Button
-        ) {
-            guideDatabase.child(guideId).get().addOnSuccessListener { snapshot ->
-                val guide = snapshot.getValue(Guide::class.java)
-                if (guide != null) {
-                    edtName.setText(guide.name)
-                    edtLocation.setText(guide.locate)
-                    edtRate.setText(guide.rate)
-                    edtPhone.setText(guide.phoneNumber)
-                    edtContent.setText(guide.content)
-                    btnRegister.text = "수정하기"
-                }
-            }.addOnFailureListener {
-                Toast.makeText(this, "가이드 정보를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
+    private fun loadGuideData(
+        guideId: String,
+        edtName: EditText,
+        edtLocation: EditText,
+        edtRate: EditText,
+        edtPhone: EditText,
+        edtContent: EditText,
+        btnRegister: Button
+    ) {
+        guideDatabase.child(guideId).get().addOnSuccessListener { snapshot ->
+            val guide = snapshot.getValue(Guide::class.java)
+            if (guide != null) {
+                edtName.setText(guide.name)
+                edtLocation.setText(guide.locate)
+                edtRate.setText(guide.rate)
+                edtPhone.setText(guide.phoneNumber)
+                edtContent.setText(guide.content)
+                btnRegister.text = "수정하기"
+                Log.d("RegisterGuide", "기존 가이드 정보 로딩 완료")
             }
+        }.addOnFailureListener {
+            Log.e("RegisterGuide", "가이드 데이터 로드 실패: ${it.message}")
+            Toast.makeText(this, "가이드 정보를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
         }
+    }
 }
-

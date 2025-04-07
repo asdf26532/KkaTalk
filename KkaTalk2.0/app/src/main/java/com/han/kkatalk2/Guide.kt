@@ -8,9 +8,10 @@ data class Guide(
     var locate: String,
     var rate: String,
     var content: String,
-    var profileImageUrl: String
+    var profileImageUrl: String,
+    val imageUrls: List<String>
 )
 {
-    constructor(): this("", "","","","", "","","")
+    constructor(): this("", "","","","", "","","", listOf())
 }
 
