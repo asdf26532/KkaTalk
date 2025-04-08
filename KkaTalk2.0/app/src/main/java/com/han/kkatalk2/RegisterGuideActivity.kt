@@ -119,20 +119,38 @@ class RegisterGuideActivity : AppCompatActivity() {
         for ((index, uri) in selectedImageUris.withIndex()) {
             val fileName = "guide_images/$userId/${System.currentTimeMillis()}_$index.jpg"
             val storageRef = storage.reference.child(fileName)
+            Log.d("RegisterGuide", "업로드할 파일 경로: $uri")
 
-            storageRef.putFile(uri).addOnSuccessListener {
-                storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
-                    Log.d("RegisterGuide", "업로드 성공: $downloadUrl")
-                    uploadedUrls.add(downloadUrl.toString())
-                    uploadCount++
-                    if (uploadCount == selectedImageUris.size) {
+            val inputStream = contentResolver.openInputStream(uri)
+            if (inputStream != null) {
+                val uploadTask = storageRef.putStream(inputStream)
+
+                uploadTask.continueWithTask { task ->
+                    if (!task.isSuccessful) {
+                        throw task.exception ?: Exception("업로드 실패")
+                    }
+                    storageRef.downloadUrl
+                }.addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val downloadUrl = task.result
+                        Log.d("RegisterGuide", "업로드 성공: $downloadUrl")
+                        uploadedUrls.add(downloadUrl.toString())
+                        uploadCount++
+                        if (uploadCount == selectedImageUris.size) {
+                            progressDialog.dismiss()
+                            onComplete()
+                        }
+                    } else {
+                        Log.e("RegisterGuide", "downloadUrl 가져오기 실패: ${task.exception?.message}")
                         progressDialog.dismiss()
-                        onComplete()
+                        Toast.makeText(this, "이미지 업로드 실패", Toast.LENGTH_SHORT).show()
                     }
                 }
-            }.addOnFailureListener {
+
+            } else {
+                Log.e("RegisterGuide", "InputStream 열기 실패 for URI: $uri")
                 progressDialog.dismiss()
-                Toast.makeText(this, "이미지 업로드 실패", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "이미지를 열 수 없습니다.", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -145,7 +163,7 @@ class RegisterGuideActivity : AppCompatActivity() {
         location: String,
         rate: String,
         content: String,
-        profileImageUrl: String, // ✅ 프로필 이미지도 포함
+        profileImageUrl: String,
         imageUrls: List<String>
     ) {
         val guideRef = guideDatabase.child(userId)
