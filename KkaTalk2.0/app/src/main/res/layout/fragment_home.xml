@@ -9,12 +9,14 @@
     android:gravity="center"
     tools:context=".HomeFragment">
 
-    <EditText
-        android:id="@+id/edt_city"
-        android:layout_width="match_parent"
+    <Spinner
+        android:id="@+id/spinner_city"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="지역"
-        android:textSize="25sp"/>
+        android:padding="8dp"
+        android:layout_gravity="start"
+        android:background="@android:drawable/btn_dropdown"
+        android:spinnerMode="dropdown" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_guide"
