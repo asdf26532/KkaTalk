@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
@@ -43,7 +44,7 @@ class RegisterGuideActivity : AppCompatActivity() {
         storage = FirebaseStorage.getInstance()
 
         val edtName = findViewById<EditText>(R.id.edt_name)
-        val edtLocation = findViewById<EditText>(R.id.edt_location)
+        val spinnerLocation = findViewById<Spinner>(R.id.spinner_location)
         val edtRate = findViewById<EditText>(R.id.edt_rate)
         val edtPhone = findViewById<EditText>(R.id.edt_phone)
         val edtContent = findViewById<EditText>(R.id.edt_content)
@@ -77,7 +78,7 @@ class RegisterGuideActivity : AppCompatActivity() {
 
             btnRegister.setOnClickListener {
                 val name = edtName.text.toString()
-                val location = edtLocation.text.toString()
+                val location = spinnerLocation.selectedItem.toString()
                 val rate = edtRate.text.toString()
                 val phone = edtPhone.text.toString()
                 val content = edtContent.text.toString()

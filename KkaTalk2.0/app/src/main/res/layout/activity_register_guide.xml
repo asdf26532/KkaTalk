@@ -32,11 +32,14 @@
         android:layout_height="wrap_content"
         android:hint="이름"/>
 
-    <EditText
-        android:id="@+id/edt_location"
+    <Spinner
+        android:id="@+id/spinner_location"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="거주 지역"/>
+        android:spinnerMode="dropdown"
+        android:layout_marginTop="8dp"
+        android:padding="8dp"
+        android:background="@android:drawable/btn_dropdown"/>
 
     <EditText
         android:id="@+id/edt_rate"
