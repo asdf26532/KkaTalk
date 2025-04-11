@@ -1,1 +1,1 @@
-<img src="https://github.com/asdf26532/KkaTalk/issues/1#issue-2987985723">
+<img src="![Image](https://github.com/user-attachments/assets/71aa4191-62b7-43ca-b9e9-8aa428ddd844)">
