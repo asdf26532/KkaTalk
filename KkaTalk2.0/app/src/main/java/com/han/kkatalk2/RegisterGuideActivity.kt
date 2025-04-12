@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -54,11 +55,20 @@ class RegisterGuideActivity : AppCompatActivity() {
         imageContainer = findViewById(R.id.image_container)
         btnAddImages = findViewById(R.id.btn_add_images)
 
+        ArrayAdapter.createFromResource(
+            this,
+            R.array.city_list,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerLocation.adapter = adapter
+        }
+
         val userId = auth.currentUser?.uid ?: return
 
         guideId = intent.getStringExtra("guideId")
         if (guideId != null) {
-            loadGuideData(guideId!!, edtName, edtLocation, edtRate, edtPhone, edtContent, btnRegister)
+            loadGuideData(guideId!!, edtName, spinnerLocation, edtRate, edtPhone, edtContent, btnRegister)
         }
 
         btnAddImages.setOnClickListener {
@@ -201,7 +211,7 @@ class RegisterGuideActivity : AppCompatActivity() {
     private fun loadGuideData(
         guideId: String,
         edtName: EditText,
-        edtLocation: EditText,
+        spinnerLocation: Spinner,
         edtRate: EditText,
         edtPhone: EditText,
         edtContent: EditText,
@@ -209,12 +219,18 @@ class RegisterGuideActivity : AppCompatActivity() {
     ) {
         guideDatabase.child(guideId).get().addOnSuccessListener { snapshot ->
             val guide = snapshot.getValue(Guide::class.java)
+            val cityList = resources.getStringArray(R.array.city_list)
             if (guide != null) {
                 edtName.setText(guide.name)
-                edtLocation.setText(guide.locate)
                 edtRate.setText(guide.rate)
                 edtPhone.setText(guide.phoneNumber)
                 edtContent.setText(guide.content)
+
+                val index = cityList.indexOf(guide.locate)
+                if (index >= 0) {
+                    spinnerLocation.setSelection(index)
+                }
+
                 btnRegister.text = "수정하기"
                 Log.d("RegisterGuide", "기존 가이드 정보 로딩 완료")
             }
