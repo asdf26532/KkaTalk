@@ -37,14 +37,14 @@
                     android:id="@+id/guideName"
                     android:text="가이드 이름"
                     android:textStyle="bold"
-                    android:textSize="16sp"/>
+                    android:textSize="20sp"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="25dp"
                     android:id="@+id/guideLocation"
-                    android:text="거주 지역"
-                    android:textSize="14sp"
+                    android:text="지역"
+                    android:textSize="18sp"
                     android:textColor="#777777"/>
 
                 <TextView
@@ -52,7 +52,7 @@
                     android:layout_height="25dp"
                     android:id="@+id/guideRate"
                     android:text="시급 or 일당"
-                    android:textSize="14sp"
+                    android:textSize="18sp"
                     android:textColor="#FF5722"/>
 
             </LinearLayout>

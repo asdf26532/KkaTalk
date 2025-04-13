@@ -2,14 +2,11 @@ package com.han.kkatalk2
 
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.EditText
 import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,6 +19,10 @@ class HomeFragment : Fragment() {
     private lateinit var database: DatabaseReference
     private lateinit var guideAdapter: GuideAdapter
     private var guideList = mutableListOf<Guide>()
+    private var filteredList = mutableListOf<Guide>()
+
+    private lateinit var spinnerCity: Spinner
+    private lateinit var recyclerView: RecyclerView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -29,12 +30,12 @@ class HomeFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
-        val spinnerCity = view.findViewById<Spinner>(R.id.spinner_city)
-        val recyclerView = view.findViewById<RecyclerView>(R.id.rv_guide)
+        spinnerCity = view.findViewById(R.id.spinner_city)
+        recyclerView = view.findViewById(R.id.rv_guide)
         val btnAddGuide = view.findViewById<FloatingActionButton>(R.id.btn_add_guide)
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        guideAdapter = GuideAdapter(guideList)
+        guideAdapter = GuideAdapter(filteredList)
         recyclerView.adapter = guideAdapter
 
         database = FirebaseDatabase.getInstance().getReference("guide")
@@ -49,7 +50,7 @@ class HomeFragment : Fragment() {
                         guideList.add(guide)
                     }
                 }
-                guideAdapter.notifyDataSetChanged()
+                updateList()
             }
 
             override fun onCancelled(error: DatabaseError) {}
@@ -73,27 +74,34 @@ class HomeFragment : Fragment() {
                 position: Int,
                 id: Long
             ) {
-                val selectedCity = parent.getItemAtPosition(position).toString()
-
-                val filteredList = if (selectedCity == "전체") {
-                    guideList
-                } else {
-                    guideList.filter { it.locate.contains(selectedCity, ignoreCase = true) }
-                }
-
-                guideAdapter = GuideAdapter(filteredList.toMutableList())
-                recyclerView.adapter = guideAdapter
+                updateList()
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
+        // 가이드 등록 버튼
         btnAddGuide.setOnClickListener {
             val intent = Intent(requireContext(), RegisterGuideActivity::class.java)
             startActivity(intent)
         }
 
-
         return view
+    }
+
+    // 필터링된 리스트로 갱신하는 함수
+    private fun updateList() {
+        val selectedCity = spinnerCity.selectedItem.toString()
+        filteredList.clear()
+
+        if (selectedCity == "전체") {
+            filteredList.addAll(guideList)
+        } else {
+            filteredList.addAll(guideList.filter {
+                it.locate.contains(selectedCity, ignoreCase = true)
+            })
+        }
+
+        guideAdapter.notifyDataSetChanged()
     }
 }
