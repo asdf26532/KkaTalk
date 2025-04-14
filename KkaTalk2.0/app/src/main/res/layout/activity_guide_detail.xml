@@ -1,68 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:fillViewport="true">
 
-    <ImageView
-        android:id="@+id/img_profile"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/profile_default"
-        android:layout_gravity="center"/>
-
-    <TextView
-        android:id="@+id/txt_name"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="이름"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:layout_marginTop="16dp"
-        android:layout_gravity="center"/>
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <TextView
-        android:id="@+id/txt_location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="지역"
-        android:textSize="16sp"
-        android:layout_marginTop="8dp"/>
+        <!-- 👤 가이드 프로필 영역 -->
+        <LinearLayout
+            android:id="@+id/layout_guide_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-    <TextView
-        android:id="@+id/txt_rate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="요금"
-        android:textSize="16sp"
-        android:layout_marginTop="4dp"/>
+            <ImageView
+                android:id="@+id/img_profile"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/profile_default"
+                android:background="@drawable/circle_background"
+                android:layout_marginEnd="16dp" />
 
-    <TextView
-        android:id="@+id/txt_phone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="전화번호"
-        android:textSize="16sp"
-        android:layout_marginTop="4dp"/>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/txt_content"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="소개글"
-        android:textSize="16sp"
-        android:layout_marginTop="8dp"/>
+                <TextView
+                    android:id="@+id/txt_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="이름"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
-    <Button
-        android:id="@+id/btn_chat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="대화하기"
-        android:textSize="18sp"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"/>
+                <TextView
+                    android:id="@+id/txt_location"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="지역"
+                    android:textSize="14sp"
+                    android:textColor="#888888" />
+            </LinearLayout>
+        </LinearLayout>
 
-</LinearLayout>
+        <!-- 🔻 Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="12dp"
+            android:background="#CCCCCC" />
+
+        <!-- 📄 상세 정보 -->
+        <TextView
+            android:id="@+id/txt_rate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="요금"
+            android:textSize="16sp"
+            android:layout_marginTop="4dp"/>
+
+        <TextView
+            android:id="@+id/txt_phone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="전화번호"
+            android:textSize="16sp"
+            android:layout_marginTop="4dp"/>
+
+        <TextView
+            android:id="@+id/txt_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="소개글"
+            android:textSize="16sp"
+            android:layout_marginTop="8dp"/>
+
+        <!-- 💬 대화 버튼 -->
+        <Button
+            android:id="@+id/btn_chat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="대화하기"
+            android:textSize="18sp"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"/>
+    </LinearLayout>
+</ScrollView>

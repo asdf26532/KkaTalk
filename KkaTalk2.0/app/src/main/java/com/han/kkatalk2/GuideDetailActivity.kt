@@ -113,6 +113,15 @@ class GuideDetailActivity : AppCompatActivity() {
                 showErrorAndExit("네트워크 오류가 발생했습니다. 다시 시도해주세요.")
             }
 
+        // 프로필 사진 클릭
+        imgProfile.setOnClickListener {
+            val intent = Intent(this, ProfileActivity::class.java)
+            intent.putExtra("uId", guideId)
+            intent.putExtra("nick", nick)
+            intent.putExtra("profileImageUrl", profileImageUrl)
+            startActivity(intent)
+        }
+
         // 액션바 설정
         supportActionBar?.title = ""
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
