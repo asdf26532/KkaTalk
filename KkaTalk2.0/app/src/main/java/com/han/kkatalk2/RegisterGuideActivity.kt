@@ -13,6 +13,7 @@ import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.firebase.auth.FirebaseAuth
@@ -20,6 +21,7 @@ import com.google.firebase.database.*
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
+import java.io.File
 
 class RegisterGuideActivity : AppCompatActivity() {
 
@@ -62,6 +64,14 @@ class RegisterGuideActivity : AppCompatActivity() {
         ).also { adapter ->
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinnerLocation.adapter = adapter
+        }
+
+        // 로그인 상태 체크
+        val currentUser = auth.currentUser
+        if (currentUser == null) {
+            Toast.makeText(this, "로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
+            finish()
+            return
         }
 
         val userId = auth.currentUser?.uid ?: return
@@ -133,17 +143,19 @@ class RegisterGuideActivity : AppCompatActivity() {
         uploadedUrls.clear()
 
         for ((index, uri) in selectedImageUris.withIndex()) {
-            Log.d("RegisterGuide", "userId: $userId")
+            val contentUri = FileProvider.getUriForFile(
+                this,
+                "${applicationContext.packageName}.fileprovider",
+                File(uri.path!!) // file:// 에서 경로 추출
+            )
 
             val fileName = "guide_images/$userId/${System.currentTimeMillis()}_$index.jpg"
-            val storageRef = Firebase.storage.reference.child(fileName)
-            Log.d("RegisterGuide", "업로드할 파일 경로: $uri")
+            val customStorage = FirebaseStorage.getInstance("gs://kkatalk-cf3fd.appspot.com")
+            val storageRef = customStorage.reference.child(fileName)
 
-            storageRef.putFile(uri)
+            storageRef.putFile(contentUri)
                 .addOnSuccessListener {
-                    // 업로드 성공 시 다운로드 URL 가져오기
                     storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
-                        Log.d("RegisterGuide", "업로드 성공: $downloadUrl")
                         uploadedUrls.add(downloadUrl.toString())
                         uploadCount++
                         if (uploadCount == selectedImageUris.size) {
@@ -152,9 +164,11 @@ class RegisterGuideActivity : AppCompatActivity() {
                         }
                     }
                 }.addOnFailureListener {
-                    Log.d("RegisterGuide", "Failed to upload image to Firebase")
+                    Log.e("RegisterGuide", "이미지 업로드 실패: ${it.message}")
+                    Toast.makeText(this, "이미지 업로드 실패", Toast.LENGTH_SHORT).show()
+                    progressDialog.dismiss()
                 }
-            }
+        }
     }
 
     private fun registerGuide(
