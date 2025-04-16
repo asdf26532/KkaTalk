@@ -44,7 +44,7 @@ class RegisterGuideActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         guideDatabase = FirebaseDatabase.getInstance().getReference("guide")
         userDatabase = FirebaseDatabase.getInstance().getReference("user")
-        storage = FirebaseStorage.getInstance()
+        storage = FirebaseStorage.getInstance("gs://kkatalk-cf3fd.appspot.com")
 
         val edtName = findViewById<EditText>(R.id.edt_name)
         val spinnerLocation = findViewById<Spinner>(R.id.spinner_location)
@@ -142,30 +142,30 @@ class RegisterGuideActivity : AppCompatActivity() {
         var uploadCount = 0
         uploadedUrls.clear()
 
+        Log.d("RegisterGuide", "업로드 경로: guide_images/$userId/... / 현재 로그인 UID: ${auth.currentUser?.uid}")
+
         for ((index, uri) in selectedImageUris.withIndex()) {
-            val contentUri = FileProvider.getUriForFile(
-                this,
-                "${applicationContext.packageName}.fileprovider",
-                File(uri.path!!) // file:// 에서 경로 추출
-            )
-
             val fileName = "guide_images/$userId/${System.currentTimeMillis()}_$index.jpg"
-            val customStorage = FirebaseStorage.getInstance("gs://kkatalk-cf3fd.appspot.com")
-            val storageRef = customStorage.reference.child(fileName)
+            val storageRef = storage.reference.child(fileName)
 
-            storageRef.putFile(contentUri)
+            storageRef.putFile(uri)
                 .addOnSuccessListener {
+                    Log.d("RegisterGuide", "업로드 성공: $fileName")
                     storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
+                        Log.d("RegisterGuide", "다운로드 URL: $downloadUrl")
                         uploadedUrls.add(downloadUrl.toString())
                         uploadCount++
                         if (uploadCount == selectedImageUris.size) {
                             progressDialog.dismiss()
                             onComplete()
                         }
+                    }.addOnFailureListener {
+                        Log.e("RegisterGuide", "다운로드 URL 가져오기 실패: ${it.message}")
+                        progressDialog.dismiss()
                     }
-                }.addOnFailureListener {
+                }
+                .addOnFailureListener {
                     Log.e("RegisterGuide", "이미지 업로드 실패: ${it.message}")
-                    Toast.makeText(this, "이미지 업로드 실패", Toast.LENGTH_SHORT).show()
                     progressDialog.dismiss()
                 }
         }
