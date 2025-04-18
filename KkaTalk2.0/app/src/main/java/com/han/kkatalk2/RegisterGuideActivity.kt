@@ -31,7 +31,7 @@ class RegisterGuideActivity : AppCompatActivity() {
     private lateinit var storage: FirebaseStorage
 
     private lateinit var imageContainer: LinearLayout
-    private lateinit var btnAddImages: Button
+    private lateinit var imgAdd: ImageView
     private val selectedImageUris = mutableListOf<Uri>()
 
     private var guideId: String? = null
@@ -44,7 +44,7 @@ class RegisterGuideActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         guideDatabase = FirebaseDatabase.getInstance().getReference("guide")
         userDatabase = FirebaseDatabase.getInstance().getReference("user")
-        storage = FirebaseStorage.getInstance("gs://kkatalk-cf3fd.appspot.com")
+        storage = FirebaseStorage.getInstance("gs://kkatalk2")
 
         val edtName = findViewById<EditText>(R.id.edt_name)
         val spinnerLocation = findViewById<Spinner>(R.id.spinner_location)
@@ -55,7 +55,7 @@ class RegisterGuideActivity : AppCompatActivity() {
         val btnBack = findViewById<Button>(R.id.btn_back)
 
         imageContainer = findViewById(R.id.image_container)
-        btnAddImages = findViewById(R.id.btn_add_images)
+        imgAdd = findViewById(R.id.img_add)
 
         ArrayAdapter.createFromResource(
             this,
@@ -81,14 +81,11 @@ class RegisterGuideActivity : AppCompatActivity() {
             loadGuideData(guideId!!, edtName, spinnerLocation, edtRate, edtPhone, edtContent, btnRegister)
         }
 
-        btnAddImages.setOnClickListener {
+        imgAdd.setOnClickListener {
             ImagePicker.with(this)
                 .galleryOnly()
-                .maxResultSize(1080, 1080)
-                .galleryMimeTypes(arrayOf("image/*"))
-                .createIntent { intent ->
-                    startActivityForResult(intent, 101)
-                }
+                .maxResultSize(1024, 1024)
+                .start(101) // requestCode 직접 설정
         }
 
         userDatabase.child(userId).get().addOnSuccessListener { snapshot ->

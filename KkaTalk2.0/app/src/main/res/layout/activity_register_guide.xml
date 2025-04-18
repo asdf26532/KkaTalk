@@ -8,29 +8,30 @@
 
     <HorizontalScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="128dp"
         android:layout_marginBottom="10dp">
 
         <LinearLayout
             android:id="@+id/image_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"/>
-    </HorizontalScrollView>
+            android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/btn_add_images"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="사진 선택하기"
-        android:layout_gravity="center"
-        android:layout_marginBottom="15dp"/>
+            <ImageView
+                android:id="@+id/img_add"
+                android:layout_width="128dp"
+                android:layout_height="128dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/ic_placeholder"
+                />
+        </LinearLayout>
+    </HorizontalScrollView>
 
     <EditText
         android:id="@+id/edt_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="이름"/>
+        android:hint="글 제목"/>
 
     <Spinner
         android:id="@+id/spinner_location"
