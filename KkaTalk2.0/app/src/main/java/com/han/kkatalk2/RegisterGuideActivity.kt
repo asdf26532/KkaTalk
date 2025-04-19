@@ -37,6 +37,8 @@ class RegisterGuideActivity : AppCompatActivity() {
     private var guideId: String? = null
     private val uploadedUrls = mutableListOf<String>()
 
+    private val MAX_IMAGE_COUNT = 10
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register_guide)
@@ -82,6 +84,10 @@ class RegisterGuideActivity : AppCompatActivity() {
         }
 
         imgAdd.setOnClickListener {
+            if (selectedImageUris.size >= MAX_IMAGE_COUNT) {
+                Toast.makeText(this, "사진은 최대 10장까지 선택 가능합니다.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             ImagePicker.with(this)
                 .galleryOnly()
                 .maxResultSize(1024, 1024)
@@ -207,10 +213,12 @@ class RegisterGuideActivity : AppCompatActivity() {
 
     private fun displaySelectedImages() {
         imageContainer.removeAllViews()
+        imageContainer.addView(imgAdd)
+
         for (uri in selectedImageUris) {
             val imageView = ImageView(this).apply {
-                layoutParams = LinearLayout.LayoutParams(300, 300).apply {
-                    setMargins(8, 0, 8, 0)
+                layoutParams = LinearLayout.LayoutParams(250, 250).apply {
+                    setMargins(8, 30, 8, 0)
                 }
                 scaleType = ImageView.ScaleType.CENTER_CROP
             }
