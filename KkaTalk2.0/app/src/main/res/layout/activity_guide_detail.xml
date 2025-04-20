@@ -10,7 +10,6 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- 👤 가이드 프로필 영역 -->
         <LinearLayout
             android:id="@+id/layout_guide_info"
             android:layout_width="match_parent"

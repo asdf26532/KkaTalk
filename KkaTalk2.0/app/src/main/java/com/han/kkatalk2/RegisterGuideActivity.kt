@@ -8,9 +8,11 @@ import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
@@ -37,6 +39,7 @@ class RegisterGuideActivity : AppCompatActivity() {
     private var guideId: String? = null
     private val uploadedUrls = mutableListOf<String>()
 
+    private lateinit var txtImageCount: TextView
     private val MAX_IMAGE_COUNT = 10
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,7 +59,8 @@ class RegisterGuideActivity : AppCompatActivity() {
         val btnRegister = findViewById<Button>(R.id.btn_register)
         val btnBack = findViewById<Button>(R.id.btn_back)
 
-        imageContainer = findViewById(R.id.image_container)
+        txtImageCount = findViewById(R.id.txt_image_count)
+        imageContainer = findViewById(R.id.img_container)
         imgAdd = findViewById(R.id.img_add)
 
         ArrayAdapter.createFromResource(
@@ -204,6 +208,10 @@ class RegisterGuideActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK && requestCode == 101) {
+            if (selectedImageUris.size >= 10) {
+                Toast.makeText(this, "최대 10장까지 업로드할 수 있습니다.", Toast.LENGTH_SHORT).show()
+                return
+            }
             val uri: Uri = data?.data ?: return
             Log.d("RegisterGuide", "이미지 선택됨: $uri")
             selectedImageUris.add(uri)
@@ -213,8 +221,8 @@ class RegisterGuideActivity : AppCompatActivity() {
 
     private fun displaySelectedImages() {
         imageContainer.removeAllViews()
-        imageContainer.addView(imgAdd)
 
+        // 선택된 이미지 썸네일
         for (uri in selectedImageUris) {
             val imageView = ImageView(this).apply {
                 layoutParams = LinearLayout.LayoutParams(250, 250).apply {
@@ -225,6 +233,8 @@ class RegisterGuideActivity : AppCompatActivity() {
             Glide.with(this).load(uri).into(imageView)
             imageContainer.addView(imageView)
         }
+        imageContainer.addView(imgAdd)
+        txtImageCount.text = "${selectedImageUris.size}/10"
     }
 
     private fun loadGuideData(

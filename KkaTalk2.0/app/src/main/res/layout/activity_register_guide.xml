@@ -12,16 +12,38 @@
         android:layout_marginBottom="10dp">
 
         <LinearLayout
-            android:id="@+id/image_container"
+            android:id="@+id/img_container"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:padding="8dp">
 
-            <ImageView
-                android:id="@+id/img_add"
-                android:layout_width="128dp"
-                android:layout_height="128dp"
-                android:src="@drawable/ic_placeholder"/>
+            <!-- 이미지 추가 버튼 + 텍스트 겹치기 -->
+            <FrameLayout
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_marginEnd="8dp">
+
+                <ImageView
+                    android:id="@+id/img_add"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_placeholder"
+                    android:scaleType="centerCrop"
+                    android:background="@drawable/rounded_gray_background" />
+
+                <TextView
+                    android:id="@+id/txt_image_count"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="0/10"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#80000000"
+                   android:layout_marginTop="30dp"/>
+            </FrameLayout>
+
         </LinearLayout>
     </HorizontalScrollView>
 
