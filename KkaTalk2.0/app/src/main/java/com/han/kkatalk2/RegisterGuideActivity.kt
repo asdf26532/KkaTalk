@@ -207,33 +207,58 @@ class RegisterGuideActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
+        Log.d("RegisterGuide", "onActivityResult 호출됨: requestCode=$requestCode, resultCode=$resultCode")
+
         if (resultCode == RESULT_OK && requestCode == 101) {
-            if (selectedImageUris.size >= 10) {
-                Toast.makeText(this, "최대 10장까지 업로드할 수 있습니다.", Toast.LENGTH_SHORT).show()
-                return
+            try {
+                if (selectedImageUris.size >= 10) {
+                    Toast.makeText(this, "최대 10장까지 업로드할 수 있습니다.", Toast.LENGTH_SHORT).show()
+                    Log.w("RegisterGuide", "이미 10장 이상 선택됨")
+                    return
+                }
+
+                if (data == null) {
+                    Log.e("RegisterGuide", "data가 null입니다.")
+                    return
+                }
+
+                val uri: Uri = data.data ?: run {
+                    Log.e("RegisterGuide", "data.data가 null입니다.")
+                    return
+                }
+
+                Log.d("RegisterGuide", "이미지 URI 확인: $uri")
+
+                selectedImageUris.add(uri)
+                Log.d("RegisterGuide", "현재 이미지 수: ${selectedImageUris.size}")
+
+                displaySelectedImages()
+
+            } catch (e: Exception) {
+                Log.e("RegisterGuide", "이미지 처리 중 예외 발생: ${e.message}", e)
             }
-            val uri: Uri = data?.data ?: return
-            Log.d("RegisterGuide", "이미지 선택됨: $uri")
-            selectedImageUris.add(uri)
-            displaySelectedImages()
         }
     }
 
     private fun displaySelectedImages() {
-        imageContainer.removeAllViews()
+        // 1. imgAdd(첫 번째 자식)만 남기고, 기존에 추가된 썸네일 뷰들은 모두 제거
+        val totalChildren = imageContainer.childCount
+        if (totalChildren > 1) {
+            imageContainer.removeViews(1, totalChildren - 1)
+        }
 
-        // 선택된 이미지 썸네일
+        // 2. 선택된 URI 리스트를 순회하면서, imgAdd 뒤에 차례대로 ImageView 추가
         for (uri in selectedImageUris) {
-            val imageView = ImageView(this).apply {
+            val thumb = ImageView(this).apply {
                 layoutParams = LinearLayout.LayoutParams(250, 250).apply {
-                    setMargins(8, 30, 8, 0)
+                    setMargins(8, 8, 8, 8)
                 }
                 scaleType = ImageView.ScaleType.CENTER_CROP
             }
-            Glide.with(this).load(uri).into(imageView)
-            imageContainer.addView(imageView)
+            Glide.with(this).load(uri).into(thumb)
+            imageContainer.addView(thumb)  // imgAdd 뒤에 붙습니다
         }
-        imageContainer.addView(imgAdd)
         txtImageCount.text = "${selectedImageUris.size}/10"
     }
 
