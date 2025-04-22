@@ -8,22 +8,17 @@ import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
-import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.ktx.storage
-import java.io.File
 
 class RegisterGuideActivity : AppCompatActivity() {
 
@@ -275,7 +270,7 @@ class RegisterGuideActivity : AppCompatActivity() {
             val guide = snapshot.getValue(Guide::class.java)
             val cityList = resources.getStringArray(R.array.city_list)
             if (guide != null) {
-                edtName.setText(guide.name)
+                edtName.setText(guide.title)
                 edtRate.setText(guide.rate)
                 edtPhone.setText(guide.phoneNumber)
                 edtContent.setText(guide.content)

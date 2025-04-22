@@ -1,7 +1,6 @@
 package com.han.kkatalk2
 
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -15,7 +14,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.han.kkatalk2.databinding.ActivityGuideDetailBinding
-import com.han.kkatalk2.databinding.ActivityProfileBinding
 
 class GuideDetailActivity : AppCompatActivity() {
 
@@ -67,7 +65,7 @@ class GuideDetailActivity : AppCompatActivity() {
                 if (guide != null) {
                     writerUid = guide.uId  // 작성자 UID 가져오기
 
-                    txtName.text = guide.name
+                    txtName.text = guide.title
                     txtLocation.text = "지역: ${guide.locate}"
                     txtRate.text = "요금: ${guide.rate}"
                     txtPhone.text = "전화번호: ${guide.phoneNumber}"

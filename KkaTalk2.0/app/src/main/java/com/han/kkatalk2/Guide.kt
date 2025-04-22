@@ -1,7 +1,7 @@
 package com.han.kkatalk2
 
 data class Guide(
-    var name: String,
+    var title: String,
     var uId: String,
     var nick: String,
     var phoneNumber: String,

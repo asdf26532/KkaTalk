@@ -15,7 +15,7 @@ class GuideAdapter(private val guideList: List<Guide>) : RecyclerView.Adapter<Gu
     // ViewHolder 클래스 정의
     class GuideViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val guideImage: ImageView = itemView.findViewById(R.id.guideImage)
-        val guideName: TextView = itemView.findViewById(R.id.guideName)
+        val guideTitle: TextView = itemView.findViewById(R.id.guideTitle)
         val guideLocation: TextView = itemView.findViewById(R.id.guideLocation)
         val guideRate: TextView = itemView.findViewById(R.id.guideRate)
     }
@@ -30,15 +30,21 @@ class GuideAdapter(private val guideList: List<Guide>) : RecyclerView.Adapter<Gu
     override fun onBindViewHolder(holder: GuideViewHolder, position: Int) {
         val guide = guideList[position]
 
-        holder.guideName.text = guide.name
+        holder.guideTitle.text = guide.title
         holder.guideLocation.text = guide.locate
         holder.guideRate.text = guide.rate
 
 
-        // Glide 사용하여 프로필 이미지 로드
-        Glide.with(holder.itemView.context)
-            .load(guide.profileImageUrl)
-            .into(holder.guideImage)
+        // 썸네일 이미지 설정 (imageUrls[0] 또는 기본 이미지)
+        if (!guide.imageUrls.isNullOrEmpty()) {
+            Glide.with(holder.itemView.context)
+                .load(guide.imageUrls[0])
+                .into(holder.guideImage)
+        } else {
+            Glide.with(holder.itemView.context)
+                .load(R.drawable.profile_default)
+                .into(holder.guideImage)
+        }
 
         holder.itemView.setOnClickListener {
             val context = holder.itemView.context
