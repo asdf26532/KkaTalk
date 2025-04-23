@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -32,12 +33,14 @@ class GuideDetailActivity : AppCompatActivity() {
         val currentUserUid = auth.currentUser?.uid
 
         // UI 요소 찾기
+        val txtTitle = findViewById<TextView>(R.id.txt_title)
         val imgProfile = findViewById<ImageView>(R.id.img_profile)
-        val txtName = findViewById<TextView>(R.id.txt_name)
+        val txtNick = findViewById<TextView>(R.id.txt_name)
         val txtLocation = findViewById<TextView>(R.id.txt_location)
         val txtRate = findViewById<TextView>(R.id.txt_rate)
         val txtPhone = findViewById<TextView>(R.id.txt_phone)
         val txtContent = findViewById<TextView>(R.id.txt_content)
+        val imageContainer = findViewById<LinearLayout>(R.id.img_container)
 
         // 인텐트에서 가이드 정보 가져오기
         val guideId = intent.getStringExtra("guideId")
@@ -65,7 +68,8 @@ class GuideDetailActivity : AppCompatActivity() {
                 if (guide != null) {
                     writerUid = guide.uId  // 작성자 UID 가져오기
 
-                    txtName.text = guide.title
+                    txtTitle.text = guide.title
+                    txtNick.text = guide.nick
                     txtLocation.text = "지역: ${guide.locate}"
                     txtRate.text = "요금: ${guide.rate}"
                     txtPhone.text = "전화번호: ${guide.phoneNumber}"
@@ -76,6 +80,27 @@ class GuideDetailActivity : AppCompatActivity() {
                         Glide.with(this).load(guide.profileImageUrl).into(imgProfile)
                     } else {
                         imgProfile.setImageResource(R.drawable.profile_default)
+                    }
+
+                    val imageUrls = guide.imageUrls ?: emptyList()
+
+                    for (url in imageUrls) {
+                        val imageView = ImageView(this).apply {
+                            layoutParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                            ).apply {
+                                setMargins(8, 0, 8, 0) // 살짝 간격만 줄게
+                            }
+                            scaleType = ImageView.ScaleType.CENTER_CROP
+                        }
+
+                        Glide.with(this)
+                            .load(url)
+                            .placeholder(R.drawable.profile_default) // 없을 때 대체 이미지
+                            .into(imageView)
+
+                        imageContainer.addView(imageView)
                     }
 
                     Log.d("GuideDetailActivity", "Current User ID: $currentUserUid, Writer ID: $writerUid")

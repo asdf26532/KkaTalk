@@ -46,7 +46,7 @@ class RegisterGuideActivity : AppCompatActivity() {
         userDatabase = FirebaseDatabase.getInstance().getReference("user")
         storage = FirebaseStorage.getInstance("gs://kkatalk2")
 
-        val edtName = findViewById<EditText>(R.id.edt_name)
+        val edtTitle = findViewById<EditText>(R.id.edt_title)
         val spinnerLocation = findViewById<Spinner>(R.id.spinner_location)
         val edtRate = findViewById<EditText>(R.id.edt_rate)
         val edtPhone = findViewById<EditText>(R.id.edt_phone)
@@ -79,7 +79,7 @@ class RegisterGuideActivity : AppCompatActivity() {
 
         guideId = intent.getStringExtra("guideId")
         if (guideId != null) {
-            loadGuideData(guideId!!, edtName, spinnerLocation, edtRate, edtPhone, edtContent, btnRegister)
+            loadGuideData(guideId!!, edtTitle, spinnerLocation, edtRate, edtPhone, edtContent, btnRegister)
         }
 
         imgAdd.setOnClickListener {
@@ -99,15 +99,15 @@ class RegisterGuideActivity : AppCompatActivity() {
             Log.d("RegisterGuide", "닉네임: $nick / 프로필 URL: $profileImageUrl")
 
             btnRegister.setOnClickListener {
-                val name = edtName.text.toString()
+                val title = edtTitle.text.toString()
                 val location = spinnerLocation.selectedItem.toString()
                 val rate = edtRate.text.toString()
                 val phone = edtPhone.text.toString()
                 val content = edtContent.text.toString()
 
-                Log.d("RegisterGuide", "입력값 - name: $name, location: $location, rate: $rate, phone: $phone, content: $content")
+                Log.d("RegisterGuide", "입력값 - name: $title, location: $location, rate: $rate, phone: $phone, content: $content")
 
-                if (name.isNotEmpty() && location.isNotEmpty() && rate.isNotEmpty() && phone.isNotEmpty()) {
+                if (title.isNotEmpty() && location.isNotEmpty() && rate.isNotEmpty() && phone.isNotEmpty()) {
                     val progressDialog = ProgressDialog(this).apply {
                         setMessage("이미지 업로드 중...")
                         setCancelable(false)
@@ -119,11 +119,11 @@ class RegisterGuideActivity : AppCompatActivity() {
                         Log.d("RegisterGuide", "선택된 이미지 수: ${selectedImageUris.size}")
                         uploadImagesToFirebase(userId, progressDialog) {
                             Log.d("RegisterGuide", "이미지 업로드 완료, URL 목록: $uploadedUrls")
-                            registerGuide(name, userId, nick, phone, location, rate, content, profileImageUrl, uploadedUrls)
+                            registerGuide(title, userId, nick, phone, location, rate, content, profileImageUrl, uploadedUrls)
                         }
                     } else {
                         Log.d("RegisterGuide", "이미지 없이 가이드 등록 시도")
-                        registerGuide(name, userId, nick, phone, location, rate, content, profileImageUrl, listOf())
+                        registerGuide(title, userId, nick, phone, location, rate, content, profileImageUrl, listOf())
                         progressDialog.dismiss()
                     }
                 } else {
@@ -174,7 +174,7 @@ class RegisterGuideActivity : AppCompatActivity() {
     }
 
     private fun registerGuide(
-        name: String,
+        title: String,
         userId: String,
         nick: String,
         phone: String,
@@ -185,7 +185,7 @@ class RegisterGuideActivity : AppCompatActivity() {
         imageUrls: List<String>
     ) {
         val guideRef = guideDatabase.child(userId)
-        val guide = Guide(name, userId, nick, phone, location, rate, content, profileImageUrl, imageUrls)
+        val guide = Guide(title, userId, nick, phone, location, rate, content, profileImageUrl, imageUrls)
         Log.d("RegisterGuide", "파이어베이스에 등록할 Guide 객체: $guide")
 
         guideRef.setValue(guide).addOnCompleteListener {

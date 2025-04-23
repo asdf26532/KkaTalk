@@ -10,6 +10,41 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <TextView
+            android:id="@+id/txt_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="글 제목"
+            android:textSize="32sp"
+            android:textStyle="bold"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="12dp"
+            android:background="#CCCCCC" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/image_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"/>
+        </HorizontalScrollView>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="12dp"
+            android:background="#CCCCCC" />
+
         <LinearLayout
             android:id="@+id/layout_guide_info"
             android:layout_width="match_parent"
@@ -49,14 +84,12 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- 🔻 Divider -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginVertical="12dp"
             android:background="#CCCCCC" />
 
-        <!-- 📄 상세 정보 -->
         <TextView
             android:id="@+id/txt_rate"
             android:layout_width="wrap_content"
@@ -81,7 +114,6 @@
             android:textSize="16sp"
             android:layout_marginTop="8dp"/>
 
-        <!-- 💬 대화 버튼 -->
         <Button
             android:id="@+id/btn_chat"
             android:layout_width="wrap_content"
