@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.storage.FirebaseStorage
 import com.han.kkatalk2.databinding.ActivityGuideDetailBinding
 
 class GuideDetailActivity : AppCompatActivity() {
@@ -21,12 +22,16 @@ class GuideDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityGuideDetailBinding
     private lateinit var database: DatabaseReference
     private lateinit var auth: FirebaseAuth
+    private lateinit var storage: FirebaseStorage
+
     private var writerUid: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityGuideDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        storage = FirebaseStorage.getInstance()
 
         auth = FirebaseAuth.getInstance()
         // 현재 로그인한 사용자 UID 가져오기
@@ -40,7 +45,7 @@ class GuideDetailActivity : AppCompatActivity() {
         val txtRate = findViewById<TextView>(R.id.txt_rate)
         val txtPhone = findViewById<TextView>(R.id.txt_phone)
         val txtContent = findViewById<TextView>(R.id.txt_content)
-        val imageContainer = findViewById<LinearLayout>(R.id.img_container)
+        val imageContainer = findViewById<LinearLayout>(R.id.image_container)
 
         // 인텐트에서 가이드 정보 가져오기
         val guideId = intent.getStringExtra("guideId")
@@ -76,13 +81,24 @@ class GuideDetailActivity : AppCompatActivity() {
                     txtContent.text = guide.content
 
                     // 프로필 이미지 로드
-                    if (!guide.profileImageUrl.isNullOrEmpty()) {
-                        Glide.with(this).load(guide.profileImageUrl).into(imgProfile)
-                    } else {
-                        imgProfile.setImageResource(R.drawable.profile_default)
-                    }
+                    Log.d("GuideDetailActivity", "Profile Image URL: ${guide.profileImageUrl}")
 
-                    val imageUrls = guide.imageUrls ?: emptyList()
+                    if (!guide.profileImageUrl.isNullOrEmpty()) {
+                        val profile = storage.getReferenceFromUrl(guide.profileImageUrl ?: "")
+
+                        profile.downloadUrl.addOnSuccessListener { uri ->
+                            Glide.with(this)
+                                .load(uri)
+                                .placeholder(R.drawable.profile_default)
+                                .error(R.drawable.profile_default)
+                                .into(imgProfile)
+                        }.addOnFailureListener {
+                            Log.d("GuideDetailActivity", "No profile image, using default image.")
+                        }
+                            imgProfile.setImageResource(R.drawable.profile_default) // 로드 실패 시 기본 이미지
+                        }
+
+                    val imageUrls = guide.imageUrls
 
                     for (url in imageUrls) {
                         val imageView = ImageView(this).apply {
