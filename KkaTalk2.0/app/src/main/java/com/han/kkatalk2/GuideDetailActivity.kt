@@ -106,7 +106,7 @@ class GuideDetailActivity : AppCompatActivity() {
                                 LinearLayout.LayoutParams.WRAP_CONTENT,
                                 LinearLayout.LayoutParams.WRAP_CONTENT
                             ).apply {
-                                setMargins(8, 0, 8, 0) // 살짝 간격만 줄게
+                                setMargins(8, 0, 8, 0)
                             }
                             scaleType = ImageView.ScaleType.CENTER_CROP
                         }

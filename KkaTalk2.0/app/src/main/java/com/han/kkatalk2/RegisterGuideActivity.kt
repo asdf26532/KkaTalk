@@ -5,9 +5,11 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Spinner
@@ -236,7 +238,7 @@ class RegisterGuideActivity : AppCompatActivity() {
         }
     }
 
-    private fun displaySelectedImages() {
+    /*private fun displaySelectedImages() {
         // 1. imgAdd(첫 번째 자식)만 남기고, 기존에 추가된 썸네일 뷰들은 모두 제거
         val totalChildren = imageContainer.childCount
         if (totalChildren > 1) {
@@ -252,8 +254,52 @@ class RegisterGuideActivity : AppCompatActivity() {
                 scaleType = ImageView.ScaleType.CENTER_CROP
             }
             Glide.with(this).load(uri).into(thumb)
-            imageContainer.addView(thumb)  // imgAdd 뒤에 붙습니다
+            imageContainer.addView(thumb)
         }
+        txtImageCount.text = "${selectedImageUris.size}/10"
+    }*/
+
+    private fun displaySelectedImages() {
+        val totalChildren = imageContainer.childCount
+        if (totalChildren > 1) {
+            imageContainer.removeViews(1, totalChildren - 1)
+        }
+
+        for ((index, uri) in selectedImageUris.withIndex()) {
+            val frame = FrameLayout(this).apply {
+                layoutParams = LinearLayout.LayoutParams(250, 250).apply {
+                    setMargins(8, 8, 8, 8)
+                }
+            }
+
+            val imageView = ImageView(this).apply {
+                layoutParams = FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT
+                )
+                scaleType = ImageView.ScaleType.CENTER_CROP
+            }
+
+            Glide.with(this).load(uri).into(imageView)
+
+            val deleteBtn = ImageView(this).apply {
+                setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+                layoutParams = FrameLayout.LayoutParams(60, 60).apply {
+                    marginEnd = 4
+                    topMargin = 4
+                    gravity = Gravity.END or Gravity.TOP
+                }
+                setOnClickListener {
+                    selectedImageUris.removeAt(index)
+                    displaySelectedImages() // 다시 갱신
+                }
+            }
+
+            frame.addView(imageView)
+            frame.addView(deleteBtn)
+            imageContainer.addView(frame)
+        }
+
         txtImageCount.text = "${selectedImageUris.size}/10"
     }
 
@@ -279,6 +325,10 @@ class RegisterGuideActivity : AppCompatActivity() {
                 if (index >= 0) {
                     spinnerLocation.setSelection(index)
                 }
+
+                selectedImageUris.clear()
+                selectedImageUris.addAll((guide.imageUrls ?: emptyList()).map { Uri.parse(it) })
+                displaySelectedImages()
 
                 btnRegister.text = "수정하기"
                 Log.d("RegisterGuide", "기존 가이드 정보 로딩 완료")
