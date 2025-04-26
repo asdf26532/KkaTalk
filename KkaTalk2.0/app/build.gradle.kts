@@ -53,6 +53,7 @@ dependencies {
     // 사진 관련
     implementation ("com.github.chrisbanes:PhotoView:2.3.0")
     implementation ("com.github.Dhaval2404:ImagePicker:2.1")
+    implementation ("me.relex:circleindicator:2.1.6")
 
     // Firebase
     implementation(libs.firebase.database)

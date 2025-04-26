@@ -111,10 +111,18 @@ class GuideDetailActivity : AppCompatActivity() {
                             scaleType = ImageView.ScaleType.CENTER_CROP
                         }
 
+                        // 없을 때 대체 이미지
                         Glide.with(this)
                             .load(url)
-                            .placeholder(R.drawable.profile_default) // 없을 때 대체 이미지
+                            .placeholder(R.drawable.profile_default) 
                             .into(imageView)
+
+                        // 사진 클릭시 풀스크린
+                        imageView.setOnClickListener {
+                            val intent = Intent(this, FullScreenImageActivity::class.java)
+                            intent.putExtra("IMAGE_URL", url)
+                            startActivity(intent)
+                        }
 
                         imageContainer.addView(imageView)
                     }

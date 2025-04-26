@@ -20,6 +20,9 @@
             android:name=".GuideDetailActivity"
             android:exported="false" />
         <activity
+            android:name=".FullScreenImageActivity"
+            android:exported="false" />
+        <activity
             android:name=".RegisterGuideActivity"
             android:exported="false" />
         <activity
