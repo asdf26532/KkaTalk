@@ -10,6 +10,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
@@ -26,18 +27,21 @@ class GuideDetailActivity : AppCompatActivity() {
 
     private var writerUid: String? = null
 
+    private lateinit var viewPager: ViewPager2
+    private lateinit var imageAdapter: GuideImageAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityGuideDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        storage = FirebaseStorage.getInstance()
+        viewPager = findViewById(R.id.view_pager)
 
+        storage = FirebaseStorage.getInstance()
         auth = FirebaseAuth.getInstance()
-        // 현재 로그인한 사용자 UID 가져오기
+
         val currentUserUid = auth.currentUser?.uid
 
-        // UI 요소 찾기
         val txtTitle = findViewById<TextView>(R.id.txt_title)
         val imgProfile = findViewById<ImageView>(R.id.img_profile)
         val txtNick = findViewById<TextView>(R.id.txt_name)
@@ -45,19 +49,14 @@ class GuideDetailActivity : AppCompatActivity() {
         val txtRate = findViewById<TextView>(R.id.txt_rate)
         val txtPhone = findViewById<TextView>(R.id.txt_phone)
         val txtContent = findViewById<TextView>(R.id.txt_content)
-        val imageContainer = findViewById<LinearLayout>(R.id.image_container)
 
-        // 인텐트에서 가이드 정보 가져오기
         val guideId = intent.getStringExtra("guideId")
         val nick = intent.getStringExtra("nick")
         val profileImageUrl = intent.getStringExtra("profileImageUrl")
 
-        // 받은 데이터 확인
-        Log.d("GuideDetailActivity", "Received Data - guideId: $guideId, nick: $nick, profileImageUrl: $profileImageUrl")
-
         if (guideId.isNullOrEmpty()) {
             Toast.makeText(this, "잘못된 접근입니다.", Toast.LENGTH_SHORT).show()
-            finish() // guideId가 없으면 액티비티 종료
+            finish()
             return
         }
 
@@ -71,7 +70,7 @@ class GuideDetailActivity : AppCompatActivity() {
 
                 val guide = snapshot.getValue(Guide::class.java)
                 if (guide != null) {
-                    writerUid = guide.uId  // 작성자 UID 가져오기
+                    writerUid = guide.uId
 
                     txtTitle.text = guide.title
                     txtNick.text = guide.nick
@@ -80,12 +79,8 @@ class GuideDetailActivity : AppCompatActivity() {
                     txtPhone.text = "전화번호: ${guide.phoneNumber}"
                     txtContent.text = guide.content
 
-                    // 프로필 이미지 로드
-                    Log.d("GuideDetailActivity", "Profile Image URL: ${guide.profileImageUrl}")
-
                     if (!guide.profileImageUrl.isNullOrEmpty()) {
                         val profile = storage.getReferenceFromUrl(guide.profileImageUrl ?: "")
-
                         profile.downloadUrl.addOnSuccessListener { uri ->
                             Glide.with(this)
                                 .load(uri)
@@ -93,45 +88,23 @@ class GuideDetailActivity : AppCompatActivity() {
                                 .error(R.drawable.profile_default)
                                 .into(imgProfile)
                         }.addOnFailureListener {
-                            Log.d("GuideDetailActivity", "No profile image, using default image.")
+                            imgProfile.setImageResource(R.drawable.profile_default)
                         }
-                            imgProfile.setImageResource(R.drawable.profile_default) // 로드 실패 시 기본 이미지
-                        }
-
-                    val imageUrls = guide.imageUrls
-
-                    for (url in imageUrls) {
-                        val imageView = ImageView(this).apply {
-                            layoutParams = LinearLayout.LayoutParams(
-                                LinearLayout.LayoutParams.WRAP_CONTENT,
-                                LinearLayout.LayoutParams.WRAP_CONTENT
-                            ).apply {
-                                setMargins(8, 0, 8, 0)
-                            }
-                            scaleType = ImageView.ScaleType.CENTER_CROP
-                        }
-
-                        // 없을 때 대체 이미지
-                        Glide.with(this)
-                            .load(url)
-                            .placeholder(R.drawable.profile_default) 
-                            .into(imageView)
-
-                        // 사진 클릭시 풀스크린
-                        imageView.setOnClickListener {
-                            val intent = Intent(this, FullScreenImageActivity::class.java)
-                            intent.putExtra("IMAGE_URL", url)
-                            startActivity(intent)
-                        }
-
-                        imageContainer.addView(imageView)
+                    } else {
+                        imgProfile.setImageResource(R.drawable.profile_default)
                     }
 
-                    Log.d("GuideDetailActivity", "Current User ID: $currentUserUid, Writer ID: $writerUid")
+                    val imageUrls = guide.imageUrls
+                    if (imageUrls.isNullOrEmpty()) {
+                        // 없으면 기본이미지 하나 넣기
+                        imageAdapter = GuideImageAdapter(listOf(R.drawable.profile_default), true)
+                    } else {
+                        imageAdapter = GuideImageAdapter(imageUrls)
+                    }
+                    viewPager.adapter = imageAdapter
 
-                    // 본인이 작성한 글이면 "수정하기", 아니면 "대화하기"
+                    // 버튼 처리
                     if (currentUserUid == writerUid) {
-                        Log.d("GuideDetailActivity", "This is the user's own post. Showing 'Edit' button.")
                         binding.btnChat.text = "수정하기"
                         binding.btnChat.setOnClickListener {
                             val intent = Intent(this, RegisterGuideActivity::class.java)
@@ -139,7 +112,6 @@ class GuideDetailActivity : AppCompatActivity() {
                             startActivity(intent)
                         }
                     } else {
-                        Log.d("GuideDetailActivity", "This is another user's post. Showing 'Chat' button.")
                         binding.btnChat.text = "대화하기"
                         binding.btnChat.setOnClickListener {
                             val intent = Intent(this, ChatActivity::class.java).apply {
@@ -147,20 +119,17 @@ class GuideDetailActivity : AppCompatActivity() {
                                 putExtra("nick", nick)
                                 putExtra("profileImageUrl", profileImageUrl)
                             }
-                            Log.d("GuideDetailActivity", "uId: $guideId, nick: $nick, profileImageUrl: $profileImageUrl")
                             startActivity(intent)
                         }
                     }
-
                 } else {
                     showErrorAndExit("데이터를 불러오는 중 오류가 발생했습니다.")
                 }
             }
-            .addOnFailureListener { exception ->
+            .addOnFailureListener {
                 showErrorAndExit("네트워크 오류가 발생했습니다. 다시 시도해주세요.")
             }
 
-        // 프로필 사진 클릭
         imgProfile.setOnClickListener {
             val intent = Intent(this, ProfileActivity::class.java)
             intent.putExtra("uId", guideId)
@@ -169,31 +138,25 @@ class GuideDetailActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // 액션바 설정
         supportActionBar?.title = ""
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
-    // 오류 발생 시 Toast 메시지를 띄우고 액티비티 종료
     private fun showErrorAndExit(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         finish()
     }
 
-    // 버튼(옵션) 선택
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
                 val intent = Intent()
-                intent.putExtra("chatUpdated", true) // 결과 값으로 '갱신 필요' 플래그 전달
+                intent.putExtra("chatUpdated", true)
                 setResult(Activity.RESULT_OK, intent)
-                Log.d("ChatActivity", "setResult 호출됨") // 로그 추가
                 finish()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
-
     }
-
 }
