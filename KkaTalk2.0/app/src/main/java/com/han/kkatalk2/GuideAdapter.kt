@@ -42,7 +42,7 @@ class GuideAdapter(private val guideList: List<Guide>) : RecyclerView.Adapter<Gu
                 .into(holder.guideImage)
         } else {
             Glide.with(holder.itemView.context)
-                .load(R.drawable.profile_default)
+                .load(R.drawable.image_default)
                 .into(holder.guideImage)
         }
 

@@ -13,14 +13,14 @@
 
         <LinearLayout
             android:orientation="horizontal"
-            android:padding="16dp"
+            android:padding="5dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <ImageView
                 android:id="@+id/guideImage"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 android:scaleType="centerCrop"
                 app:srcCompat="@drawable/profile_default"/>
 
@@ -34,16 +34,17 @@
                 <TextView
                     android:id="@+id/guideTitle"
                     android:layout_width="wrap_content"
-                    android:layout_height="25dp"
+                    android:layout_height="30dp"
                     android:text="제목"
                     android:textStyle="bold"
-                    android:textSize="20sp"/>
+                    android:textSize="24sp"/>
 
                 <TextView
                     android:id="@+id/guideLocation"
                     android:layout_width="wrap_content"
                     android:layout_height="25dp"
                     android:text="지역"
+                    android:layout_marginTop="7dp"
                     android:textSize="18sp"
                     android:textColor="#777777"/>
 
@@ -51,6 +52,7 @@
                     android:id="@+id/guideRate"
                     android:layout_width="wrap_content"
                     android:layout_height="25dp"
+                    android:layout_marginTop="7dp"
                     android:text="시급 or 일당"
                     android:textSize="18sp"
                     android:textColor="#FF5722"/>

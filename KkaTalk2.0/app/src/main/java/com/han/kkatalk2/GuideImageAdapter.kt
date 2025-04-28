@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
 class GuideImageAdapter(
-    private val imageList: List<Any>, // String(url) 또는 Int(drawableResId)
+    private val imageList: List<Any>,
     private val isDrawable: Boolean = false
 ) : RecyclerView.Adapter<GuideImageAdapter.ImageViewHolder>() {
 
@@ -27,8 +27,8 @@ class GuideImageAdapter(
             val url = imageList[position] as String
             Glide.with(holder.imageView.context)
                 .load(url)
-                .placeholder(R.drawable.profile_default)
-                .error(R.drawable.profile_default)
+                .placeholder(R.drawable.image_default)
+                .error(R.drawable.image_default)
                 .into(holder.imageView)
         }
     }

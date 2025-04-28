@@ -23,33 +23,40 @@
             android:id="@+id/txt_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:padding="5dp"
             android:text="글 제목"
             android:textSize="32sp"
             android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/txt_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="지역"
+            android:paddingStart="5dp"
+            android:textSize="16sp"
+            android:layout_marginTop="4dp"/>
 
         <TextView
             android:id="@+id/txt_rate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="요금"
-            android:textSize="16sp"
-            android:layout_marginTop="4dp"/>
-
-        <TextView
-            android:id="@+id/txt_phone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="전화번호"
+            android:paddingStart="5dp"
             android:textSize="16sp"
             android:layout_marginTop="4dp"/>
 
         <TextView
             android:id="@+id/txt_content"
-            android:layout_width="wrap_content"
+            android:layout_width="350dp"
             android:layout_height="wrap_content"
-            android:text="소개글"
+            android:layout_margin="10dp"
+            android:padding="12dp"
+            android:background="@drawable/bubble_background"
+            android:text="상세 내용"
             android:textSize="16sp"
-            android:layout_marginTop="8dp"/>
+            android:textColor="@android:color/black"
+            />
 
         <View
             android:layout_width="match_parent"
@@ -61,6 +68,7 @@
             android:id="@+id/layout_guide_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:padding="7dp"
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
@@ -87,10 +95,10 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/txt_location"
+                    android:id="@+id/txt_phone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="지역"
+                    android:text="전화번호"
                     android:textSize="14sp"
                     android:textColor="#888888" />
             </LinearLayout>

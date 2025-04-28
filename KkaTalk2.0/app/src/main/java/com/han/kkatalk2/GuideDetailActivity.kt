@@ -97,7 +97,7 @@ class GuideDetailActivity : AppCompatActivity() {
                     val imageUrls = guide.imageUrls
                     if (imageUrls.isNullOrEmpty()) {
                         // 없으면 기본이미지 하나 넣기
-                        imageAdapter = GuideImageAdapter(listOf(R.drawable.profile_default), true)
+                        imageAdapter = GuideImageAdapter(listOf(R.drawable.image_default), true)
                     } else {
                         imageAdapter = GuideImageAdapter(imageUrls)
                     }
