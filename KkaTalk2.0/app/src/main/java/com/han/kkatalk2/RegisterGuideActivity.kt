@@ -35,6 +35,7 @@ class RegisterGuideActivity : AppCompatActivity() {
 
     private var guideId: String? = null
     private val uploadedUrls = mutableListOf<String>()
+    private var viewCount = 0
 
     private lateinit var txtImageCount: TextView
     private val MAX_IMAGE_COUNT = 10
@@ -121,11 +122,11 @@ class RegisterGuideActivity : AppCompatActivity() {
                         Log.d("RegisterGuide", "선택된 이미지 수: ${selectedImageUris.size}")
                         uploadImagesToFirebase(userId, progressDialog) {
                             Log.d("RegisterGuide", "이미지 업로드 완료, URL 목록: $uploadedUrls")
-                            registerGuide(title, userId, nick, phone, location, rate, content, profileImageUrl, uploadedUrls)
+                            registerGuide(title, userId, nick, phone, location, rate, content, profileImageUrl, uploadedUrls, viewCount)
                         }
                     } else {
                         Log.d("RegisterGuide", "이미지 없이 가이드 등록 시도")
-                        registerGuide(title, userId, nick, phone, location, rate, content, profileImageUrl, listOf())
+                        registerGuide(title, userId, nick, phone, location, rate, content, profileImageUrl, listOf(), viewCount)
                         progressDialog.dismiss()
                     }
                 } else {
@@ -184,10 +185,11 @@ class RegisterGuideActivity : AppCompatActivity() {
         rate: String,
         content: String,
         profileImageUrl: String,
-        imageUrls: List<String>
+        imageUrls: List<String>,
+        viewCount: Int
     ) {
         val guideRef = guideDatabase.child(userId)
-        val guide = Guide(title, userId, nick, phone, location, rate, content, profileImageUrl, imageUrls)
+        val guide = Guide(title, userId, nick, phone, location, rate, content, profileImageUrl, imageUrls, viewCount)
         Log.d("RegisterGuide", "파이어베이스에 등록할 Guide 객체: $guide")
 
         guideRef.setValue(guide).addOnCompleteListener {

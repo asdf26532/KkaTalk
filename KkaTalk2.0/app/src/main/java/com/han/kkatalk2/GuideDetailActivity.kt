@@ -13,8 +13,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.MutableData
+import com.google.firebase.database.Transaction
 import com.google.firebase.storage.FirebaseStorage
 import com.han.kkatalk2.databinding.ActivityGuideDetailBinding
 
@@ -49,6 +53,7 @@ class GuideDetailActivity : AppCompatActivity() {
         val txtRate = findViewById<TextView>(R.id.txt_rate)
         val txtPhone = findViewById<TextView>(R.id.txt_phone)
         val txtContent = findViewById<TextView>(R.id.txt_content)
+        val txtViewCount = findViewById<TextView>(R.id.txt_view_count)
 
         val guideId = intent.getStringExtra("guideId")
         val nick = intent.getStringExtra("nick")
@@ -61,6 +66,24 @@ class GuideDetailActivity : AppCompatActivity() {
         }
 
         database = FirebaseDatabase.getInstance().getReference("guide").child(guideId)
+
+        database.runTransaction(object : Transaction.Handler {
+            override fun doTransaction(currentData: MutableData): Transaction.Result {
+                val guide = currentData.getValue(Guide::class.java) ?: return Transaction.success(currentData)
+                val updatedGuide = guide.copy(viewCount = guide.viewCount + 1)
+                currentData.value = updatedGuide
+                return Transaction.success(currentData)
+            }
+
+            override fun onComplete(error: DatabaseError?, committed: Boolean, currentData: DataSnapshot?) {
+                if (error != null) {
+                    Log.e("GuideDetailActivity", "조회수 증가 실패: ${error.message}")
+                } else {
+                    Log.d("GuideDetailActivity", "조회수 증가 성공")
+                }
+            }
+        })
+
         database.get()
             .addOnSuccessListener { snapshot ->
                 if (!snapshot.exists()) {
@@ -78,6 +101,7 @@ class GuideDetailActivity : AppCompatActivity() {
                     txtRate.text = "요금: ${guide.rate}"
                     txtPhone.text = "전화번호: ${guide.phoneNumber}"
                     txtContent.text = guide.content
+                    txtViewCount.text = "조회수: ${guide.viewCount}"
 
                     if (!guide.profileImageUrl.isNullOrEmpty()) {
                         val profile = storage.getReferenceFromUrl(guide.profileImageUrl ?: "")

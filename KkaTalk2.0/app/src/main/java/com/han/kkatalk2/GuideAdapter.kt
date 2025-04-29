@@ -18,6 +18,7 @@ class GuideAdapter(private val guideList: List<Guide>) : RecyclerView.Adapter<Gu
         val guideTitle: TextView = itemView.findViewById(R.id.guideTitle)
         val guideLocation: TextView = itemView.findViewById(R.id.guideLocation)
         val guideRate: TextView = itemView.findViewById(R.id.guideRate)
+        val guideViewCount = itemView.findViewById<TextView>(R.id.txt_view_count)
     }
 
     // ViewHolder 생성
@@ -33,6 +34,7 @@ class GuideAdapter(private val guideList: List<Guide>) : RecyclerView.Adapter<Gu
         holder.guideTitle.text = guide.title
         holder.guideLocation.text = guide.locate
         holder.guideRate.text = guide.rate
+        holder.guideViewCount.text= guide.viewCount.toString()
 
 
         // 썸네일 이미지 설정 (imageUrls[0] 또는 기본 이미지)

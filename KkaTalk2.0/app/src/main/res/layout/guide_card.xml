@@ -22,11 +22,11 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:scaleType="centerCrop"
-                app:srcCompat="@drawable/profile_default"/>
+                app:srcCompat="@drawable/image_default"/>
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:paddingLeft="16dp">
@@ -58,6 +58,16 @@
                     android:textColor="#FF5722"/>
 
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/txt_view_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="조회수: 0"
+                android:textSize="16sp"
+                android:textColor="#888888"
+                android:layout_gravity="bottom"
+                android:layout_marginEnd="10dp"/>
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>

@@ -9,9 +9,10 @@ data class Guide(
     var rate: String,
     var content: String,
     var profileImageUrl: String,
-    val imageUrls: List<String>
+    val imageUrls: List<String>,
+    val viewCount: Int
 )
 {
-    constructor(): this("", "","","","", "","","", listOf())
+    constructor(): this("", "","","","", "","","", listOf(),0)
 }
 
