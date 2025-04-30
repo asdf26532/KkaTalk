@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -39,8 +38,6 @@ class GuideDetailActivity : AppCompatActivity() {
         binding = ActivityGuideDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        viewPager = findViewById(R.id.view_pager)
-
         storage = FirebaseStorage.getInstance()
         auth = FirebaseAuth.getInstance()
 
@@ -54,6 +51,10 @@ class GuideDetailActivity : AppCompatActivity() {
         val txtPhone = findViewById<TextView>(R.id.txt_phone)
         val txtContent = findViewById<TextView>(R.id.txt_content)
         val txtViewCount = findViewById<TextView>(R.id.txt_view_count)
+        val indicator = findViewById<me.relex.circleindicator.CircleIndicator3>(R.id.indicator)
+
+        viewPager = findViewById(R.id.view_pager)
+
 
         val guideId = intent.getStringExtra("guideId")
         val nick = intent.getStringExtra("nick")
@@ -104,16 +105,11 @@ class GuideDetailActivity : AppCompatActivity() {
                     txtViewCount.text = "조회수: ${guide.viewCount}"
 
                     if (!guide.profileImageUrl.isNullOrEmpty()) {
-                        val profile = storage.getReferenceFromUrl(guide.profileImageUrl ?: "")
-                        profile.downloadUrl.addOnSuccessListener { uri ->
-                            Glide.with(this)
-                                .load(uri)
-                                .placeholder(R.drawable.profile_default)
-                                .error(R.drawable.profile_default)
-                                .into(imgProfile)
-                        }.addOnFailureListener {
-                            imgProfile.setImageResource(R.drawable.profile_default)
-                        }
+                        Glide.with(this)
+                            .load(guide.profileImageUrl)
+                            .placeholder(R.drawable.profile_default)
+                            .error(R.drawable.profile_default)
+                            .into(imgProfile)
                     } else {
                         imgProfile.setImageResource(R.drawable.profile_default)
                     }
@@ -126,6 +122,7 @@ class GuideDetailActivity : AppCompatActivity() {
                         imageAdapter = GuideImageAdapter(imageUrls)
                     }
                     viewPager.adapter = imageAdapter
+                    indicator.setViewPager(viewPager)
 
                     // 버튼 처리
                     if (currentUserUid == writerUid) {

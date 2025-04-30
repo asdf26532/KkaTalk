@@ -34,10 +34,10 @@ class GuideAdapter(private val guideList: List<Guide>) : RecyclerView.Adapter<Gu
         holder.guideTitle.text = guide.title
         holder.guideLocation.text = guide.locate
         holder.guideRate.text = guide.rate
-        holder.guideViewCount.text= guide.viewCount.toString()
+        holder.guideViewCount.text= "조회수: " + guide.viewCount.toString()
 
 
-        // 썸네일 이미지 설정 (imageUrls[0] 또는 기본 이미지)
+        // 썸네일 이미지 설정 (imageUrls[0] 또는 기본 이미지)ㅅ
         if (!guide.imageUrls.isNullOrEmpty()) {
             Glide.with(holder.itemView.context)
                 .load(guide.imageUrls[0])

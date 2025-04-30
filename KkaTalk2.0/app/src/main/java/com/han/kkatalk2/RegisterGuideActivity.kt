@@ -47,7 +47,7 @@ class RegisterGuideActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         guideDatabase = FirebaseDatabase.getInstance().getReference("guide")
         userDatabase = FirebaseDatabase.getInstance().getReference("user")
-        storage = FirebaseStorage.getInstance("gs://kkatalk2")
+        storage = FirebaseStorage.getInstance("gs://kkatalk-cf3fd.appspot.com")
 
         val edtTitle = findViewById<EditText>(R.id.edt_title)
         val spinnerLocation = findViewById<Spinner>(R.id.spinner_location)
