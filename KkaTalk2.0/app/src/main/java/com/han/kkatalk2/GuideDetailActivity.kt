@@ -26,7 +26,6 @@ class GuideDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityGuideDetailBinding
     private lateinit var database: DatabaseReference
     private lateinit var auth: FirebaseAuth
-    private lateinit var storage: FirebaseStorage
 
     private var writerUid: String? = null
 
@@ -38,7 +37,6 @@ class GuideDetailActivity : AppCompatActivity() {
         binding = ActivityGuideDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        storage = FirebaseStorage.getInstance()
         auth = FirebaseAuth.getInstance()
 
         val currentUserUid = auth.currentUser?.uid

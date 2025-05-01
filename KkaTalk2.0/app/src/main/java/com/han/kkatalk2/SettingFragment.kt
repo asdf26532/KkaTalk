@@ -197,7 +197,7 @@ class SettingFragment : Fragment() {
 
                 if (!profileImageUrl.isNullOrEmpty()) {
                     // Firebase Storage 참조 생성
-                    val storage = FirebaseStorage.getInstance("gs://kkatalk-cf3fd.appspot.com")
+                    val storage = FirebaseStorage.getInstance("BuildConfig.STORAGE_BUCKET")
                     val storageRef = storage.getReferenceFromUrl(profileImageUrl)
                     //val storageRef = Firebase.storage.getReferenceFromUrl(profileImageUrl)
 

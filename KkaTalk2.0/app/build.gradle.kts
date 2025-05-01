@@ -15,7 +15,18 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        buildConfigField(
+            type = "String",
+            name = "STORAGE_BUCKET",
+            value = "\"${project.findProperty("storage.bucket")}\""
+        )
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {

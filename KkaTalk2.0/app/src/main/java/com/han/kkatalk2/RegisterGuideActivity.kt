@@ -47,7 +47,15 @@ class RegisterGuideActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         guideDatabase = FirebaseDatabase.getInstance().getReference("guide")
         userDatabase = FirebaseDatabase.getInstance().getReference("user")
-        storage = FirebaseStorage.getInstance("gs://kkatalk-cf3fd.appspot.com")
+        //storage = FirebaseStorage.getInstance("BuildConfig.STORAGE_BUCKET")
+        try {
+            storage = FirebaseStorage.getInstance(BuildConfig.STORAGE_BUCKET)
+
+        } catch (e: IllegalArgumentException) {
+            Log.d("Firebase", "Bucket URL: ${storage}")
+            Log.e("Firebase", "Error initializing FirebaseStorage: ${e.message}")
+            Toast.makeText(this, "Storage initialization failed", Toast.LENGTH_SHORT).show()
+        }
 
         val edtTitle = findViewById<EditText>(R.id.edt_title)
         val spinnerLocation = findViewById<Spinner>(R.id.spinner_location)
