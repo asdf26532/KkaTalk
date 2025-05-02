@@ -1,7 +1,16 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.gms.google-services")
+}
+
+val localProperties = Properties()
+val localPropsFile = rootProject.file("local.properties")
+if (localPropsFile.exists()) {
+    localProperties.load(FileInputStream(localPropsFile))
 }
 
 android {
@@ -16,9 +25,9 @@ android {
         versionName = "1.0"
 
         buildConfigField(
-            type = "String",
-            name = "STORAGE_BUCKET",
-            value = "\"${project.findProperty("storage.bucket")}\""
+            "String",
+            "STORAGE_BUCKET",
+            "\"${localProperties["storage.bucket"]}\""
         )
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

@@ -47,15 +47,9 @@ class RegisterGuideActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         guideDatabase = FirebaseDatabase.getInstance().getReference("guide")
         userDatabase = FirebaseDatabase.getInstance().getReference("user")
-        //storage = FirebaseStorage.getInstance("BuildConfig.STORAGE_BUCKET")
-        try {
-            storage = FirebaseStorage.getInstance(BuildConfig.STORAGE_BUCKET)
+        storage = FirebaseStorage.getInstance(BuildConfig.STORAGE_BUCKET)
+        Log.d("Firebase", "Bucket URL: ${storage}")
 
-        } catch (e: IllegalArgumentException) {
-            Log.d("Firebase", "Bucket URL: ${storage}")
-            Log.e("Firebase", "Error initializing FirebaseStorage: ${e.message}")
-            Toast.makeText(this, "Storage initialization failed", Toast.LENGTH_SHORT).show()
-        }
 
         val edtTitle = findViewById<EditText>(R.id.edt_title)
         val spinnerLocation = findViewById<Spinner>(R.id.spinner_location)
@@ -247,27 +241,6 @@ class RegisterGuideActivity : AppCompatActivity() {
             }
         }
     }
-
-    /*private fun displaySelectedImages() {
-        // 1. imgAdd(첫 번째 자식)만 남기고, 기존에 추가된 썸네일 뷰들은 모두 제거
-        val totalChildren = imageContainer.childCount
-        if (totalChildren > 1) {
-            imageContainer.removeViews(1, totalChildren - 1)
-        }
-
-        // 2. 선택된 URI 리스트를 순회하면서, imgAdd 뒤에 차례대로 ImageView 추가
-        for (uri in selectedImageUris) {
-            val thumb = ImageView(this).apply {
-                layoutParams = LinearLayout.LayoutParams(250, 250).apply {
-                    setMargins(8, 8, 8, 8)
-                }
-                scaleType = ImageView.ScaleType.CENTER_CROP
-            }
-            Glide.with(this).load(uri).into(thumb)
-            imageContainer.addView(thumb)
-        }
-        txtImageCount.text = "${selectedImageUris.size}/10"
-    }*/
 
     private fun displaySelectedImages() {
         val totalChildren = imageContainer.childCount
