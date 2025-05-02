@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.TextView
@@ -166,15 +167,51 @@ class GuideDetailActivity : AppCompatActivity() {
         finish()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.guide_detail_menu, menu)
+
+        val currentUserUid = auth.currentUser?.uid
+
+        if (currentUserUid == writerUid) {
+            menu?.findItem(R.id.action_edit)?.isVisible = true
+            menu?.findItem(R.id.action_delete)?.isVisible = true
+            menu?.findItem(R.id.action_bump)?.isVisible = true
+        } else {
+            menu?.findItem(R.id.action_report)?.isVisible = true
+        }
+
+        return true
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
                 val intent = Intent()
-                intent.putExtra("chatUpdated", true)
                 setResult(Activity.RESULT_OK, intent)
                 finish()
                 true
             }
+
+            R.id.action_edit -> {
+                Toast.makeText(this, "수정 클릭됨", Toast.LENGTH_SHORT).show()
+                true
+            }
+
+            R.id.action_delete -> {
+                Toast.makeText(this, "삭제 클릭됨", Toast.LENGTH_SHORT).show()
+                true
+            }
+
+            R.id.action_bump -> {
+                Toast.makeText(this, "끌어올리기 클릭됨", Toast.LENGTH_SHORT).show()
+                true
+            }
+
+            R.id.action_report -> {
+                Toast.makeText(this, "신고하기 클릭됨", Toast.LENGTH_SHORT).show()
+                true
+            }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
