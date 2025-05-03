@@ -9,6 +9,7 @@ import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
@@ -32,6 +33,9 @@ class GuideDetailActivity : AppCompatActivity() {
 
     private lateinit var viewPager: ViewPager2
     private lateinit var imageAdapter: GuideImageAdapter
+
+    private var guideId: String? = null
+    private var imageUrls: List<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -167,13 +171,42 @@ class GuideDetailActivity : AppCompatActivity() {
         finish()
     }
 
+    private fun deleteGuide() {
+        val guideId = this.guideId ?: return
+        val imageUrls = this.imageUrls
+
+        val storage = FirebaseStorage.getInstance()
+
+        // 스토리지 이미지 삭제
+        imageUrls?.forEach { imageUrl ->
+            storage.getReferenceFromUrl(imageUrl).delete()
+                .addOnSuccessListener {
+                    Log.d("GuideDelete", "이미지 삭제 성공: $imageUrl")
+                }
+                .addOnFailureListener {
+                    Log.w("GuideDelete", "이미지 삭제 실패: $imageUrl", it)
+                }
+        }
+
+        // DB에서 가이드 글 삭제
+        val guideRef = FirebaseDatabase.getInstance().getReference("guide").child(guideId)
+        guideRef.removeValue()
+            .addOnSuccessListener {
+                Toast.makeText(this, "게시글이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "삭제 실패: ${it.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.guide_detail_menu, menu)
 
         val currentUserUid = auth.currentUser?.uid
 
         if (currentUserUid == writerUid) {
-            menu?.findItem(R.id.action_edit)?.isVisible = true
             menu?.findItem(R.id.action_delete)?.isVisible = true
             menu?.findItem(R.id.action_bump)?.isVisible = true
         } else {
@@ -191,22 +224,23 @@ class GuideDetailActivity : AppCompatActivity() {
                 finish()
                 true
             }
-
-            R.id.action_edit -> {
-                Toast.makeText(this, "수정 클릭됨", Toast.LENGTH_SHORT).show()
-                true
-            }
-
             R.id.action_delete -> {
-                Toast.makeText(this, "삭제 클릭됨", Toast.LENGTH_SHORT).show()
+                AlertDialog.Builder(this)
+                    .setTitle("삭제 확인")
+                    .setMessage("정말 이 게시글을 삭제하시겠습니까?")
+                    .setPositiveButton("삭제") { _, _ ->
+                        deleteGuide()
+                    }
+                    .setNegativeButton("취소", null)
+                    .show()
                 true
-            }
 
+
+            }
             R.id.action_bump -> {
                 Toast.makeText(this, "끌어올리기 클릭됨", Toast.LENGTH_SHORT).show()
                 true
             }
-
             R.id.action_report -> {
                 Toast.makeText(this, "신고하기 클릭됨", Toast.LENGTH_SHORT).show()
                 true
