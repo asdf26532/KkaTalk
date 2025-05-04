@@ -34,8 +34,8 @@ class GuideDetailActivity : AppCompatActivity() {
     private lateinit var viewPager: ViewPager2
     private lateinit var imageAdapter: GuideImageAdapter
 
-    private var guideId: String? = null
-    private var imageUrls: List<String>? = null
+    private lateinit var guideId: String
+    private lateinit var imageUrls: List<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,15 +59,17 @@ class GuideDetailActivity : AppCompatActivity() {
         viewPager = findViewById(R.id.view_pager)
 
 
-        val guideId = intent.getStringExtra("guideId")
+        guideId = intent.getStringExtra("guideId")
+            ?: throw IllegalArgumentException("Guide ID is required")
+
         val nick = intent.getStringExtra("nick")
         val profileImageUrl = intent.getStringExtra("profileImageUrl")
 
-        if (guideId.isNullOrEmpty()) {
+        /*if (guideId.isNullOrEmpty()) {
             Toast.makeText(this, "잘못된 접근입니다.", Toast.LENGTH_SHORT).show()
             finish()
             return
-        }
+        }*/
 
         database = FirebaseDatabase.getInstance().getReference("guide").child(guideId)
 
@@ -96,6 +98,7 @@ class GuideDetailActivity : AppCompatActivity() {
                 }
 
                 val guide = snapshot.getValue(Guide::class.java)
+
                 if (guide != null) {
                     writerUid = guide.uId
 
@@ -117,13 +120,15 @@ class GuideDetailActivity : AppCompatActivity() {
                         imgProfile.setImageResource(R.drawable.profile_default)
                     }
 
-                    val imageUrls = guide.imageUrls
-                    if (imageUrls.isNullOrEmpty()) {
-                        // 없으면 기본이미지 하나 넣기
-                        imageAdapter = GuideImageAdapter(listOf(R.drawable.image_default), true)
+                    imageUrls = guide.imageUrls ?: emptyList() // Null 체크 후 빈 리스트를 할당
+
+                    // imageUrls가 비어 있으면 기본 이미지를 설정
+                    imageAdapter = if (imageUrls.isEmpty()) {
+                        GuideImageAdapter(listOf(R.drawable.image_default), true) // 기본 이미지
                     } else {
-                        imageAdapter = GuideImageAdapter(imageUrls)
+                        GuideImageAdapter(imageUrls) // 실제 이미지 리스트
                     }
+
                     viewPager.adapter = imageAdapter
                     indicator.setViewPager(viewPager)
 
@@ -172,25 +177,24 @@ class GuideDetailActivity : AppCompatActivity() {
     }
 
     private fun deleteGuide() {
-        val guideId = this.guideId ?: return
-        val imageUrls = this.imageUrls
+        Log.d("GuideDelete", "guideId = $guideId, imageUrls = $imageUrls")
 
         val storage = FirebaseStorage.getInstance()
-
-        // 스토리지 이미지 삭제
-        imageUrls?.forEach { imageUrl ->
-            storage.getReferenceFromUrl(imageUrl).delete()
+        imageUrls.forEach { url ->
+            storage.getReferenceFromUrl(url)
+                .delete()
                 .addOnSuccessListener {
-                    Log.d("GuideDelete", "이미지 삭제 성공: $imageUrl")
+                    Log.d("GuideDelete", "이미지 삭제 성공: $url")
                 }
                 .addOnFailureListener {
-                    Log.w("GuideDelete", "이미지 삭제 실패: $imageUrl", it)
+                    Log.w("GuideDelete", "이미지 삭제 실패: $url", it)
                 }
         }
 
-        // DB에서 가이드 글 삭제
-        val guideRef = FirebaseDatabase.getInstance().getReference("guide").child(guideId)
-        guideRef.removeValue()
+        FirebaseDatabase.getInstance()
+            .getReference("guide")
+            .child(guideId)
+            .removeValue()
             .addOnSuccessListener {
                 Toast.makeText(this, "게시글이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
                 finish()
@@ -227,15 +231,13 @@ class GuideDetailActivity : AppCompatActivity() {
             R.id.action_delete -> {
                 AlertDialog.Builder(this)
                     .setTitle("삭제 확인")
-                    .setMessage("정말 이 게시글을 삭제하시겠습니까?")
+                    .setMessage("정말 삭제하시겠습니까?")
                     .setPositiveButton("삭제") { _, _ ->
                         deleteGuide()
                     }
                     .setNegativeButton("취소", null)
                     .show()
                 true
-
-
             }
             R.id.action_bump -> {
                 Toast.makeText(this, "끌어올리기 클릭됨", Toast.LENGTH_SHORT).show()
