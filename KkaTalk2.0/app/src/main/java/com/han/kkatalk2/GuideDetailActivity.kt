@@ -2,6 +2,7 @@ package com.han.kkatalk2
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -59,11 +60,18 @@ class GuideDetailActivity : AppCompatActivity() {
         viewPager = findViewById(R.id.view_pager)
 
 
-        guideId = intent.getStringExtra("guideId")
-            ?: throw IllegalArgumentException("Guide ID is required")
+        /*guideId = intent.getStringExtra("guideId")
+            ?: throw IllegalArgumentException("Guide ID is required")*/
+
+        guideId = intent.getStringExtra("guideId") ?: run {
+            Toast.makeText(this, "가이드 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
 
         val nick = intent.getStringExtra("nick")
         val profileImageUrl = intent.getStringExtra("profileImageUrl")
+
 
         /*if (guideId.isNullOrEmpty()) {
             Toast.makeText(this, "잘못된 접근입니다.", Toast.LENGTH_SHORT).show()
@@ -120,7 +128,7 @@ class GuideDetailActivity : AppCompatActivity() {
                         imgProfile.setImageResource(R.drawable.profile_default)
                     }
 
-                    imageUrls = guide.imageUrls ?: emptyList() // Null 체크 후 빈 리스트를 할당
+                    imageUrls = guide.imageUrls
 
                     // imageUrls가 비어 있으면 기본 이미지를 설정
                     imageAdapter = if (imageUrls.isEmpty()) {
@@ -179,7 +187,26 @@ class GuideDetailActivity : AppCompatActivity() {
     private fun deleteGuide() {
         Log.d("GuideDelete", "guideId = $guideId, imageUrls = $imageUrls")
 
-        val storage = FirebaseStorage.getInstance()
+        val storage = FirebaseStorage.getInstance(BuildConfig.STORAGE_BUCKET)
+
+        /*imageUrls.forEach { fullUrl ->
+            val decodedUrl = Uri.decode(fullUrl)
+            val startIndex = decodedUrl.indexOf("/o/") + 3
+            val endIndex = decodedUrl.indexOf("?alt=")
+            val filePath = decodedUrl.substring(startIndex, endIndex)
+
+            Log.d("GuideDelete", "삭제할 파일 경로: $filePath")
+
+            storage.getReference(filePath)
+                .delete()
+                .addOnSuccessListener {
+                    Log.d("GuideDelete", "이미지 삭제 성공: $filePath")
+                }
+                .addOnFailureListener {
+                    Log.w("GuideDelete", "이미지 삭제 실패: $filePath", it)
+                }
+        }*/
+
         imageUrls.forEach { url ->
             storage.getReferenceFromUrl(url)
                 .delete()
