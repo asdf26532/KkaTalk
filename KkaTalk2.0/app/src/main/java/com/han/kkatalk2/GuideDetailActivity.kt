@@ -1,6 +1,7 @@
 package com.han.kkatalk2
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -23,6 +24,9 @@ import com.google.firebase.database.MutableData
 import com.google.firebase.database.Transaction
 import com.google.firebase.storage.FirebaseStorage
 import com.han.kkatalk2.databinding.ActivityGuideDetailBinding
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class GuideDetailActivity : AppCompatActivity() {
 
@@ -184,28 +188,11 @@ class GuideDetailActivity : AppCompatActivity() {
         finish()
     }
 
+    // 가이드 글 삭제
     private fun deleteGuide() {
         Log.d("GuideDelete", "guideId = $guideId, imageUrls = $imageUrls")
 
         val storage = FirebaseStorage.getInstance(BuildConfig.STORAGE_BUCKET)
-
-        /*imageUrls.forEach { fullUrl ->
-            val decodedUrl = Uri.decode(fullUrl)
-            val startIndex = decodedUrl.indexOf("/o/") + 3
-            val endIndex = decodedUrl.indexOf("?alt=")
-            val filePath = decodedUrl.substring(startIndex, endIndex)
-
-            Log.d("GuideDelete", "삭제할 파일 경로: $filePath")
-
-            storage.getReference(filePath)
-                .delete()
-                .addOnSuccessListener {
-                    Log.d("GuideDelete", "이미지 삭제 성공: $filePath")
-                }
-                .addOnFailureListener {
-                    Log.w("GuideDelete", "이미지 삭제 실패: $filePath", it)
-                }
-        }*/
 
         imageUrls.forEach { url ->
             storage.getReferenceFromUrl(url)
@@ -228,6 +215,32 @@ class GuideDetailActivity : AppCompatActivity() {
             }
             .addOnFailureListener {
                 Toast.makeText(this, "삭제 실패: ${it.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    // 가이드 글 끌어올리기
+    private fun liftGuide() {
+        val guideId = intent.getStringExtra("guideId") ?: return
+        val guideRef = FirebaseDatabase.getInstance().getReference("guide").child(guideId)
+
+        val today = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
+        val liftKey = "lastLifted_$guideId"
+
+        val prefs = getSharedPreferences("LiftPrefs", Context.MODE_PRIVATE)
+        val lastLiftedDate = prefs.getString(liftKey, "")
+
+        if (lastLiftedDate == today) {
+            Toast.makeText(this, "오늘은 이미 끌어올리기를 했습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        guideRef.child("timestamp").setValue(System.currentTimeMillis())
+            .addOnSuccessListener {
+                prefs.edit().putString(liftKey, today).apply()
+                Toast.makeText(this, "끌어올리기 완료!", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "끌어올리기 실패", Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -267,7 +280,14 @@ class GuideDetailActivity : AppCompatActivity() {
                 true
             }
             R.id.action_bump -> {
-                Toast.makeText(this, "끌어올리기 클릭됨", Toast.LENGTH_SHORT).show()
+                AlertDialog.Builder(this)
+                    .setTitle("끌어올리기 확인")
+                    .setMessage("글을 끌어올리겠습니까?")
+                    .setPositiveButton("확인") { _, _ ->
+                        liftGuide()
+                    }
+                    .setNegativeButton("취소", null)
+                    .show()
                 true
             }
             R.id.action_report -> {
