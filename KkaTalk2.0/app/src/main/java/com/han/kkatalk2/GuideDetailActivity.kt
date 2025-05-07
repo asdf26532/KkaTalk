@@ -102,6 +102,23 @@ class GuideDetailActivity : AppCompatActivity() {
             }
         })
 
+        /*database.runTransaction(object : Transaction.Handler {
+            override fun doTransaction(currentData: MutableData): Transaction.Result {
+                val guide = currentData.getValue(Guide::class.java) ?: return Transaction.success(currentData)
+                val updatedGuide = guide.copy(viewCount = guide.viewCount + 1)
+                currentData.value = updatedGuide
+                return Transaction.success(currentData)
+            }
+
+            override fun onComplete(error: DatabaseError?, committed: Boolean, currentData: DataSnapshot?) {
+                if (error != null) {
+                    Log.e("GuideDetailActivity", "조회수 증가 실패: ${error.message}")
+                } else {
+                    Log.d("GuideDetailActivity", "조회수 증가 성공")
+                }
+            }
+        })*/
+
         database.get()
             .addOnSuccessListener { snapshot ->
                 if (!snapshot.exists()) {

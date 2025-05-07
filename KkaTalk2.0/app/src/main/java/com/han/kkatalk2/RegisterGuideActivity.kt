@@ -109,7 +109,6 @@ class RegisterGuideActivity : AppCompatActivity() {
                 val rate = edtRate.text.toString()
                 val phone = edtPhone.text.toString()
                 val content = edtContent.text.toString()
-                val timestamp = System.currentTimeMillis()
 
                 Log.d("RegisterGuide", "입력값 - name: $title, location: $location, rate: $rate, phone: $phone, content: $content")
 
@@ -125,11 +124,11 @@ class RegisterGuideActivity : AppCompatActivity() {
                         Log.d("RegisterGuide", "선택된 이미지 수: ${selectedImageUris.size}")
                         uploadImagesToFirebase(userId, progressDialog) {
                             Log.d("RegisterGuide", "이미지 업로드 완료, URL 목록: $uploadedUrls")
-                            registerGuide(title, userId, nick, phone, location, rate, content, profileImageUrl, uploadedUrls, viewCount, timestamp)
+                            registerGuide(title, userId, nick, phone, location, rate, content, profileImageUrl, uploadedUrls, viewCount)
                         }
                     } else {
                         Log.d("RegisterGuide", "이미지 없이 가이드 등록 시도")
-                        registerGuide(title, userId, nick, phone, location, rate, content, profileImageUrl, listOf(), viewCount, timestamp)
+                        registerGuide(title, userId, nick, phone, location, rate, content, profileImageUrl, listOf(), viewCount)
                         progressDialog.dismiss()
                     }
                 } else {
@@ -189,10 +188,11 @@ class RegisterGuideActivity : AppCompatActivity() {
         content: String,
         profileImageUrl: String,
         imageUrls: List<String>,
-        viewCount: Int,
-        timestamp: Long?
+        viewCount: Int
     ) {
         val guideRef = guideDatabase.child(userId)
+        val timestamp = System.currentTimeMillis()
+
         val guide = Guide(title, userId, nick, phone, location, rate, content, profileImageUrl, imageUrls, viewCount, timestamp)
         Log.d("RegisterGuide", "파이어베이스에 등록할 Guide 객체: $guide")
 
