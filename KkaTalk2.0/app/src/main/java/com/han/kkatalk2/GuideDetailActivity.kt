@@ -3,7 +3,6 @@ package com.han.kkatalk2
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -39,9 +38,6 @@ class GuideDetailActivity : AppCompatActivity() {
     private lateinit var viewPager: ViewPager2
     private lateinit var imageAdapter: GuideImageAdapter
 
-    private lateinit var guideId: String
-    private lateinit var imageUrls: List<String>
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityGuideDetailBinding.inflate(layoutInflater)
@@ -63,25 +59,15 @@ class GuideDetailActivity : AppCompatActivity() {
 
         viewPager = findViewById(R.id.view_pager)
 
-
-        /*guideId = intent.getStringExtra("guideId")
-            ?: throw IllegalArgumentException("Guide ID is required")*/
-
-        guideId = intent.getStringExtra("guideId") ?: run {
-            Toast.makeText(this, "가이드 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
-            finish()
-            return
-        }
-
+        val guideId = intent.getStringExtra("guideId")
         val nick = intent.getStringExtra("nick")
         val profileImageUrl = intent.getStringExtra("profileImageUrl")
 
-
-        /*if (guideId.isNullOrEmpty()) {
+        if (guideId.isNullOrEmpty()) {
             Toast.makeText(this, "잘못된 접근입니다.", Toast.LENGTH_SHORT).show()
             finish()
             return
-        }*/
+        }
 
         database = FirebaseDatabase.getInstance().getReference("guide").child(guideId)
 
@@ -102,22 +88,12 @@ class GuideDetailActivity : AppCompatActivity() {
             }
         })
 
-        /*database.runTransaction(object : Transaction.Handler {
-            override fun doTransaction(currentData: MutableData): Transaction.Result {
-                val guide = currentData.getValue(Guide::class.java) ?: return Transaction.success(currentData)
-                val updatedGuide = guide.copy(viewCount = guide.viewCount + 1)
-                currentData.value = updatedGuide
-                return Transaction.success(currentData)
-            }
+        /*val guideRef = database.child("viewCount")
 
-            override fun onComplete(error: DatabaseError?, committed: Boolean, currentData: DataSnapshot?) {
-                if (error != null) {
-                    Log.e("GuideDetailActivity", "조회수 증가 실패: ${error.message}")
-                } else {
-                    Log.d("GuideDetailActivity", "조회수 증가 성공")
-                }
-            }
-        })*/
+        guideRef.get().addOnSuccessListener { snapshot ->
+            val currentViewCount = snapshot.getValue(Int::class.java) ?: 0
+            guideRef.setValue(currentViewCount + 1)
+        }*/
 
         database.get()
             .addOnSuccessListener { snapshot ->
@@ -149,7 +125,7 @@ class GuideDetailActivity : AppCompatActivity() {
                         imgProfile.setImageResource(R.drawable.profile_default)
                     }
 
-                    imageUrls = guide.imageUrls
+                    val imageUrls = guide.imageUrls
 
                     // imageUrls가 비어 있으면 기본 이미지를 설정
                     imageAdapter = if (imageUrls.isEmpty()) {
