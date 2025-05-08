@@ -38,6 +38,9 @@ class GuideDetailActivity : AppCompatActivity() {
     private lateinit var viewPager: ViewPager2
     private lateinit var imageAdapter: GuideImageAdapter
 
+    private lateinit var guideId: String
+    private var currentGuide: Guide? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityGuideDetailBinding.inflate(layoutInflater)
@@ -59,7 +62,9 @@ class GuideDetailActivity : AppCompatActivity() {
 
         viewPager = findViewById(R.id.view_pager)
 
-        val guideId = intent.getStringExtra("guideId")
+        guideId = intent.getStringExtra("guideId")
+            ?: throw IllegalArgumentException("guideId가 존재하지 않습니다.")
+
         val nick = intent.getStringExtra("nick")
         val profileImageUrl = intent.getStringExtra("profileImageUrl")
 
@@ -88,13 +93,6 @@ class GuideDetailActivity : AppCompatActivity() {
             }
         })
 
-        /*val guideRef = database.child("viewCount")
-
-        guideRef.get().addOnSuccessListener { snapshot ->
-            val currentViewCount = snapshot.getValue(Int::class.java) ?: 0
-            guideRef.setValue(currentViewCount + 1)
-        }*/
-
         database.get()
             .addOnSuccessListener { snapshot ->
                 if (!snapshot.exists()) {
@@ -105,6 +103,7 @@ class GuideDetailActivity : AppCompatActivity() {
                 val guide = snapshot.getValue(Guide::class.java)
 
                 if (guide != null) {
+                    currentGuide = guide
                     writerUid = guide.uId
 
                     txtTitle.text = guide.title
@@ -182,8 +181,8 @@ class GuideDetailActivity : AppCompatActivity() {
     }
 
     // 가이드 글 삭제
-    private fun deleteGuide() {
-        Log.d("GuideDelete", "guideId = $guideId, imageUrls = $imageUrls")
+    private fun deleteGuide(guideId: String, imageUrls: List<String>) {
+        Log.d("GuideDelete", "guideId = $guideId imageUrls: $imageUrls")
 
         val storage = FirebaseStorage.getInstance(BuildConfig.STORAGE_BUCKET)
 
@@ -266,7 +265,9 @@ class GuideDetailActivity : AppCompatActivity() {
                     .setTitle("삭제 확인")
                     .setMessage("정말 삭제하시겠습니까?")
                     .setPositiveButton("삭제") { _, _ ->
-                        deleteGuide()
+                        currentGuide?.let {
+                            deleteGuide(guideId, it.imageUrls ?: emptyList())
+                        } ?: Toast.makeText(this, "가이드 정보가 없습니다.", Toast.LENGTH_SHORT).show()
                     }
                     .setNegativeButton("취소", null)
                     .show()

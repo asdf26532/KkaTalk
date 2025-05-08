@@ -8,7 +8,7 @@ data class Guide(
     var locate: String,
     var rate: String,
     var content: String,
-    val profileImageUrl: String,
+    var profileImageUrl: String,
     var imageUrls: List<String>,
     var viewCount: Int,
     var timestamp: Long?
