@@ -41,6 +41,10 @@ class GuideDetailActivity : AppCompatActivity() {
     private lateinit var guideId: String
     private var currentGuide: Guide? = null
 
+    companion object {
+        private const val REQUEST_EDIT_GUIDE = 1002
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityGuideDetailBinding.inflate(layoutInflater)
@@ -142,7 +146,7 @@ class GuideDetailActivity : AppCompatActivity() {
                         binding.btnChat.setOnClickListener {
                             val intent = Intent(this, RegisterGuideActivity::class.java)
                             intent.putExtra("guideId", guideId)
-                            startActivity(intent)
+                            startActivityForResult(intent, REQUEST_EDIT_GUIDE)
                         }
                     } else {
                         binding.btnChat.text = "대화하기"
@@ -234,6 +238,29 @@ class GuideDetailActivity : AppCompatActivity() {
             .addOnFailureListener {
                 Toast.makeText(this, "끌어올리기 실패", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_EDIT_GUIDE && resultCode == RESULT_OK) {
+            reloadGuideData()
+        }
+    }
+
+    private fun reloadGuideData() {
+        database.get().addOnSuccessListener { snapshot ->
+            if (!snapshot.exists()) {
+                showErrorAndExit("해당 가이드를 찾을 수 없습니다.")
+                return@addOnSuccessListener
+            }
+
+            val guide = snapshot.getValue(Guide::class.java)
+            if (guide != null) {
+                currentGuide = guide
+                updateUI(guide)
+            }
+        }
     }
 
 

@@ -100,7 +100,7 @@ class RegisterGuideActivity : AppCompatActivity() {
 
         userDatabase.child(userId).get().addOnSuccessListener { snapshot ->
             val nick = snapshot.child("nick").value as? String ?: ""
-            val profileImageUrl = snapshot.child("profileImageUrl").value as? String ?: "" // ✅ 프로필 이미지 URL 가져오기
+            val profileImageUrl = snapshot.child("profileImageUrl").value as? String ?: ""
             Log.d("RegisterGuide", "닉네임: $nick / 프로필 URL: $profileImageUrl")
 
             btnRegister.setOnClickListener {
@@ -199,7 +199,8 @@ class RegisterGuideActivity : AppCompatActivity() {
         guideRef.setValue(guide).addOnCompleteListener {
             if (it.isSuccessful) {
                 Log.d("RegisterGuide", "가이드 등록 성공")
-                Toast.makeText(this, "가이드 등록 완료!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "등록 완료!", Toast.LENGTH_SHORT).show()
+                setResult(RESULT_OK)
                 finish()
             } else {
                 Log.e("RegisterGuide", "가이드 등록 실패: ${it.exception?.message}")
