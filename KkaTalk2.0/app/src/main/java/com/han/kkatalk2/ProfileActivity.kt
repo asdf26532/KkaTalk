@@ -7,6 +7,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.han.kkatalk2.databinding.ActivityProfileBinding
@@ -42,6 +43,12 @@ class ProfileActivity : AppCompatActivity() {
         // 상태 메시지 표시
         loadStatusMessage()
 
+        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId == currentUserUid) {
+            binding.btnChat.visibility = View.GONE
+        } else {
+            binding.btnChat.visibility = View.VISIBLE
+        }
         // 대화하기 버튼 클릭 이벤트
         binding.btnChat.setOnClickListener {
             val intent = Intent(this, ChatActivity::class.java)
