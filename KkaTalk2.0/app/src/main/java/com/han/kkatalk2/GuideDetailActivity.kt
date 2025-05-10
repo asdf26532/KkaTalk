@@ -1,6 +1,7 @@
 package com.han.kkatalk2
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -10,7 +11,6 @@ import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
@@ -51,35 +51,38 @@ class GuideDetailActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         auth = FirebaseAuth.getInstance()
-
-        val currentUserUid = auth.currentUser?.uid
-
-        val txtTitle = findViewById<TextView>(R.id.txt_title)
-        val imgProfile = findViewById<ImageView>(R.id.img_profile)
-        val txtNick = findViewById<TextView>(R.id.txt_name)
-        val txtLocation = findViewById<TextView>(R.id.txt_location)
-        val txtRate = findViewById<TextView>(R.id.txt_rate)
-        val txtPhone = findViewById<TextView>(R.id.txt_phone)
-        val txtContent = findViewById<TextView>(R.id.txt_content)
-        val txtViewCount = findViewById<TextView>(R.id.txt_view_count)
-        val indicator = findViewById<me.relex.circleindicator.CircleIndicator3>(R.id.indicator)
-
-        viewPager = findViewById(R.id.view_pager)
-
         guideId = intent.getStringExtra("guideId")
             ?: throw IllegalArgumentException("guideId가 존재하지 않습니다.")
-
         val nick = intent.getStringExtra("nick")
         val profileImageUrl = intent.getStringExtra("profileImageUrl")
 
-        if (guideId.isNullOrEmpty()) {
+        if (guideId.isEmpty()) {
             Toast.makeText(this, "잘못된 접근입니다.", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
 
         database = FirebaseDatabase.getInstance().getReference("guide").child(guideId)
+        viewPager = findViewById(R.id.view_pager)
 
+        // 가이드 정보 불러오기 및 조회수 증가
+        loadGuide()
+
+        // 프로필 클릭 시 프로필 화면으로 이동
+        findViewById<ImageView>(R.id.img_profile).setOnClickListener {
+            val intent = Intent(this, ProfileActivity::class.java)
+            intent.putExtra("uId", guideId)
+            intent.putExtra("nick", nick)
+            intent.putExtra("profileImageUrl", profileImageUrl)
+            startActivity(intent)
+        }
+
+        supportActionBar?.title = ""
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    }
+
+    private fun loadGuide() {
+        // 조회수 증가 처리
         database.runTransaction(object : Transaction.Handler {
             override fun doTransaction(currentData: MutableData): Transaction.Result {
                 val guide = currentData.getValue(Guide::class.java) ?: return Transaction.success(currentData)
@@ -97,86 +100,78 @@ class GuideDetailActivity : AppCompatActivity() {
             }
         })
 
-        database.get()
-            .addOnSuccessListener { snapshot ->
-                if (!snapshot.exists()) {
-                    showErrorAndExit("해당 가이드를 찾을 수 없습니다.")
-                    return@addOnSuccessListener
-                }
+        // 가이드 데이터 가져오기
+        database.get().addOnSuccessListener { snapshot ->
+            if (!snapshot.exists()) {
+                showErrorAndExit("해당 가이드를 찾을 수 없습니다.")
+                return@addOnSuccessListener
+            }
 
-                val guide = snapshot.getValue(Guide::class.java)
+            val guide = snapshot.getValue(Guide::class.java)
+            if (guide != null) {
+                currentGuide = guide
+                writerUid = guide.uId
 
-                if (guide != null) {
-                    currentGuide = guide
-                    writerUid = guide.uId
+                updateUI(guide)
 
-                    txtTitle.text = guide.title
-                    txtNick.text = guide.nick
-                    txtLocation.text = "지역: ${guide.locate}"
-                    txtRate.text = "요금: ${guide.rate}"
-                    txtPhone.text = "전화번호: ${guide.phoneNumber}"
-                    txtContent.text = guide.content
-                    txtViewCount.text = "조회수: ${guide.viewCount}"
-
-                    if (!guide.profileImageUrl.isNullOrEmpty()) {
-                        Glide.with(this)
-                            .load(guide.profileImageUrl)
-                            .placeholder(R.drawable.profile_default)
-                            .error(R.drawable.profile_default)
-                            .into(imgProfile)
-                    } else {
-                        imgProfile.setImageResource(R.drawable.profile_default)
-                    }
-
-                    val imageUrls = guide.imageUrls
-
-                    // imageUrls가 비어 있으면 기본 이미지를 설정
-                    imageAdapter = if (imageUrls.isEmpty()) {
-                        GuideImageAdapter(listOf(R.drawable.image_default), true) // 기본 이미지
-                    } else {
-                        GuideImageAdapter(imageUrls) // 실제 이미지 리스트
-                    }
-
-                    viewPager.adapter = imageAdapter
-                    indicator.setViewPager(viewPager)
-
-                    // 버튼 처리
-                    if (currentUserUid == writerUid) {
-                        binding.btnChat.text = "수정하기"
-                        binding.btnChat.setOnClickListener {
-                            val intent = Intent(this, RegisterGuideActivity::class.java)
-                            intent.putExtra("guideId", guideId)
-                            startActivityForResult(intent, REQUEST_EDIT_GUIDE)
-                        }
-                    } else {
-                        binding.btnChat.text = "대화하기"
-                        binding.btnChat.setOnClickListener {
-                            val intent = Intent(this, ChatActivity::class.java).apply {
-                                putExtra("uId", guideId)
-                                putExtra("nick", nick)
-                                putExtra("profileImageUrl", profileImageUrl)
-                            }
-                            startActivity(intent)
-                        }
+                // 버튼 처리
+                val currentUserUid = auth.currentUser?.uid
+                if (currentUserUid == writerUid) {
+                    binding.btnChat.text = "수정하기"
+                    binding.btnChat.setOnClickListener {
+                        val intent = Intent(this, RegisterGuideActivity::class.java)
+                        intent.putExtra("guideId", guideId)
+                        startActivityForResult(intent, REQUEST_EDIT_GUIDE)
                     }
                 } else {
-                    showErrorAndExit("데이터를 불러오는 중 오류가 발생했습니다.")
+                    binding.btnChat.text = "대화하기"
+                    binding.btnChat.setOnClickListener {
+                        val intent = Intent(this, ChatActivity::class.java).apply {
+                            putExtra("uId", guideId)
+                            putExtra("nick", guide.nick)
+                            putExtra("profileImageUrl", guide.profileImageUrl)
+                        }
+                        startActivity(intent)
+                    }
                 }
-            }
-            .addOnFailureListener {
-                showErrorAndExit("네트워크 오류가 발생했습니다. 다시 시도해주세요.")
-            }
 
-        imgProfile.setOnClickListener {
-            val intent = Intent(this, ProfileActivity::class.java)
-            intent.putExtra("uId", guideId)
-            intent.putExtra("nick", nick)
-            intent.putExtra("profileImageUrl", profileImageUrl)
-            startActivity(intent)
+            } else {
+                showErrorAndExit("데이터를 불러오는 중 오류가 발생했습니다.")
+            }
+        }.addOnFailureListener {
+            showErrorAndExit("네트워크 오류가 발생했습니다. 다시 시도해주세요.")
+        }
+    }
+
+    private fun updateUI(guide: Guide) {
+        findViewById<TextView>(R.id.txt_title).text = guide.title
+        findViewById<TextView>(R.id.txt_name).text = guide.nick
+        findViewById<TextView>(R.id.txt_location).text = "지역: ${guide.locate}"
+        findViewById<TextView>(R.id.txt_rate).text = "요금: ${guide.rate}"
+        findViewById<TextView>(R.id.txt_phone).text = "전화번호: ${guide.phoneNumber}"
+        findViewById<TextView>(R.id.txt_content).text = guide.content
+        findViewById<TextView>(R.id.txt_view_count).text = "조회수: ${guide.viewCount}"
+
+        val imgProfile = findViewById<ImageView>(R.id.img_profile)
+        if (!guide.profileImageUrl.isNullOrEmpty()) {
+            Glide.with(this)
+                .load(guide.profileImageUrl)
+                .placeholder(R.drawable.profile_default)
+                .error(R.drawable.profile_default)
+                .into(imgProfile)
+        } else {
+            imgProfile.setImageResource(R.drawable.profile_default)
         }
 
-        supportActionBar?.title = ""
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        val imageUrls = guide.imageUrls
+        imageAdapter = if (imageUrls.isEmpty()) {
+            GuideImageAdapter(listOf(R.drawable.image_default), true)
+        } else {
+            GuideImageAdapter(imageUrls)
+        }
+
+        viewPager.adapter = imageAdapter
+        findViewById<me.relex.circleindicator.CircleIndicator3>(R.id.indicator).setViewPager(viewPager)
     }
 
     private fun showErrorAndExit(message: String) {
@@ -184,10 +179,90 @@ class GuideDetailActivity : AppCompatActivity() {
         finish()
     }
 
-    // 가이드 글 삭제
-    private fun deleteGuide(guideId: String, imageUrls: List<String>) {
-        Log.d("GuideDelete", "guideId = $guideId imageUrls: $imageUrls")
+    private fun reloadGuideData() {
+        database.get().addOnSuccessListener { snapshot ->
+            if (!snapshot.exists()) {
+                showErrorAndExit("해당 가이드를 찾을 수 없습니다.")
+                return@addOnSuccessListener
+            }
 
+            val guide = snapshot.getValue(Guide::class.java)
+            if (guide != null) {
+                currentGuide = guide
+                updateUI(guide)
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_EDIT_GUIDE && resultCode == RESULT_OK) {
+            reloadGuideData()
+        }
+    }
+
+    // 메뉴 관련 메서드들
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.guide_detail_menu, menu)
+
+        val currentUserUid = auth.currentUser?.uid
+
+        if (currentUserUid == writerUid) {
+            menu?.findItem(R.id.action_delete)?.isVisible = true
+            menu?.findItem(R.id.action_bump)?.isVisible = true
+        } else {
+            menu?.findItem(R.id.action_report)?.isVisible = true
+        }
+
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                val intent = Intent()
+                setResult(Activity.RESULT_OK, intent)
+                finish()
+                true
+            }
+
+            R.id.action_delete -> {
+                AlertDialog.Builder(this)
+                    .setTitle("삭제 확인")
+                    .setMessage("정말 삭제하시겠습니까?")
+                    .setPositiveButton("삭제") { _, _ ->
+                        currentGuide?.let {
+                            deleteGuide(guideId, it.imageUrls ?: emptyList())
+                        } ?: Toast.makeText(this, "가이드 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                    .setNegativeButton("취소", null)
+                    .show()
+                true
+            }
+
+            R.id.action_bump -> {
+                AlertDialog.Builder(this)
+                    .setTitle("끌어올리기 확인")
+                    .setMessage("글을 끌어올리겠습니까?")
+                    .setPositiveButton("확인") { _, _ ->
+                        liftGuide()
+                    }
+                    .setNegativeButton("취소", null)
+                    .show()
+                true
+            }
+
+            R.id.action_report -> {
+                Toast.makeText(this, "신고하기 클릭됨", Toast.LENGTH_SHORT).show()
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun deleteGuide(guideId: String, imageUrls: List<String>) {
         val storage = FirebaseStorage.getInstance(BuildConfig.STORAGE_BUCKET)
 
         imageUrls.forEach { url ->
@@ -214,11 +289,7 @@ class GuideDetailActivity : AppCompatActivity() {
             }
     }
 
-    // 가이드 글 끌어올리기
     private fun liftGuide() {
-        val guideId = intent.getStringExtra("guideId") ?: return
-        val guideRef = FirebaseDatabase.getInstance().getReference("guide").child(guideId)
-
         val today = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
         val liftKey = "lastLifted_$guideId"
 
@@ -230,7 +301,7 @@ class GuideDetailActivity : AppCompatActivity() {
             return
         }
 
-        guideRef.child("timestamp").setValue(System.currentTimeMillis())
+        database.child("timestamp").setValue(System.currentTimeMillis())
             .addOnSuccessListener {
                 prefs.edit().putString(liftKey, today).apply()
                 Toast.makeText(this, "끌어올리기 완료!", Toast.LENGTH_SHORT).show()
@@ -238,85 +309,5 @@ class GuideDetailActivity : AppCompatActivity() {
             .addOnFailureListener {
                 Toast.makeText(this, "끌어올리기 실패", Toast.LENGTH_SHORT).show()
             }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == REQUEST_EDIT_GUIDE && resultCode == RESULT_OK) {
-            reloadGuideData()
-        }
-    }
-
-    private fun reloadGuideData() {
-        database.get().addOnSuccessListener { snapshot ->
-            if (!snapshot.exists()) {
-                showErrorAndExit("해당 가이드를 찾을 수 없습니다.")
-                return@addOnSuccessListener
-            }
-
-            val guide = snapshot.getValue(Guide::class.java)
-            if (guide != null) {
-                currentGuide = guide
-                updateUI(guide)
-            }
-        }
-    }
-
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.guide_detail_menu, menu)
-
-        val currentUserUid = auth.currentUser?.uid
-
-        if (currentUserUid == writerUid) {
-            menu?.findItem(R.id.action_delete)?.isVisible = true
-            menu?.findItem(R.id.action_bump)?.isVisible = true
-        } else {
-            menu?.findItem(R.id.action_report)?.isVisible = true
-        }
-
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            android.R.id.home -> {
-                val intent = Intent()
-                setResult(Activity.RESULT_OK, intent)
-                finish()
-                true
-            }
-            R.id.action_delete -> {
-                AlertDialog.Builder(this)
-                    .setTitle("삭제 확인")
-                    .setMessage("정말 삭제하시겠습니까?")
-                    .setPositiveButton("삭제") { _, _ ->
-                        currentGuide?.let {
-                            deleteGuide(guideId, it.imageUrls ?: emptyList())
-                        } ?: Toast.makeText(this, "가이드 정보가 없습니다.", Toast.LENGTH_SHORT).show()
-                    }
-                    .setNegativeButton("취소", null)
-                    .show()
-                true
-            }
-            R.id.action_bump -> {
-                AlertDialog.Builder(this)
-                    .setTitle("끌어올리기 확인")
-                    .setMessage("글을 끌어올리겠습니까?")
-                    .setPositiveButton("확인") { _, _ ->
-                        liftGuide()
-                    }
-                    .setNegativeButton("취소", null)
-                    .show()
-                true
-            }
-            R.id.action_report -> {
-                Toast.makeText(this, "신고하기 클릭됨", Toast.LENGTH_SHORT).show()
-                true
-            }
-
-            else -> super.onOptionsItemSelected(item)
-        }
     }
 }
