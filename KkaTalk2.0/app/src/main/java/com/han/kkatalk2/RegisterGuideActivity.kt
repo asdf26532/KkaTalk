@@ -118,17 +118,16 @@ class RegisterGuideActivity : AppCompatActivity() {
                         setCancelable(false)
                         show()
                     }
-
                     if (selectedImageUris.isNotEmpty()) {
                         uploadedUrls.clear()
                         Log.d("RegisterGuide", "선택된 이미지 수: ${selectedImageUris.size}")
                         uploadImagesToFirebase(userId, progressDialog) {
                             Log.d("RegisterGuide", "이미지 업로드 완료, URL 목록: $uploadedUrls")
-                            registerGuide(title, userId, nick, phone, location, rate, content, profileImageUrl, uploadedUrls, viewCount)
+                            registerGuide(title, userId, nick, phone, location, rate, content, profileImageUrl, uploadedUrls)
                         }
                     } else {
                         Log.d("RegisterGuide", "이미지 없이 가이드 등록 시도")
-                        registerGuide(title, userId, nick, phone, location, rate, content, profileImageUrl, listOf(), viewCount)
+                        registerGuide(title, userId, nick, phone, location, rate, content, profileImageUrl, listOf())
                         progressDialog.dismiss()
                     }
                 } else {
@@ -187,27 +186,34 @@ class RegisterGuideActivity : AppCompatActivity() {
         rate: String,
         content: String,
         profileImageUrl: String,
-        imageUrls: List<String>,
-        viewCount: Int
+        imageUrls: List<String>
     ) {
         val guideRef = guideDatabase.child(userId)
         val timestamp = System.currentTimeMillis()
 
-        val guide = Guide(title, userId, nick, phone, location, rate, content, profileImageUrl, imageUrls, viewCount, timestamp)
-        Log.d("RegisterGuide", "파이어베이스에 등록할 Guide 객체: $guide")
+        guideRef.child("viewCount").get().addOnSuccessListener { snapshot ->
+            val currentViewCount = snapshot.getValue(Int::class.java) ?: 0
 
-        guideRef.setValue(guide).addOnCompleteListener {
-            if (it.isSuccessful) {
-                Log.d("RegisterGuide", "가이드 등록 성공")
-                Toast.makeText(this, "등록 완료!", Toast.LENGTH_SHORT).show()
-                setResult(RESULT_OK)
-                finish()
-            } else {
-                Log.e("RegisterGuide", "가이드 등록 실패: ${it.exception?.message}")
-                Toast.makeText(this, "등록 실패", Toast.LENGTH_SHORT).show()
+            val guide = Guide(title, userId, nick, phone, location, rate, content, profileImageUrl, imageUrls, currentViewCount, timestamp)
+            Log.d("RegisterGuide", "파이어베이스에 등록할 Guide 객체: $guide")
+
+            guideRef.setValue(guide).addOnCompleteListener {
+                if (it.isSuccessful) {
+                    Log.d("RegisterGuide", "등록 성공")
+                    Toast.makeText(this, "등록 완료!", Toast.LENGTH_SHORT).show()
+                    setResult(RESULT_OK)
+                    finish()
+                } else {
+                    Log.e("RegisterGuide", "등록 실패: ${it.exception?.message}")
+                    Toast.makeText(this, "등록 실패", Toast.LENGTH_SHORT).show()
+                }
             }
+
+        }.addOnFailureListener {
+            Toast.makeText(this, "viewCount 불러오기 실패", Toast.LENGTH_SHORT).show()
         }
     }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
