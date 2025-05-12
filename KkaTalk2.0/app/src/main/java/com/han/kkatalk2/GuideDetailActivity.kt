@@ -290,7 +290,43 @@ class GuideDetailActivity : AppCompatActivity() {
     }
 
     private fun liftGuide() {
-        val today = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
+
+        val guideRef = FirebaseDatabase.getInstance().getReference("guide").child(guideId)
+
+        guideRef.get().addOnSuccessListener { snapshot ->
+            val guide = snapshot.getValue(Guide::class.java)
+            if (guide == null) {
+                Toast.makeText(this, "가이드 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                return@addOnSuccessListener
+            }
+
+            val lastTimestamp = guide.timestamp
+            val currentTime = System.currentTimeMillis()
+            val twentyFourHoursMillis = 24 * 60 * 60 * 1000L
+
+            if (currentTime - lastTimestamp < twentyFourHoursMillis) {
+                val remaining = twentyFourHoursMillis - (currentTime - lastTimestamp)
+                val hours = remaining / (60 * 60 * 1000)
+                val minutes = (remaining % (60 * 60 * 1000)) / (60 * 1000)
+                Toast.makeText(this, "끌어올리기는 24시간에 한 번만 가능합니다.\n남은 시간: ${hours}시간 ${minutes}분", Toast.LENGTH_LONG).show()
+                return@addOnSuccessListener
+            }
+
+            // timestamp 업데이트
+            guideRef.child("timestamp").setValue(currentTime)
+                .addOnSuccessListener {
+                    Toast.makeText(this, "끌어올리기가 완료되었습니다!", Toast.LENGTH_SHORT).show()
+                    reloadGuideData()
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "끌어올리기 실패: ${it.message}", Toast.LENGTH_SHORT).show()
+                }
+
+        }.addOnFailureListener {
+            Toast.makeText(this, "데이터 불러오기 실패: ${it.message}", Toast.LENGTH_SHORT).show()
+        }
+
+        /*val today = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
         val liftKey = "lastLifted_$guideId"
 
         val prefs = getSharedPreferences("LiftPrefs", Context.MODE_PRIVATE)
@@ -308,6 +344,6 @@ class GuideDetailActivity : AppCompatActivity() {
             }
             .addOnFailureListener {
                 Toast.makeText(this, "끌어올리기 실패", Toast.LENGTH_SHORT).show()
-            }
+            }*/
     }
 }

@@ -11,7 +11,7 @@ data class Guide(
     var profileImageUrl: String,
     var imageUrls: List<String>,
     var viewCount: Int,
-    var timestamp: Long?
+    var timestamp: Long
 )
 {
     constructor(): this("", "","","","", "","","", listOf(),0,0L)
