@@ -82,6 +82,89 @@ class GuideDetailActivity : AppCompatActivity() {
     }
 
     private fun loadGuide() {
+        val currentUserUid = auth.currentUser?.uid
+
+        // 가이드 정보 가져오기
+        database.get().addOnSuccessListener { snapshot ->
+            if (!snapshot.exists()) {
+                showErrorAndExit("해당 가이드를 찾을 수 없습니다.")
+                return@addOnSuccessListener
+            }
+
+            val guide = snapshot.getValue(Guide::class.java)
+            if (guide != null) {
+                currentGuide = guide
+                writerUid = guide.uId
+
+                updateUI(guide)
+
+                // 버튼 처리
+                if (currentUserUid == writerUid) {
+                    binding.btnChat.text = "수정하기"
+                    binding.btnChat.setOnClickListener {
+                        val intent = Intent(this, RegisterGuideActivity::class.java)
+                        intent.putExtra("guideId", guideId)
+                        startActivityForResult(intent, REQUEST_EDIT_GUIDE)
+                    }
+                } else {
+                    binding.btnChat.text = "대화하기"
+                    binding.btnChat.setOnClickListener {
+                        val intent = Intent(this, ChatActivity::class.java).apply {
+                            putExtra("uId", guideId)
+                            putExtra("nick", guide.nick)
+                            putExtra("profileImageUrl", guide.profileImageUrl)
+                        }
+                        startActivity(intent)
+                    }
+                }
+
+                // 조회수 증가 처리
+                if (currentUserUid != null && currentUserUid != guide.uId) {
+                    val viewsRef = database.child("views").child(currentUserUid)
+
+                    viewsRef.get().addOnSuccessListener { viewSnapshot ->
+                        if (!viewSnapshot.exists()) {
+                            // 처음 보는 사용자 -> 조회수 증가
+                            database.runTransaction(object : Transaction.Handler {
+                                override fun doTransaction(currentData: MutableData): Transaction.Result {
+                                    val currentGuide = currentData.getValue(Guide::class.java)
+                                        ?: return Transaction.success(currentData)
+
+                                    val updatedGuide = currentGuide.copy(viewCount = currentGuide.viewCount + 1)
+                                    currentData.value = updatedGuide
+                                    return Transaction.success(currentData)
+                                }
+
+                                override fun onComplete(
+                                    error: DatabaseError?,
+                                    committed: Boolean,
+                                    currentData: DataSnapshot?
+                                ) {
+                                    if (error != null) {
+                                        Log.e("GuideDetailActivity", "조회수 증가 실패: ${error.message}")
+                                    } else {
+                                        Log.d("GuideDetailActivity", "조회수 증가 성공")
+                                        // 기록 남기기
+                                        viewsRef.setValue(true)
+                                    }
+                                }
+                            })
+                        } else {
+                            Log.d("GuideDetailActivity", "이미 조회한 사용자 - 조회수 증가 없음")
+                        }
+                    }
+                }
+
+            } else {
+                showErrorAndExit("데이터를 불러오는 중 오류가 발생했습니다.")
+            }
+        }.addOnFailureListener {
+            showErrorAndExit("네트워크 오류가 발생했습니다. 다시 시도해주세요.")
+        }
+    }
+
+
+    /*private fun loadGuide() {
         // 조회수 증가 처리
         database.runTransaction(object : Transaction.Handler {
             override fun doTransaction(currentData: MutableData): Transaction.Result {
@@ -141,7 +224,7 @@ class GuideDetailActivity : AppCompatActivity() {
         }.addOnFailureListener {
             showErrorAndExit("네트워크 오류가 발생했습니다. 다시 시도해주세요.")
         }
-    }
+    }*/
 
     private fun updateUI(guide: Guide) {
         findViewById<TextView>(R.id.txt_title).text = guide.title
@@ -179,6 +262,7 @@ class GuideDetailActivity : AppCompatActivity() {
         finish()
     }
 
+    // 수정 후 새로고침
     private fun reloadGuideData() {
         database.get().addOnSuccessListener { snapshot ->
             if (!snapshot.exists()) {
@@ -202,7 +286,7 @@ class GuideDetailActivity : AppCompatActivity() {
         }
     }
 
-    // 메뉴 관련 메서드들
+    // 메뉴 관련 메서드
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.guide_detail_menu, menu)
 
@@ -218,6 +302,7 @@ class GuideDetailActivity : AppCompatActivity() {
         return true
     }
 
+    // 버튼처리
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
@@ -262,6 +347,7 @@ class GuideDetailActivity : AppCompatActivity() {
         }
     }
 
+    // 게시글 지우기
     private fun deleteGuide(guideId: String, imageUrls: List<String>) {
         val storage = FirebaseStorage.getInstance(BuildConfig.STORAGE_BUCKET)
 
@@ -289,6 +375,7 @@ class GuideDetailActivity : AppCompatActivity() {
             }
     }
 
+    // 게시글 끌어올리기(24시간)
     private fun liftGuide() {
 
         val guideRef = FirebaseDatabase.getInstance().getReference("guide").child(guideId)
@@ -326,24 +413,6 @@ class GuideDetailActivity : AppCompatActivity() {
             Toast.makeText(this, "데이터 불러오기 실패: ${it.message}", Toast.LENGTH_SHORT).show()
         }
 
-        /*val today = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
-        val liftKey = "lastLifted_$guideId"
 
-        val prefs = getSharedPreferences("LiftPrefs", Context.MODE_PRIVATE)
-        val lastLiftedDate = prefs.getString(liftKey, "")
-
-        if (lastLiftedDate == today) {
-            Toast.makeText(this, "오늘은 이미 끌어올리기를 했습니다.", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        database.child("timestamp").setValue(System.currentTimeMillis())
-            .addOnSuccessListener {
-                prefs.edit().putString(liftKey, today).apply()
-                Toast.makeText(this, "끌어올리기 완료!", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "끌어올리기 실패", Toast.LENGTH_SHORT).show()
-            }*/
     }
 }
