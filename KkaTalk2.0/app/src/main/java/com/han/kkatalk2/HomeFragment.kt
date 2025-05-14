@@ -50,6 +50,9 @@ class HomeFragment : Fragment() {
                         guideList.add(guide)
                     }
                 }
+                // 시간순 정렬
+                guideList.sortByDescending { it.timestamp }
+
                 updateList()
             }
 

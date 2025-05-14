@@ -35,7 +35,6 @@ class RegisterGuideActivity : AppCompatActivity() {
 
     private var guideId: String? = null
     private val uploadedUrls = mutableListOf<String>()
-    private var viewCount = 0
 
     private lateinit var txtImageCount: TextView
     private val MAX_IMAGE_COUNT = 10

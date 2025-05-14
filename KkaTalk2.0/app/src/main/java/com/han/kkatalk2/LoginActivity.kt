@@ -18,6 +18,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
 import com.han.kkatalk2.databinding.ActivityLoginBinding
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
@@ -29,9 +30,6 @@ class LoginActivity : AppCompatActivity() {
     lateinit var googleSignInClient: GoogleSignInClient
 
     private val RC_SIGN_IN = 9001 // Request code for Google Sign-In
-
-    // 기본 프로필 이미지 URL
-    private val defaultProfileImageUrl = "gs://kkatalk-cf3fd.appspot.com/profile_default.png"
 
     private val defaultStatusMessage = ""
 
@@ -203,10 +201,20 @@ class LoginActivity : AppCompatActivity() {
 
     private fun addUserToDatabase(name: String, email: String, uId: String, nick: String) {
 
-        val user = User(name, email, uId, nick, defaultProfileImageUrl, defaultStatusMessage)
+        val storageRef = FirebaseStorage.getInstance(BuildConfig.STORAGE_BUCKET)
+            .getReference("profile_default.png")
 
-        Firebase.database.reference.child("user").child(uId).setValue(user)
+        storageRef.downloadUrl.addOnSuccessListener { uri ->
+            val defaultProfileImageUrl = uri.toString()
+            val user = User(name, email, uId, nick, defaultProfileImageUrl, defaultStatusMessage)
+            Firebase.database.reference.child("user").child(uId).setValue(user)
+        }.addOnFailureListener {
+            // 실패 시 기본 URL 없이 저장하거나 오류 처리
+            Log.e("LoginActivity", "프로필 이미지 URL 가져오기 실패: ${it.message}")
+            val user = User(name, email, uId, nick, "", defaultStatusMessage)
+            Firebase.database.reference.child("user").child(uId).setValue(user)
+        }
+
     }
-
 
 }

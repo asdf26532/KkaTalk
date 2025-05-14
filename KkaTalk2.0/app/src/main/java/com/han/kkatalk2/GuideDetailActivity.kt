@@ -375,7 +375,7 @@ class GuideDetailActivity : AppCompatActivity() {
             }
     }
 
-    // 게시글 끌어올리기(24시간)
+    // 게시글 끌어올리기
     private fun liftGuide() {
 
         val guideRef = FirebaseDatabase.getInstance().getReference("guide").child(guideId)
