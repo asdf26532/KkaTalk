@@ -21,7 +21,7 @@ class SignUpActivity : AppCompatActivity() {
     private lateinit var mDbRef: DatabaseReference
 
     // 기본 프로필 이미지 URL
-    private val defaultProfileImageUrl = "gs://kkatalk-cf3fd.appspot.com/profile_default.png"
+    private val defaultProfileImageUrl = "${BuildConfig.STORAGE_BUCKET}/profile_default.png"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

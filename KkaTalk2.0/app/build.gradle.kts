@@ -29,6 +29,11 @@ android {
             "STORAGE_BUCKET",
             "\"${localProperties["storage.bucket"]}\""
         )
+        buildConfigField(
+            "String",
+            "KAKAO_NATIVE_KEY",
+            "\"${localProperties["KAKAO_NATIVE_KEY"]}\""
+        )
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
