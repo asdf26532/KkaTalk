@@ -2,12 +2,8 @@ package com.han.kkatalk2
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Patterns
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DatabaseReference
@@ -24,10 +20,6 @@ class SignUpActivity : AppCompatActivity() {
     // 기본 프로필 이미지 URL
     private val defaultProfileImageUrl = "${BuildConfig.STORAGE_BUCKET}/profile_default.png"
 
-    // 이메일 중복 체크 여부
-    private var isEmailChecked = false
-    private var lastCheckedEmail = ""
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySignUpBinding.inflate(layoutInflater)
@@ -39,84 +31,47 @@ class SignUpActivity : AppCompatActivity() {
         // DB 초기화
         mDbRef = Firebase.database.reference
 
-        // 이메일 중복 확인 버튼 클릭
-        binding.btnEmailCheck.setOnClickListener {
-            val email = binding.edtEmail.text.toString().trim()
-
-            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                Toast.makeText(this, "올바른 이메일 형식을 입력하세요.", Toast.LENGTH_SHORT).show()
-                isEmailChecked = false
-                return@setOnClickListener
-            }
-
-            checkEmailDuplicate(email) { isDuplicate ->
-                if (isDuplicate) {
-                    Toast.makeText(this, "이미 사용 중인 이메일입니다.", Toast.LENGTH_SHORT).show()
-                    isEmailChecked = false
-                } else {
-                    Toast.makeText(this, "사용 가능한 이메일입니다.", Toast.LENGTH_SHORT).show()
-                    isEmailChecked = true
-                    lastCheckedEmail = email
-                }
-            }
-        }
-
-        // 회원가입 버튼 클릭
         binding.btnSignUp.setOnClickListener {
             val name = binding.edtName.text.toString().trim()
             val email = binding.edtEmail.text.toString().trim()
             val password = binding.edtPassword.text.toString().trim()
-            val nick = binding.edtNick.text.toString().trim()
+            val originalNick = binding.edtNick.text.toString().trim()
 
-            // 입력값 검사
-            if (name.isEmpty() || email.isEmpty() || password.isEmpty() || nick.isEmpty()) {
-                Toast.makeText(this, "모든 정보를 입력해주세요.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+            // 닉네임 가공 (한글 포함 여부 확인 후 랜덤 생성)
+            val nickToSave = if (containsKorean(originalNick)) generateRandomNick() else originalNick
 
-            // 이메일 형식 검사
-            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                Toast.makeText(this, "이메일 형식이 올바르지 않습니다.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+            signUp(name, email, password, nickToSave)
 
-            // 중복 확인을 안 했거나, 확인한 이메일이 현재 이메일과 다름
-            if (!isEmailChecked || lastCheckedEmail != email) {
-                Toast.makeText(this, "이메일 중복 확인을 해주세요.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // 회원가입 실행
-            signUp(name, email, password, nick)
         }
     }
 
-    // 이메일 중복 확인
-    private fun checkEmailDuplicate(email: String, onResult: (Boolean) -> Unit) {
-        mAuth.fetchSignInMethodsForEmail(email)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val isDuplicate = task.result?.signInMethods?.isNotEmpty() == true
-                    onResult(isDuplicate)
-                } else {
-                    onResult(true) // 오류 발생 시 중복으로 간주
-                }
-            }
+    // 한글 포함 여부 체크
+    private fun containsKorean(text: String): Boolean {
+        return text.any { it in '\uAC00'..'\uD7A3' }
     }
 
-    // Firebase Auth를 이용한 회원가입
-    private fun signUp(name: String, email: String, password: String, nick: String) {
+    // 랜덤 닉네임 생성
+    private fun generateRandomNick(): String {
+        val chars = "abcdefghijklmnopqrstuvwxyz0123456789"
+        val random = (1..6).map { chars.random() }.joinToString("")
+        return "user_$random"
+    }
+
+    // 회원 가입 기능
+    private fun signUp(name:String, email:String, password:String, nick:String) {
+
         mAuth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     Toast.makeText(this, "회원가입 성공", Toast.LENGTH_LONG).show()
+                    val intent: Intent = Intent(this@SignUpActivity, MainActivity::class.java)
+                    startActivity(intent)
                     addUserToDatabase(name, email, mAuth.currentUser?.uid!!, nick)
-                    startActivity(Intent(this@SignUpActivity, MainActivity::class.java))
-                    finish()
                 } else {
                     Toast.makeText(this, "회원가입 실패: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }
             }
+
     }
 
     private fun addUserToDatabase(name:String, email:String, uId: String, nick: String) {

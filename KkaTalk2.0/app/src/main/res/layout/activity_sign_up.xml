@@ -28,23 +28,11 @@
         android:hint="Email"
         android:inputType="textEmailAddress"/>
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btn_email_check"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/edt_email"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/btn_background"
-        android:text="중복 확인"
-        android:textColor="@color/white"
-        android:textSize="20sp" />
-
     <EditText
         android:id="@+id/edt_password"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_below="@id/btn_email_check"
+        android:layout_below="@id/edt_email"
         android:layout_marginLeft="20dp"
         android:layout_marginTop="20dp"
         android:layout_marginRight="20dp"
