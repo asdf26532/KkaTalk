@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="12dp">
 
         <EditText
             android:layout_width="match_parent"
@@ -153,7 +153,15 @@
             android:layout_height="wrap_content"
             android:text="로그아웃"
             android:layout_gravity="center"
-            android:layout_marginTop="24dp" />
+            android:layout_marginTop="16dp" />
+
+        <Button
+            android:id="@+id/btn_delete_account"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="회원 탈퇴"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp" />
 
     </LinearLayout>
 

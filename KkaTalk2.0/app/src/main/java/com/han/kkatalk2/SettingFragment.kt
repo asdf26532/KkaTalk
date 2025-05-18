@@ -2,6 +2,7 @@ package com.han.kkatalk2
 
 import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -39,6 +40,7 @@ class SettingFragment : Fragment() {
     private lateinit var btnBlock: Button
     private lateinit var btnChangeProfile: Button
     private lateinit var btnDeleteProfile: Button
+    private lateinit var btnDeleteAccount: Button
     private lateinit var ivProfile: ImageView
 
     private lateinit var tvCurrentStatus: TextView
@@ -74,6 +76,7 @@ class SettingFragment : Fragment() {
         ivProfile = view.findViewById(R.id.iv_profile)
         btnBlock = view.findViewById(R.id.btnManageBlockedUsers)
         btnDeleteProfile = view.findViewById(R.id.btn_delete_profile)
+        btnDeleteAccount = view.findViewById(R.id.btn_delete_account)
 
         // 상태 메시지 관련 UI 요소 초기화
         tvCurrentStatus = view.findViewById(R.id.tv_current_status)
@@ -148,6 +151,11 @@ class SettingFragment : Fragment() {
             deleteProfileImage()
         }
 
+        // 회원 탈퇴 버튼
+        btnDeleteAccount.setOnClickListener {
+            showDeleteAccountDialog()
+        }
+
         // 다크 모드 토글 추가
         val switchDarkMode: SwitchCompat = view.findViewById(R.id.switch_dark_mode)
 
@@ -173,6 +181,47 @@ class SettingFragment : Fragment() {
 
         return view
     }
+
+    // 탈퇴 확인
+    private fun showDeleteAccountDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("회원 탈퇴")
+            .setMessage("정말 탈퇴하시겠습니까? 모든 정보가 삭제됩니다.")
+            .setPositiveButton("탈퇴") { _, _ ->
+                deleteAccount()
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
+
+    // 계정 삭제
+    private fun deleteAccount() {
+        val user = mAuth.currentUser
+        val uid = user?.uid
+
+        if (user != null && uid != null) {
+            // DB에서 데이터 삭제
+            FirebaseDatabase.getInstance().reference.child("user").child(uid).removeValue()
+                .addOnCompleteListener {
+                    // Authentication에서 계정 삭제
+                    user.delete()
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                Toast.makeText(requireContext(), "회원 탈퇴 완료", Toast.LENGTH_SHORT).show()
+                                mAuth.signOut()
+                                startActivity(Intent(requireContext(), LoginActivity::class.java))
+                                requireActivity().finish()
+                            } else {
+                                Toast.makeText(requireContext(), "회원 탈퇴 실패: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                }
+        } else {
+            Toast.makeText( requireContext(), "로그인 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
 
     // 다크 모드 토글
     private fun applyDarkMode(enabled: Boolean) {
