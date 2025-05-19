@@ -24,8 +24,11 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
@@ -195,9 +198,11 @@ class SettingFragment : Fragment() {
     }
 
     // 계정 삭제
-    private fun deleteAccount() {
+   /* private fun deleteAccount() {
         val user = mAuth.currentUser
         val uid = user?.uid
+
+        Log.d("DeleteAccount", "user, uid: $user, $uid")
 
         if (user != null && uid != null) {
             // DB에서 데이터 삭제
@@ -219,7 +224,59 @@ class SettingFragment : Fragment() {
         } else {
             Toast.makeText( requireContext(), "로그인 정보가 없습니다.", Toast.LENGTH_SHORT).show()
         }
+    }*/
+    private fun deleteAccount() {
+        val uid = getSocialUserUidFromDb()  // DB에서 uid를 가져오는 함수, 구현 필요
+
+        if (uid != null) {
+            // DB에서 유저 정보 삭제
+            mDbRef.child("user").child(uid).removeValue()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Toast.makeText(requireContext(), "회원 탈퇴 완료", Toast.LENGTH_SHORT).show()
+                        // 로그아웃 처리 및 로그인 화면 이동
+                        mAuth.signOut()
+                        startActivity(Intent(requireContext(), LoginActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        })
+                        requireActivity().finish()
+                    } else {
+                        Toast.makeText(requireContext(), "회원 탈퇴 실패: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+        } else {
+            Toast.makeText(requireContext(), "사용자 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+        }
     }
+
+    private fun getSocialUserUidFromDb(email: String, callback: (String?) -> Unit) {
+        val userRef = FirebaseDatabase.getInstance().getReference("user")
+
+        // 이메일이 일치하는 uid 찾기 위해 전체 user 노드에서 쿼리
+        val query = userRef.orderByChild("email").equalTo(email)
+
+        query.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    for (userSnapshot in snapshot.children) {
+                        val uid = userSnapshot.key
+                        // 첫 번째 일치하는 uid 리턴
+                        callback(uid)
+                        return
+                    }
+                } else {
+                    // 없으면 null 리턴
+                    callback(null)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // 에러 시 null 리턴
+                callback(null)
+            }
+        })
+    }
+
 
 
 
@@ -248,7 +305,6 @@ class SettingFragment : Fragment() {
                     // Firebase Storage 참조 생성
                     val storage = FirebaseStorage.getInstance(BuildConfig.STORAGE_BUCKET)
                     val storageRef = storage.getReferenceFromUrl(profileImageUrl)
-                    //val storageRef = Firebase.storage.getReferenceFromUrl(profileImageUrl)
 
                     // Firebase Storage에서 이미지 URL 다운로드
                     storageRef.downloadUrl.addOnSuccessListener { uri ->
