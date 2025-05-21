@@ -2,6 +2,7 @@ package com.han.kkatalk2
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -34,33 +35,17 @@ class TestFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance()
 
-        // 유저 ID 로드 (auth → db 조회 순)
+        // 유저 ID 로드
         val currentUser = auth.currentUser
         if (currentUser != null) {
             userId = currentUser.uid
             loadUserData()
+            Log.d("SettingFragment","userid: $userId")
         } else {
-            // SharedPreferences에서 이메일 가져오기
+            // SharedPreferences에서 userid 가져오기
             val sharedPref = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
-            val email = sharedPref.getString("email", null)
-            if (email != null) {
-                // 이메일로 DB에서 userId 찾기
-                val userRef = database.getReference("user")
-                userRef.orderByChild("email").equalTo(email)
-                    .addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            for (child in snapshot.children) {
-                                userId = child.key ?: ""
-                                loadUserData()
-                                break
-                            }
-                        }
-
-                        override fun onCancelled(error: DatabaseError) {
-                            // 실패 처리
-                        }
-                    })
-            }
+            userId = sharedPref.getString("userId", null) ?: ""
+            Log.d("SettingFragment","userid: $userId")
         }
 
         // 닉네임 변경 버튼 클릭 처리

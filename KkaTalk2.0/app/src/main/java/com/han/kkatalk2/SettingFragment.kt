@@ -32,8 +32,6 @@ import com.google.firebase.storage.ktx.storage
 
 class SettingFragment : Fragment() {
 
-
-    // 전부 뜯어 고치기
     private lateinit var tvCurrentNick: TextView
     private lateinit var btnChangeNick: Button
     private lateinit var edtNewNick: EditText
@@ -238,9 +236,16 @@ class SettingFragment : Fragment() {
 
     // 사용자 프로필 로드
     private fun loadCurrentProfile() {
-        val userId = mAuth.currentUser?.uid.toString()
+        // SharedPreferences에서 userId 먼저 시도
+        val sharedPref = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        var userId = sharedPref.getString("userId", null)
 
-        if (userId.isNotEmpty()) {
+        // 없으면 FirebaseAuth에서 가져오기
+        if (userId.isNullOrEmpty()) {
+            userId = FirebaseAuth.getInstance().currentUser?.uid
+        }
+
+        if (!userId.isNullOrEmpty()) {
             // 프로그레스바 보이기
             progressBar.visibility = View.VISIBLE
 

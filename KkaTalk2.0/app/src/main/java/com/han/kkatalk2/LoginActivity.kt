@@ -39,6 +39,9 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // SharedPreferences 초기화
+        val sharedPref = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+
         // Firebase 인증 초기화
         mAuth = Firebase.auth
 
@@ -133,6 +136,12 @@ class LoginActivity : AppCompatActivity() {
                     val email = firebaseUser?.email
                     val nick = firebaseUser?.displayName //이름으로 저장 후 나중에 변경페이지 만들기
 
+                    // SharedPreferences에 UID 저장
+                    if (uid != null) {
+                        val sharedPref = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+                        sharedPref.edit().putString("userId", uid).apply()
+                    }
+
                     // 파이어베이스 Realtime DB에 사용자 정보 저장
                     if (uid != null && name != null && email != null) {
                         addUserToDatabase(name, email, uid, nick?: "")
@@ -188,6 +197,11 @@ class LoginActivity : AppCompatActivity() {
                 // Firebase DB에 사용자 정보 저장
                 val uid = user.id.toString()
                 val email = user.kakaoAccount?.email ?: ""
+
+                // SharedPreferences에 UID 저장
+                val sharedPref = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+                sharedPref.edit().putString("userId", uid).apply()
+
                 addUserToDatabase(nickname ?: "", email, uid, nickname ?: "")
 
             } else {
