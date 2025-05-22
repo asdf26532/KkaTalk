@@ -47,6 +47,7 @@ class TestFragment : Fragment() {
             Log.d("SettingFragment","userid: $userId")
         }
 
+        // 나머지 유저 정보 불러오기
         loadUserData()
 
         // 닉네임 변경 버튼 클릭 처리
@@ -67,8 +68,8 @@ class TestFragment : Fragment() {
                 val status = snapshot.child("status").getValue(String::class.java) ?: "상태메시지 없음"
                 val profileUrl = snapshot.child("profileImageUrl").getValue(String::class.java)
 
-                binding.tvCurrentNick.text = nick
-                binding.tvCurrentStatus.text = status
+                binding.tvCurrentNick.text = "현재 닉네임: $nick"
+                binding.tvCurrentStatus.text = "현재 상태 메시지: $status"
 
                 if (!profileUrl.isNullOrEmpty()) {
                     Glide.with(requireContext())
