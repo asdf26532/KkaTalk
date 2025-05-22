@@ -39,7 +39,6 @@ class TestFragment : Fragment() {
         val currentUser = auth.currentUser
         if (currentUser != null) {
             userId = currentUser.uid
-            loadUserData()
             Log.d("SettingFragment","userid: $userId")
         } else {
             // SharedPreferences에서 userid 가져오기
@@ -47,6 +46,8 @@ class TestFragment : Fragment() {
             userId = sharedPref.getString("userId", null) ?: ""
             Log.d("SettingFragment","userid: $userId")
         }
+
+        loadUserData()
 
         // 닉네임 변경 버튼 클릭 처리
         binding.btnChangeNick.setOnClickListener {
