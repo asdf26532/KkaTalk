@@ -1,11 +1,13 @@
 package com.han.kkatalk2
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
@@ -47,21 +49,57 @@ class TestFragment : Fragment() {
             Log.d("SettingFragment","userid: $userId")
         }
 
-        // 나머지 유저 정보 불러오기
-        loadUserData()
+        userRef = database.getReference("user").child(userId)
 
-        // 닉네임 변경 버튼 클릭 처리
+
+        // 유저 정보 불러오기
+        if (userId.isNotEmpty()) {
+            loadUserData()
+        } else {
+            Toast.makeText(requireContext(), "사용자 정보를 불러올 수 없습니다.", Toast.LENGTH_LONG).show()
+            // 로그인 화면으로 이동
+            val intent = Intent(requireContext(), LoginActivity::class.java)
+            startActivity(intent)
+            requireActivity().finish()
+        }
+
+        // 닉네임 변경 버튼 클릭 시
         binding.btnChangeNick.setOnClickListener {
+            binding.edtNewNick.visibility= View.VISIBLE
+            binding.btnSaveNewNick.visibility = View.VISIBLE
+        }
+
+        // 저장 버튼 클릭 시
+        binding.btnSaveNewNick.setOnClickListener {
             val newNick = binding.edtNewNick.text.toString().trim()
-            if (newNick.isNotEmpty() && userId.isNotEmpty()) {
-                database.getReference("user").child(userId).child("nick").setValue(newNick)
-                binding.tvCurrentNick.text = newNick
+            if (newNick.isNotEmpty()) {
+                updateNickname(newNick)
             }
         }
+
+        // 상태 메시지 변경 버튼 클릭 시
+        binding.btnChangeStatus.setOnClickListener {
+            binding.edtNewStatus.visibility = View.VISIBLE
+            binding.btnSaveNewStatus.visibility = View.VISIBLE
+        }
+
+        // 상태 메시지 저장 버튼 클릭 시
+        binding.btnSaveNewStatus.setOnClickListener {
+            val newStatus = binding.edtNewStatus.text.toString().trim()
+            if (newStatus.isNotEmpty()) {
+                updateStatusMessage(newStatus)
+            }
+        }
+
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    // 현재 사용자 정보 불러오기
     private fun loadUserData() {
-        userRef = database.getReference("user").child(userId)
         userRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val nick = snapshot.child("nick").getValue(String::class.java) ?: "닉네임 없음"
@@ -80,12 +118,39 @@ class TestFragment : Fragment() {
 
             override fun onCancelled(error: DatabaseError) {
                 // 실패 처리
+                Toast.makeText(requireContext(), "사용자를 찾을 수 없습니다", Toast.LENGTH_SHORT).show()
             }
         })
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    // 닉네임 변경
+    private fun updateNickname(newNick: String) {
+        if (userId.isNotEmpty()) {
+            userRef.child("nick").setValue(newNick)
+                .addOnSuccessListener {
+                    binding.tvCurrentNick.text = "현재 닉네임: $newNick"
+                    binding.edtNewNick.text.clear()
+                    binding.edtNewNick.visibility = View.GONE
+                    binding.btnSaveNewNick.visibility = View.GONE
+                    Toast.makeText(requireContext(), "닉네임이 변경되었습니다.", Toast.LENGTH_LONG).show()
+                }
+                .addOnFailureListener {
+                    Toast.makeText(requireContext(), "닉네임 변경에 실패했습니다.", Toast.LENGTH_LONG).show()
+                }
+        }
     }
+
+    // 상태 메시지 업데이트
+    private fun updateStatusMessage(newStatus: String) {
+        if (userId.isNotEmpty()) {
+            userRef.child("statusMessage").setValue(newStatus)
+                .addOnSuccessListener {
+                    binding.tvCurrentStatus.text = "현재 상태 메시지: $newStatus"
+                    binding.edtNewStatus.visibility = View.GONE
+                    binding.btnSaveNewStatus.visibility = View.GONE
+                }
+        }
+    }
+
+
 }
