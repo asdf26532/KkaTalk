@@ -2,6 +2,7 @@ package com.han.kkatalk2
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,9 +11,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.han.kkatalk2.databinding.FragmentTestBinding
+import com.kakao.sdk.user.UserApiClient
 
 class TestFragment : Fragment() {
     private var _binding: FragmentTestBinding? = null
@@ -21,6 +25,7 @@ class TestFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
     private lateinit var database: FirebaseDatabase
     private lateinit var userRef: DatabaseReference
+    private lateinit var prefs: SharedPreferences
     private var userId: String = ""
 
     override fun onCreateView(
@@ -36,16 +41,16 @@ class TestFragment : Fragment() {
 
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance()
+        prefs = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
 
-        // 유저 ID 로드
+        // 유저 정보 불러오기
         val currentUser = auth.currentUser
         if (currentUser != null) {
             userId = currentUser.uid
             Log.d("SettingFragment","userid: $userId")
         } else {
             // SharedPreferences에서 userid 가져오기
-            val sharedPref = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
-            userId = sharedPref.getString("userId", null) ?: ""
+            userId = prefs.getString("userId", null) ?: ""
             Log.d("SettingFragment","userid: $userId")
         }
 
@@ -91,6 +96,19 @@ class TestFragment : Fragment() {
             }
         }
 
+        // 차단 관리 버튼 클릭 시
+        binding.btnManageBlockedUsers.setOnClickListener {
+            val intent = Intent(requireContext(), BlockedUsersActivity::class.java)
+            startActivity(intent)
+        }
+
+        // 로그아웃 버튼 클릭 시
+        binding.btnLogout.setOnClickListener {
+            handleLogout()
+        }
+
+
+
     }
 
     override fun onDestroyView() {
@@ -118,7 +136,7 @@ class TestFragment : Fragment() {
 
             override fun onCancelled(error: DatabaseError) {
                 // 실패 처리
-                Toast.makeText(requireContext(), "사용자를 찾을 수 없습니다", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "사용자를 찾을 수 없습니다", Toast.LENGTH_LONG).show()
             }
         })
     }
@@ -151,6 +169,31 @@ class TestFragment : Fragment() {
                 }
         }
     }
+
+    // 통합 로그아웃 처리
+    private fun handleLogout() {
+        // FirebaseAuth 로그아웃
+        auth.signOut()
+
+        // 카카오 로그아웃 시도 (카카오 로그아웃 실패해도 무시)
+        UserApiClient.instance.logout { error ->
+            if (error != null) {
+                Log.w("TestFragment", "카카오 로그아웃 실패: ${error.message}")
+            }
+            // SharedPreferences 초기화 및 로그인 화면 이동
+            prefs.edit().clear().apply()
+            redirectToLogin()
+        }
+    }
+
+
+    private fun redirectToLogin() {
+        val intent = Intent(requireActivity(), LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        activity?.finish()
+    }
+
 
 
 }
