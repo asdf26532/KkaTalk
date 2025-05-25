@@ -212,34 +212,23 @@ class LoginActivity : AppCompatActivity() {
 
     private fun addUserToDatabase(name: String, email: String, uId: String, nick: String) {
 
-        try {
-            // BuildConfig.STORAGE_BUCKET은 gs:// 형식이므로 직접 파싱해서 FirebaseStorage 인스턴스 생성
-            val gsBucketUrl = BuildConfig.STORAGE_BUCKET // 예: "gs://kkatalk-cf3fd.appspot.com"
-            val filePath = "profile_default.png"
+        val gsBucketUrl = BuildConfig.STORAGE_BUCKET  // "gs://kkatalk-cf3fd.appspot.com"
+        val storage = FirebaseStorage.getInstance(gsBucketUrl)
+        val storageRef = storage.getReference("profile_default.png")
 
-            // FirebaseStorage 인스턴스는 따로 만들고 참조 경로는 gs 형식으로 연결
-            val storage = FirebaseStorage.getInstance(gsBucketUrl)
-            val storageRef = storage.getReference(filePath)
+        storageRef.downloadUrl
+            .addOnSuccessListener { uri ->
+                // 이 uri는 반드시 https:// 로 시작함
+                val profileImageUrl = uri.toString()
+                Log.d("DEBUG", "다운로드 URL: $profileImageUrl") // 이거 로그로 꼭 확인해봐
 
-            storageRef.downloadUrl.addOnSuccessListener { uri ->
-                val defaultProfileImageUrl = uri.toString() // 이건 무조건 https:// 형식
-                Log.d("LoginActivity", "정상 다운로드 URL: $defaultProfileImageUrl")
-
-                val user =
-                    User(name, email, uId, nick, defaultProfileImageUrl, defaultStatusMessage)
+                val user = User(name, email, uId, nick, profileImageUrl, defaultStatusMessage)
                 Firebase.database.reference.child("user").child(uId).setValue(user)
-            }.addOnFailureListener { exception ->
+            }
+            .addOnFailureListener { exception ->
                 Log.e("LoginActivity", "프로필 이미지 URL 가져오기 실패: ${exception.message}")
-
                 val user = User(name, email, uId, nick, "", defaultStatusMessage)
                 Firebase.database.reference.child("user").child(uId).setValue(user)
             }
-
-        } catch (e: Exception) {
-            Log.e("LoginActivity", "FirebaseStorage 초기화 오류: ${e.message}")
-
-            val user = User(name, email, uId, nick, "", defaultStatusMessage)
-            Firebase.database.reference.child("user").child(uId).setValue(user)
-        }
     }
 }
