@@ -186,14 +186,11 @@ class TestFragment : Fragment() {
         }
     }
 
-
+    // 로그아웃 후처리
     private fun redirectToLogin() {
         val intent = Intent(requireActivity(), LoginActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         activity?.finish()
     }
-
-
-
 }

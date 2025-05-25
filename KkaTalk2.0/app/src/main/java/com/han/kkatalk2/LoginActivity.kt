@@ -39,9 +39,6 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // SharedPreferences 초기화
-        val sharedPref = getSharedPreferences("UserPrefs", MODE_PRIVATE)
-
         // Firebase 인증 초기화
         mAuth = Firebase.auth
 
@@ -215,20 +212,34 @@ class LoginActivity : AppCompatActivity() {
 
     private fun addUserToDatabase(name: String, email: String, uId: String, nick: String) {
 
-        val storageRef = FirebaseStorage.getInstance(BuildConfig.STORAGE_BUCKET)
-            .getReference("profile_default.png")
+        try {
+            // BuildConfig.STORAGE_BUCKET은 gs:// 형식이므로 직접 파싱해서 FirebaseStorage 인스턴스 생성
+            val gsBucketUrl = BuildConfig.STORAGE_BUCKET // 예: "gs://kkatalk-cf3fd.appspot.com"
+            val filePath = "profile_default.png"
 
-        storageRef.downloadUrl.addOnSuccessListener { uri ->
-            val defaultProfileImageUrl = uri.toString()
-            val user = User(name, email, uId, nick, defaultProfileImageUrl, defaultStatusMessage)
-            Firebase.database.reference.child("user").child(uId).setValue(user)
-        }.addOnFailureListener {
-            // 실패 시 기본 URL 없이 저장하거나 오류 처리
-            Log.e("LoginActivity", "프로필 이미지 URL 가져오기 실패: ${it.message}")
+            // FirebaseStorage 인스턴스는 따로 만들고 참조 경로는 gs 형식으로 연결
+            val storage = FirebaseStorage.getInstance(gsBucketUrl)
+            val storageRef = storage.getReference(filePath)
+
+            storageRef.downloadUrl.addOnSuccessListener { uri ->
+                val defaultProfileImageUrl = uri.toString() // 이건 무조건 https:// 형식
+                Log.d("LoginActivity", "정상 다운로드 URL: $defaultProfileImageUrl")
+
+                val user =
+                    User(name, email, uId, nick, defaultProfileImageUrl, defaultStatusMessage)
+                Firebase.database.reference.child("user").child(uId).setValue(user)
+            }.addOnFailureListener { exception ->
+                Log.e("LoginActivity", "프로필 이미지 URL 가져오기 실패: ${exception.message}")
+
+                val user = User(name, email, uId, nick, "", defaultStatusMessage)
+                Firebase.database.reference.child("user").child(uId).setValue(user)
+            }
+
+        } catch (e: Exception) {
+            Log.e("LoginActivity", "FirebaseStorage 초기화 오류: ${e.message}")
+
             val user = User(name, email, uId, nick, "", defaultStatusMessage)
             Firebase.database.reference.child("user").child(uId).setValue(user)
         }
-
     }
-
 }
