@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
@@ -15,6 +16,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.google.firebase.storage.FirebaseStorage
 import com.han.kkatalk2.databinding.FragmentTestBinding
 import com.kakao.sdk.user.UserApiClient
 
@@ -26,7 +28,9 @@ class TestFragment : Fragment() {
     private lateinit var database: FirebaseDatabase
     private lateinit var userRef: DatabaseReference
     private lateinit var prefs: SharedPreferences
+    private lateinit var storage: FirebaseStorage
     private var userId: String = ""
+    private lateinit var progressBar: ProgressBar
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,6 +46,7 @@ class TestFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance()
         prefs = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        storage = FirebaseStorage.getInstance(BuildConfig.STORAGE_BUCKET)
 
         // 유저 정보 불러오기
         val currentUser = auth.currentUser
@@ -70,7 +75,7 @@ class TestFragment : Fragment() {
 
         // 닉네임 변경 버튼 클릭 시
         binding.btnChangeNick.setOnClickListener {
-            binding.edtNewNick.visibility= View.VISIBLE
+            binding.edtNewNick.visibility = View.VISIBLE
             binding.btnSaveNewNick.visibility = View.VISIBLE
         }
 
@@ -122,15 +127,36 @@ class TestFragment : Fragment() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val nick = snapshot.child("nick").getValue(String::class.java) ?: "닉네임 없음"
                 val status = snapshot.child("status").getValue(String::class.java) ?: "상태메시지 없음"
-                val profileUrl = snapshot.child("profileImageUrl").getValue(String::class.java)
+                val profileImageUrl = snapshot.child("profileImageUrl").getValue(String::class.java)
 
                 binding.tvCurrentNick.text = "현재 닉네임: $nick"
                 binding.tvCurrentStatus.text = "현재 상태 메시지: $status"
 
-                if (!profileUrl.isNullOrEmpty()) {
-                    Glide.with(requireContext())
-                        .load(profileUrl)
-                        .into(binding.ivProfile)
+                binding.progressBar.visibility = View.VISIBLE
+
+                if (!profileImageUrl.isNullOrEmpty()) {
+                    // Firebase Storage 참조 생성
+                    val storageRef = storage.getReferenceFromUrl(profileImageUrl)
+
+                    // Firebase Storage에서 이미지 URL 다운로드
+                    storageRef.downloadUrl.addOnSuccessListener { uri ->
+                        // Glide를 사용해 ImageView에 이미지 로드
+                        Glide.with(this@TestFragment)
+                            .load(uri)
+                            .placeholder(R.drawable.profile_default) // 기본 이미지 설정
+                            .into(binding.ivProfile)
+
+                    }.addOnFailureListener {
+                        // 실패 시 기본 이미지 로드
+                        binding.ivProfile.setImageResource(R.drawable.profile_default)
+                    }.addOnCompleteListener {
+                        // 프로그래스바 숨기기
+                        progressBar.visibility = View.GONE
+                    }
+                } else {
+                    // profileImageUrl이 null이거나 비어있는 경우 기본 이미지를 설정
+                    binding.ivProfile.setImageResource(R.drawable.profile_default)
+                    progressBar.visibility = View.GONE
                 }
             }
 
