@@ -310,7 +310,8 @@ class SettingFragment : Fragment() {
     // Firebase에 선택한 이미지를 업로드
     private fun uploadProfileImage(uri: Uri) {
         val userId = mAuth.currentUser?.uid.toString()
-        val storageRef = Firebase.storage.reference.child("profileImages/$userId.jpg")
+        val storage = FirebaseStorage.getInstance(BuildConfig.STORAGE_BUCKET)
+        val storageRef = storage.reference.child("profileImages/$userId.jpg")
 
         storageRef.putFile(uri)
             .addOnSuccessListener {
@@ -332,9 +333,11 @@ class SettingFragment : Fragment() {
                 Log.d(TAG, "Profile image URL saved to database")
                 // 이미지가 성공적으로 저장되었으면 로드
                 loadCurrentProfile()
+                Toast.makeText(requireContext(),"프로필 사진이 변경되었습니다",Toast.LENGTH_LONG).show()
             }
             .addOnFailureListener {
                 Log.d(TAG, "Failed to save image URL to database")
+                Toast.makeText(requireContext(),"프로필 사진 변경 실패",Toast.LENGTH_LONG).show()
             }
     }
 
