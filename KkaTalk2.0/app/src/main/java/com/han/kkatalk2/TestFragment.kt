@@ -54,6 +54,7 @@ class TestFragment : Fragment() {
         database = FirebaseDatabase.getInstance()
         prefs = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
         storage = FirebaseStorage.getInstance(BuildConfig.STORAGE_BUCKET)
+        progressBar = binding.progressBar
 
         // 유저 정보 불러오기
         val currentUser = auth.currentUser
@@ -116,12 +117,12 @@ class TestFragment : Fragment() {
 
         // 프로필 변경 버튼에 대한 클릭 리스너 설정
         binding.btnChangeProfile.setOnClickListener {
-            //chageProfileImage()
+            chageProfileImage()
         }
 
         // 프로필 삭제 버튼
         binding.btnDeleteProfile.setOnClickListener {
-            //deleteProfileImage()
+            deleteProfileImage()
         }
 
         // 로그아웃 버튼 클릭 시
@@ -244,7 +245,7 @@ class TestFragment : Fragment() {
     }
 
     // 사진 선택 기능
-    private fun selectProfileImage() {
+    private fun chageProfileImage() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             // Android 13 이상: READ_MEDIA_IMAGES 권한 요청
             Log.d(TAG, "Requesting READ_MEDIA_IMAGES permission")
@@ -260,38 +261,6 @@ class TestFragment : Fragment() {
                 REQUEST_CODE_SELECT_PHOTOS
             )
         }
-    }
-
-    // Firebase에 선택한 이미지를 업로드
-    private fun uploadProfileImage(uri: Uri) {
-        val storage = FirebaseStorage.getInstance(BuildConfig.STORAGE_BUCKET)
-        val storageRef = storage.reference.child("profileImages/$userId.jpg")
-
-        storageRef.putFile(uri)
-            .addOnSuccessListener {
-                // 업로드 성공 시 다운로드 URL 가져오기
-                storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
-                    saveProfileImageUrl(downloadUri.toString())
-                }
-            }
-            .addOnFailureListener {
-                Log.d(TAG, "Failed to upload image to Firebase")
-            }
-    }
-
-    // 다운로드 URL을 Firebase Realtime Database에 저장
-    private fun saveProfileImageUrl(url: String) {
-        userRef.child("profileImageUrl").setValue(url)
-            .addOnSuccessListener {
-                Log.d(TAG, "Profile image URL saved to database")
-                // 이미지가 성공적으로 저장되었으면 로드
-                loadUserData()
-                Toast.makeText(requireContext(),"프로필 사진이 변경되었습니다",Toast.LENGTH_LONG).show()
-            }
-            .addOnFailureListener {
-                Log.d(TAG, "Failed to save image URL to database")
-                Toast.makeText(requireContext(),"프로필 사진 변경 실패",Toast.LENGTH_LONG).show()
-            }
     }
 
     // 선택된 사진 처리
@@ -325,11 +294,62 @@ class TestFragment : Fragment() {
 
     }
 
+    // Firebase에 선택한 이미지를 업로드
+    private fun uploadProfileImage(uri: Uri) {
+        val storageRef = storage.reference.child("profileImages/$userId.jpg")
+
+        // Storage에서 기존 이미지 삭제
+        storageRef.delete()
+            .addOnSuccessListener {
+                Log.d(TAG, "Firebase Storage 이미지 삭제 성공")
+            }
+            .addOnFailureListener {
+                Log.e(TAG, "Firebase Storage 이미지 삭제 실패 또는 존재하지 않음: ${it.message}")
+            }
+
+        storageRef.putFile(uri)
+            .addOnSuccessListener {
+                // 업로드 성공 시 다운로드 URL 가져오기
+                storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                    saveProfileImageUrl(downloadUri.toString())
+                }
+            }
+            .addOnFailureListener {
+                Log.d(TAG, "Failed to upload image to Firebase")
+            }
+    }
+
+    // 이미지 주소 DB에 저장
+    private fun saveProfileImageUrl(url: String) {
+        userRef.child("profileImageUrl").setValue(url)
+            .addOnSuccessListener {
+                Log.d(TAG, "Profile image URL saved to database")
+                // 이미지가 성공적으로 저장되었으면 로드
+                loadUserData()
+                Toast.makeText(requireContext(),"프로필 사진이 변경되었습니다",Toast.LENGTH_LONG).show()
+            }
+            .addOnFailureListener {
+                Log.d(TAG, "Failed to save image URL to database")
+                Toast.makeText(requireContext(),"프로필 사진 변경 실패",Toast.LENGTH_LONG).show()
+            }
+    }
+
     // 프로필 사진 삭제
     private fun deleteProfileImage() {
+        val storageRef = storage.reference.child("profileImages/$userId.jpg")
+
+        // Storage에서 이미지 삭제
+        storageRef.delete()
+            .addOnSuccessListener {
+                Log.d(TAG, "Firebase Storage 이미지 삭제 성공")
+            }
+            .addOnFailureListener {
+                Log.e(TAG, "Firebase Storage 이미지 삭제 실패 또는 존재하지 않음: ${it.message}")
+            }
+
+        // DB에서 프로필 이미지 URL 삭제
         if (userId.isNotEmpty()) {
-            // Firebase Realtime Database에서 프로필 이미지 URL 삭제
-         userRef.child("profileImageUrl").removeValue()
+            userRef.child("profileImageUrl").removeValue()
                 .addOnSuccessListener {
                     // ImageView를 기본 이미지로 변경
                     binding.ivProfile.setImageResource(R.drawable.profile_default)
@@ -343,11 +363,7 @@ class TestFragment : Fragment() {
         } else {
             // 사용자 ID가 비어있을 경우 기본 이미지 설정 및 알림
             binding.ivProfile.setImageResource(R.drawable.profile_default)
-            Toast.makeText(
-                requireContext(),
-                "기본 프로필 이미지가 적용되었습니다.",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(requireContext(), "기본 프로필 이미지가 적용되었습니다.", Toast.LENGTH_SHORT).show()
         }
     }
 
