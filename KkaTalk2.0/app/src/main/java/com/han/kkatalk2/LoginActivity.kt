@@ -4,10 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -212,15 +209,13 @@ class LoginActivity : AppCompatActivity() {
 
     private fun addUserToDatabase(name: String, email: String, uId: String, nick: String) {
 
-        val gsBucketUrl = BuildConfig.STORAGE_BUCKET  // "gs://kkatalk-cf3fd.appspot.com"
-        val storage = FirebaseStorage.getInstance(gsBucketUrl)
+        val storage = FirebaseStorage.getInstance(BuildConfig.STORAGE_BUCKET)
         val storageRef = storage.getReference("profile_default.png")
 
         storageRef.downloadUrl
             .addOnSuccessListener { uri ->
-                // 이 uri는 반드시 https:// 로 시작함
                 val profileImageUrl = uri.toString()
-                Log.d("DEBUG", "다운로드 URL: $profileImageUrl") // 이거 로그로 꼭 확인해봐
+                Log.d("DEBUG", "다운로드 URL: $profileImageUrl")
 
                 val user = User(name, email, uId, nick, profileImageUrl, defaultStatusMessage)
                 Firebase.database.reference.child("user").child(uId).setValue(user)

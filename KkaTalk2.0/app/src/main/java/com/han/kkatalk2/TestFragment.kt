@@ -2,6 +2,7 @@ package com.han.kkatalk2
 
 import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -38,6 +39,7 @@ class TestFragment : Fragment() {
     private lateinit var progressBar: ProgressBar
 
     private val TAG = "SettingFragment"
+    private val defaultProfileImageUrl = "${BuildConfig.STORAGE_BUCKET}/profile_default.png"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -95,13 +97,13 @@ class TestFragment : Fragment() {
             }
         }
 
-        // 상태 메시지 변경 버튼 클릭 시
+        // 상태 메시지 변경
         binding.btnChangeStatus.setOnClickListener {
             binding.edtNewStatus.visibility = View.VISIBLE
             binding.btnSaveNewStatus.visibility = View.VISIBLE
         }
 
-        // 상태 메시지 저장 버튼 클릭 시
+        // 상태 메시지 저장
         binding.btnSaveNewStatus.setOnClickListener {
             val newStatus = binding.edtNewStatus.text.toString().trim()
             if (newStatus.isNotEmpty()) {
@@ -109,25 +111,30 @@ class TestFragment : Fragment() {
             }
         }
 
-        // 차단 관리 버튼 클릭 시
+        // 차단 관리
         binding.btnManageBlockedUsers.setOnClickListener {
             val intent = Intent(requireContext(), BlockedUsersActivity::class.java)
             startActivity(intent)
         }
 
-        // 프로필 변경 버튼에 대한 클릭 리스너 설정
+        // 프로필 변경
         binding.btnChangeProfile.setOnClickListener {
             chageProfileImage()
         }
 
-        // 프로필 삭제 버튼
+        // 프로필 삭제
         binding.btnDeleteProfile.setOnClickListener {
             deleteProfileImage()
         }
 
-        // 로그아웃 버튼 클릭 시
+        // 로그아웃
         binding.btnLogout.setOnClickListener {
             handleLogout()
+        }
+
+        // 회원 탈퇴
+        binding.btnDeleteAccount.setOnClickListener {
+            //showDeleteAccountDialog()
         }
 
     }
@@ -142,12 +149,11 @@ class TestFragment : Fragment() {
         userRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val nick = snapshot.child("nick").getValue(String::class.java) ?: "닉네임 없음"
-                val status = snapshot.child("status").getValue(String::class.java) ?: "상태메시지 없음"
+                val status = snapshot.child("statusMessage").getValue(String::class.java) ?: "상태메시지 없음"
                 val profileImageUrl = snapshot.child("profileImageUrl").getValue(String::class.java)
 
                 binding.tvCurrentNick.text = "현재 닉네임: $nick"
                 binding.tvCurrentStatus.text = "현재 상태 메시지: $status"
-
                 binding.progressBar.visibility = View.VISIBLE
 
                 if (!profileImageUrl.isNullOrEmpty()) {
@@ -210,6 +216,7 @@ class TestFragment : Fragment() {
                     binding.btnSaveNewStatus.visibility = View.GONE
                 }
         }
+        Toast.makeText(requireContext(), "상태 메시지가 변경되었습니다.", Toast.LENGTH_LONG).show()
     }
 
     companion object {
@@ -349,10 +356,9 @@ class TestFragment : Fragment() {
 
         // DB에서 프로필 이미지 URL 삭제
         if (userId.isNotEmpty()) {
-            userRef.child("profileImageUrl").removeValue()
+            userRef.child("profileImageUrl").setValue(defaultProfileImageUrl)
                 .addOnSuccessListener {
-                    // ImageView를 기본 이미지로 변경
-                    binding.ivProfile.setImageResource(R.drawable.profile_default)
+                    loadUserData()
                     // 상태 알림
                     Toast.makeText(requireContext(), "기본 프로필 이미지가 적용되었습니다.", Toast.LENGTH_LONG).show()
                 }
@@ -391,4 +397,41 @@ class TestFragment : Fragment() {
         startActivity(intent)
         activity?.finish()
     }
+
+    // 탈퇴 확인
+    /*private fun showDeleteAccountDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("회원 탈퇴")
+            .setMessage("정말 탈퇴하시겠습니까? 모든 정보가 삭제됩니다.")
+            .setPositiveButton("탈퇴") { _, _ ->
+                deleteAccount()
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }*/
+
+    // 계정 삭제
+   /* private fun deleteAccount() {
+        if (userId.isNotEmpty()) {
+            // DB에서 데이터 삭제
+            FirebaseDatabase.getInstance().reference.child("user").child(uid).removeValue()
+                .addOnCompleteListener {
+                    // Authentication에서 계정 삭제
+                    user.delete()
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                Toast.makeText(requireContext(), "회원 탈퇴 완료", Toast.LENGTH_SHORT).show()
+                                mAuth.signOut()
+                                startActivity(Intent(requireContext(), LoginActivity::class.java))
+                                requireActivity().finish()
+                            } else {
+                                Toast.makeText(requireContext(), "회원 탈퇴 실패: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                }
+        } else {
+            Toast.makeText( requireContext(), "로그인 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+        }
+    }*/
+
 }
