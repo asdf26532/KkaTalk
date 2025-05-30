@@ -134,7 +134,7 @@ class TestFragment : Fragment() {
 
         // 회원 탈퇴
         binding.btnDeleteAccount.setOnClickListener {
-            //showDeleteAccountDialog()
+            showDeleteAccountDialog()
         }
 
     }
@@ -234,11 +234,11 @@ class TestFragment : Fragment() {
 
         if (requestCode == REQUEST_CODE_SELECT_PHOTOS) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // 권한이 승인되면 갤러리를 엽니다.
+                // 권한이 승인되면 갤러리 열기
                 Log.d(TAG, "Permission granted, opening gallery")
                 openGallery()
             } else {
-                // 권한이 거부된 경우, 사용자에게 알림을 표시하거나 대체 처리를 합니다.
+                // 권한이 거부된 경우
                 Log.d(TAG, "Permission denied, cannot open gallery")
             }
         }
@@ -399,7 +399,7 @@ class TestFragment : Fragment() {
     }
 
     // 탈퇴 확인
-    /*private fun showDeleteAccountDialog() {
+    private fun showDeleteAccountDialog() {
         AlertDialog.Builder(requireContext())
             .setTitle("회원 탈퇴")
             .setMessage("정말 탈퇴하시겠습니까? 모든 정보가 삭제됩니다.")
@@ -408,30 +408,41 @@ class TestFragment : Fragment() {
             }
             .setNegativeButton("취소", null)
             .show()
-    }*/
+    }
 
     // 계정 삭제
-   /* private fun deleteAccount() {
+    private fun deleteAccount() {
         if (userId.isNotEmpty()) {
-            // DB에서 데이터 삭제
-            FirebaseDatabase.getInstance().reference.child("user").child(uid).removeValue()
-                .addOnCompleteListener {
-                    // Authentication에서 계정 삭제
-                    user.delete()
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                Toast.makeText(requireContext(), "회원 탈퇴 완료", Toast.LENGTH_SHORT).show()
-                                mAuth.signOut()
-                                startActivity(Intent(requireContext(), LoginActivity::class.java))
-                                requireActivity().finish()
-                            } else {
-                                Toast.makeText(requireContext(), "회원 탈퇴 실패: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
-                            }
+
+            // 1. DB에서 유저 데이터 삭제
+            userRef.removeValue()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        // 2. auth계정 삭제 (자체 회원가입 유저인 경우만)
+                        val currentUser = FirebaseAuth.getInstance().currentUser
+                        if (currentUser != null) {
+                            currentUser.delete()
+                                .addOnCompleteListener { authTask ->
+                                    if (authTask.isSuccessful) {
+                                        Toast.makeText(requireContext(), "회원 탈퇴가 완료되었습니다.", Toast.LENGTH_SHORT).show()
+                                        FirebaseAuth.getInstance().signOut()
+                                        redirectToLogin()
+                                    } else {
+                                        Toast.makeText(requireContext(), "계정 삭제 실패: ${authTask.exception?.message}", Toast.LENGTH_LONG).show()
+                                    }
+                                }
+                        } else {
+                            // SNS 로그인 사용자: DB만 삭제됨
+                            Toast.makeText(requireContext(), "회원 데이터 삭제 완료되었습니다. (SNS 로그인 계정)", Toast.LENGTH_SHORT).show()
+                            redirectToLogin()
                         }
+                    } else {
+                        Toast.makeText(requireContext(), "데이터베이스 삭제 실패", Toast.LENGTH_LONG).show()
+                    }
                 }
         } else {
-            Toast.makeText( requireContext(), "로그인 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "로그인된 사용자 정보가 없습니다.", Toast.LENGTH_SHORT).show()
         }
-    }*/
+    }
 
 }
