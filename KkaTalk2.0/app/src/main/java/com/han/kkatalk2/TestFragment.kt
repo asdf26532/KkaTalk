@@ -16,6 +16,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -40,6 +42,12 @@ class TestFragment : Fragment() {
 
     private val TAG = "SettingFragment"
     private val defaultProfileImageUrl = "${BuildConfig.STORAGE_BUCKET}/profile_default.png"
+
+    private lateinit var switchDarkMode: SwitchCompat
+
+    private val appPrefs by lazy {
+        requireActivity().getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -135,6 +143,20 @@ class TestFragment : Fragment() {
         // 회원 탈퇴
         binding.btnDeleteAccount.setOnClickListener {
             showDeleteAccountDialog()
+        }
+
+        // 다크모드 스위치 연결
+        switchDarkMode = view.findViewById(R.id.switch_dark_mode)
+
+        // 초기 상태 반영
+        val isDarkMode = appPrefs.getBoolean("DARK_MODE", false)
+        switchDarkMode.isChecked = isDarkMode
+        applyDarkMode(isDarkMode)
+
+        // 리스너 연결
+        switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
+            appPrefs.edit().putBoolean("DARK_MODE", isChecked).apply()
+            applyDarkMode(isChecked)
         }
 
     }
@@ -443,6 +465,13 @@ class TestFragment : Fragment() {
         } else {
             Toast.makeText(requireContext(), "로그인된 사용자 정보가 없습니다.", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    // 다크모드
+    private fun applyDarkMode(enabled: Boolean) {
+        AppCompatDelegate.setDefaultNightMode(
+            if (enabled) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+        )
     }
 
 }
