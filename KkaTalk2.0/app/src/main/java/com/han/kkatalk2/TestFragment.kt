@@ -470,7 +470,8 @@ class TestFragment : Fragment() {
     // 다크모드
     private fun applyDarkMode(enabled: Boolean) {
         AppCompatDelegate.setDefaultNightMode(
-            if (enabled) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+            if (enabled) AppCompatDelegate.MODE_NIGHT_YES
+            else AppCompatDelegate.MODE_NIGHT_NO
         )
     }
 
