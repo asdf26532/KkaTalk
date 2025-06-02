@@ -65,8 +65,8 @@ class UserAdapter(private val context: Context, private var userList: ArrayList<
     }
 
     // 차단된 사용자 목록만 업데이트
-    fun updateList(blockedUserIds: List<String>, allUsers: List<User>) {
-        userList = ArrayList(allUsers.filter { blockedUserIds.contains(it.uId) })
+    fun updateList(blockedUsers: List<User>) {
+        userList = ArrayList(blockedUsers)
         notifyDataSetChanged()
     }
 

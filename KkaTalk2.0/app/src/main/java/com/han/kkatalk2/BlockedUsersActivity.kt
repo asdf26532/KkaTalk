@@ -1,5 +1,6 @@
 package com.han.kkatalk2
 
+import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
@@ -9,52 +10,42 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 
 class BlockedUsersActivity : AppCompatActivity() {
 
     private lateinit var userAdapter: UserAdapter
-    private lateinit var blockedUserIds: ArrayList<String>
-    private lateinit var allUsers: ArrayList<User>
-    private lateinit var auth: FirebaseAuth
+    private val blockedUsers = ArrayList<User>()
     private lateinit var database: FirebaseDatabase
     private lateinit var prefs: SharedPreferences
     private lateinit var userRef: DatabaseReference
-    private var userId: String = ""
+    private lateinit var currentUserId: String
 
-    private val TAG = "BlockUsersActivity"
+    private val TAG = "BlockedUsersActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_blocked_users)
 
-        // Firebase 설정
-        auth = FirebaseAuth.getInstance()
+        // 초기화
         database = FirebaseDatabase.getInstance()
-        blockedUserIds = ArrayList()
-        allUsers = ArrayList()
+        prefs = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
 
-        // 유저 정보 불러오기
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
-            userId = currentUser.uid
-            Log.d(TAG,"userid: $userId")
-        } else {
-            // SharedPreferences에서 userid 가져오기
-            userId = prefs.getString("userId", null) ?: ""
-            Log.d(TAG,"userid: $userId")
+        currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+            ?: prefs.getString("userId", null).orEmpty()
+
+        if (currentUserId.isEmpty()) {
+            Log.e(TAG, "현재 사용자 ID를 찾을 수 없습니다.")
+            finish()
+            return
         }
 
-        userRef = database.getReference("user").child(userId)
+        userRef = database.reference.child("user")
 
         // RecyclerView 설정
         val recyclerView: RecyclerView = findViewById(R.id.rvBlockedUsers)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        userAdapter = UserAdapter(this, ArrayList())
+        userAdapter = UserAdapter(this, blockedUsers)
         recyclerView.adapter = userAdapter
 
         fetchBlockedUsers()
@@ -63,95 +54,87 @@ class BlockedUsersActivity : AppCompatActivity() {
             showUnblockDialog(user)
         }
 
-        // 툴바에 뒤로가기 버튼 추가
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-        }
+        // 툴바 뒤로가기
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
-    // 전체 유저 목록
-    private fun fetchAllUsers() {
-        userRef.addValueEventListener(object : ValueEventListener {
+    // 차단된 사용자 ID 목록을 기반으로 유저 정보 조회
+    private fun fetchBlockedUsers() {
+        val blockedRef = database.reference.child("user").child(currentUserId).child("blockedUsers")
+
+        blockedRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                allUsers.clear()
-                for (child in snapshot.children) {
-                    val user = child.getValue(User::class.java)
-                    if (user != null) {
-                        allUsers.add(user)
-                    }
+                blockedUsers.clear()
+                val blockedIds = snapshot.children.mapNotNull { it.key }
+
+                if (blockedIds.isEmpty()) {
+                    userAdapter.updateList(blockedUsers)
+                    return
                 }
-                updateAdapter() // 차단된 사용자 목록 갱신
+
+                var loadedCount = 0
+
+                for (uid in blockedIds) {
+                    userRef.child(uid).addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(userSnap: DataSnapshot) {
+                            val user = userSnap.getValue(User::class.java)
+                            if (user != null) {
+                                blockedUsers.add(user)
+                            }
+                            loadedCount++
+                            if (loadedCount == blockedIds.size) {
+                                userAdapter.updateList(blockedUsers)
+                            }
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            Log.e(TAG, "유저 정보 조회 실패: ${error.message}")
+                            loadedCount++
+                            if (loadedCount == blockedIds.size) {
+                                userAdapter.updateList(blockedUsers)
+                            }
+                        }
+                    })
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.e("BlockedUsersActivity", "Failed to fetch all users: ${error.message}")
+                Log.e(TAG, "차단 목록 조회 실패: ${error.message}")
             }
         })
     }
 
-    // 차단 유저 목록
-    private fun fetchBlockedUsers() {
-        if (userId.isNotEmpty()) {
-            userRef.child("blockedUsers").addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    blockedUserIds.clear()
-                    for (child in snapshot.children) {
-                        val blockedUserId = child.key
-                        if (blockedUserId != null) {
-                            blockedUserIds.add(blockedUserId)
-                        }
-                    }
-
-                    fetchAllUsers()
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Log.e("BlockedUsersActivity", "Failed to fetch blocked users: ${error.message}")
-                }
-            })
-        }
-    }
-
-    private fun updateAdapter() {
-        userAdapter.updateList(blockedUserIds, allUsers)
-    }
-
-    // 차단 해제 다이얼로그
     private fun showUnblockDialog(user: User) {
         MaterialAlertDialogBuilder(this)
             .setTitle("차단 해제")
-            .setMessage("차단을 해제하시겠습니까?")
-            .setPositiveButton("해제") { _, _ ->
-                unblockUser(user)
-            }
-            .setNegativeButton("취소", null) // 아무 동작 없이 닫기
+            .setMessage("${user.nick} 님의 차단을 해제하시겠습니까?")
+            .setPositiveButton("해제") { _, _ -> unblockUser(user) }
+            .setNegativeButton("취소", null)
             .show()
     }
 
-    // 차단 해제 기능
     private fun unblockUser(user: User) {
-        val blockedUsersRef = database.reference.child("user").child(userId).child("blockedUsers")
+        val blockedRef = database.reference.child("user").child(currentUserId).child("blockedUsers")
 
-        blockedUsersRef.child(user.uId).removeValue().addOnCompleteListener { task ->
+        blockedRef.child(user.uId).removeValue().addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                Log.d("BlockedUsersActivity", "${user.nick} 차단 해제 성공")
+                Log.d(TAG, "${user.nick} 차단 해제 성공")
+                blockedUsers.remove(user)
+                userAdapter.updateList(blockedUsers)
             } else {
-                Log.e("BlockedUsersActivity", "${user.nick} 차단 해제 실패: ${task.exception?.message}")
+                Log.e(TAG, "차단 해제 실패: ${task.exception?.message}")
             }
         }
     }
-    
-    // 뒤로 가기 버튼
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            android.R.id.home -> { // 뒤로가기 버튼 클릭 이벤트 처리
-                Log.d("BlockedUsersActivity", "뒤로가기 버튼 클릭됨")
+            android.R.id.home -> {
                 onBackPressed()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
-
-
 }
