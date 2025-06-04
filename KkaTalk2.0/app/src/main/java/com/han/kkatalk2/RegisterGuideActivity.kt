@@ -1,7 +1,9 @@
 package com.han.kkatalk2
 
 import android.app.ProgressDialog
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -28,6 +30,7 @@ class RegisterGuideActivity : AppCompatActivity() {
     private lateinit var guideDatabase: DatabaseReference
     private lateinit var userDatabase: DatabaseReference
     private lateinit var storage: FirebaseStorage
+    private lateinit var prefs: SharedPreferences
 
     private lateinit var imageContainer: LinearLayout
     private lateinit var imgAdd: ImageView
@@ -36,6 +39,7 @@ class RegisterGuideActivity : AppCompatActivity() {
     private var guideId: String? = null
     private val uploadedUrls = mutableListOf<String>()
 
+    private lateinit var userId: String
     private lateinit var txtImageCount: TextView
     private val MAX_IMAGE_COUNT = 10
 
@@ -47,8 +51,7 @@ class RegisterGuideActivity : AppCompatActivity() {
         guideDatabase = FirebaseDatabase.getInstance().getReference("guide")
         userDatabase = FirebaseDatabase.getInstance().getReference("user")
         storage = FirebaseStorage.getInstance(BuildConfig.STORAGE_BUCKET)
-        Log.d("Firebase", "Bucket URL: ${storage}")
-
+        prefs = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
 
         val edtTitle = findViewById<EditText>(R.id.edt_title)
         val spinnerLocation = findViewById<Spinner>(R.id.spinner_location)
@@ -71,15 +74,15 @@ class RegisterGuideActivity : AppCompatActivity() {
             spinnerLocation.adapter = adapter
         }
 
-        // 로그인 상태 체크
-        val currentUser = auth.currentUser
-        if (currentUser == null) {
-            Toast.makeText(this, "로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
+        userId = auth.currentUser?.uid
+            ?: prefs.getString("userId", null).orEmpty()
+
+        if (userId.isEmpty()) {
+            Log.e("RegisterGuide", "현재 사용자 ID를 찾을 수 없습니다.")
             finish()
             return
         }
 
-        val userId = auth.currentUser?.uid ?: return
 
         guideId = intent.getStringExtra("guideId")
         if (guideId != null) {

@@ -17,6 +17,7 @@ class BlockedUsersActivity : AppCompatActivity() {
     private lateinit var userAdapter: UserAdapter
     private val blockedUsers = ArrayList<User>()
     private lateinit var database: FirebaseDatabase
+    private lateinit var auth: FirebaseAuth
     private lateinit var prefs: SharedPreferences
     private lateinit var userRef: DatabaseReference
     private lateinit var currentUserId: String
@@ -29,9 +30,10 @@ class BlockedUsersActivity : AppCompatActivity() {
 
         // 초기화
         database = FirebaseDatabase.getInstance()
+        auth = FirebaseAuth.getInstance()
         prefs = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
 
-        currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+        currentUserId = auth.currentUser?.uid
             ?: prefs.getString("userId", null).orEmpty()
 
         if (currentUserId.isEmpty()) {

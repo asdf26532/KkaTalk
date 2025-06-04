@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -33,6 +34,7 @@ class GuideDetailActivity : AppCompatActivity() {
     private lateinit var database: DatabaseReference
     private lateinit var auth: FirebaseAuth
 
+    private lateinit var prefs: SharedPreferences
     private var writerUid: String? = null
 
     private lateinit var viewPager: ViewPager2
@@ -51,6 +53,8 @@ class GuideDetailActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         auth = FirebaseAuth.getInstance()
+        prefs = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+
         guideId = intent.getStringExtra("guideId")
             ?: throw IllegalArgumentException("guideId가 존재하지 않습니다.")
         val nick = intent.getStringExtra("nick")
@@ -82,7 +86,15 @@ class GuideDetailActivity : AppCompatActivity() {
     }
 
     private fun loadGuide() {
+
         val currentUserUid = auth.currentUser?.uid
+            ?: prefs.getString("userId", null).orEmpty()
+
+        if (currentUserUid.isEmpty()) {
+            Log.e("RegisterGuide", "현재 사용자 ID를 찾을 수 없습니다.")
+            finish()
+            return
+        }
 
         // 가이드 정보 가져오기
         database.get().addOnSuccessListener { snapshot ->
