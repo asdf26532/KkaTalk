@@ -6,6 +6,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -38,13 +39,15 @@ class ChatActivity : AppCompatActivity() {
 
     private lateinit var messageAdapter: MessageAdapter
 
+    private lateinit var senderUid: String
     private lateinit var receiverNick: String
     private lateinit var receiverUid: String
 
     private lateinit var binding: ActivityChatBinding
 
-    lateinit var mAuth: FirebaseAuth
-    lateinit var mDbRef: DatabaseReference
+    private lateinit var mAuth: FirebaseAuth
+    private lateinit var mDbRef: DatabaseReference
+    private lateinit var prefs: SharedPreferences
 
     private lateinit var receiverRoom: String
     private lateinit var senderRoom: String
@@ -93,9 +96,17 @@ class ChatActivity : AppCompatActivity() {
         // Firebase 설정
         mAuth = FirebaseAuth.getInstance()
         mDbRef = FirebaseDatabase.getInstance().reference
+        prefs = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
 
         // 접속자 Uid
-        val senderUid = mAuth.currentUser?.uid
+        senderUid = mAuth.currentUser?.uid
+            ?: prefs.getString("userId", null).orEmpty()
+
+        if (senderUid.isEmpty()) {
+            Log.e("ChatActivity", "현재 사용자 ID를 찾을 수 없습니다.")
+            finish()
+            return
+        }
 
         senderRoom = senderUid + receiverUid
         receiverRoom = receiverUid + senderUid
@@ -318,7 +329,6 @@ class ChatActivity : AppCompatActivity() {
 
     // 파일 메시지 전송 함수
     private fun sendMessageWithFile(fileUrl: String) {
-        val senderUid = mAuth.currentUser?.uid
         val timeStamp = System.currentTimeMillis()
         val messageObject = Message(
             message = null,         // 텍스트 메시지는 없음
@@ -675,10 +685,8 @@ class ChatActivity : AppCompatActivity() {
 
     // 차단된 사용자 목록 가져오기
    private fun fetchBlockedUsers() {
-       val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
-
-       if (currentUserId != null) {
-           val userRef = FirebaseDatabase.getInstance().reference.child("user").child(currentUserId)
+       if (senderUid.isNotEmpty()) {
+           val userRef = FirebaseDatabase.getInstance().reference.child("user").child(senderUid)
                .child("blockedUsers")
 
            userRef.addValueEventListener(object : ValueEventListener { //
