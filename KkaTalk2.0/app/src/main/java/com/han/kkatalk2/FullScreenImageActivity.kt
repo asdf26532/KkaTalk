@@ -2,27 +2,25 @@ package com.han.kkatalk2
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.github.chrisbanes.photoview.PhotoView
 
 class FullScreenImageActivity : AppCompatActivity() {
+
+    private lateinit var viewPager: ViewPager2
+    private lateinit var imageUrls: List<String>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_full_screen_image)
 
-        val photoView: PhotoView = findViewById(R.id.photo_view)
+        viewPager = findViewById(R.id.viewPager)
 
-        // Intent로 전달된 이미지 URL 받기
-        val imageUrl = intent.getStringExtra("IMAGE_URL")
+        imageUrls = intent.getStringArrayListExtra("IMAGE_URLS") ?: listOf()
+        val startPosition = intent.getIntExtra("START_POSITION", 0)
 
-        // Glide를 사용하여 이미지를 PhotoView에 로드
-        if (!imageUrl.isNullOrEmpty()) {
-            Glide.with(this)
-                .load(imageUrl)
-                .placeholder(android.R.drawable.ic_menu_gallery) // 로딩 중 표시할 기본 이미지
-                .error(android.R.drawable.ic_delete) // 실패 시 표시할 기본 이미지
-                .into(photoView)
-        }
+        viewPager.adapter = GuideImageAdapter(imageUrls)
+        viewPager.setCurrentItem(startPosition, false)
     }
-
 }

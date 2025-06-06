@@ -5,32 +5,26 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.github.chrisbanes.photoview.PhotoView
 
 class GuideImageAdapter(
-    private val imageList: List<Any>,
-    private val isDrawable: Boolean = false
+    private val imageList: List<String>
 ) : RecyclerView.Adapter<GuideImageAdapter.ImageViewHolder>() {
 
-    class ImageViewHolder(val imageView: ImageView) : RecyclerView.ViewHolder(imageView)
+    class ImageViewHolder(val photoView: PhotoView) : RecyclerView.ViewHolder(photoView)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
-        val imageView = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_image_pager, parent, false) as ImageView
-        return ImageViewHolder(imageView)
+        val photoView = LayoutInflater.from(parent.context)
+            .inflate(R.layout.activity_full_screen_image, parent, false) as PhotoView
+        return ImageViewHolder(photoView)
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-        if (isDrawable) {
-            val resId = imageList[position] as Int
-            holder.imageView.setImageResource(resId)
-        } else {
-            val url = imageList[position] as String
-            Glide.with(holder.imageView.context)
-                .load(url)
-                .placeholder(R.drawable.image_default)
-                .error(R.drawable.image_default)
-                .into(holder.imageView)
-        }
+        Glide.with(holder.photoView.context)
+            .load(imageList[position])
+            .placeholder(R.drawable.image_default)
+            .error(R.drawable.image_default)
+            .into(holder.photoView)
     }
 
     override fun getItemCount() = imageList.size

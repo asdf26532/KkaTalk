@@ -57,6 +57,7 @@ class GuideDetailActivity : AppCompatActivity() {
 
         guideId = intent.getStringExtra("guideId")
             ?: throw IllegalArgumentException("guideId가 존재하지 않습니다.")
+
         val nick = intent.getStringExtra("nick")
         val profileImageUrl = intent.getStringExtra("profileImageUrl")
 
@@ -175,69 +176,6 @@ class GuideDetailActivity : AppCompatActivity() {
         }
     }
 
-
-    /*private fun loadGuide() {
-        // 조회수 증가 처리
-        database.runTransaction(object : Transaction.Handler {
-            override fun doTransaction(currentData: MutableData): Transaction.Result {
-                val guide = currentData.getValue(Guide::class.java) ?: return Transaction.success(currentData)
-                val updatedGuide = guide.copy(viewCount = guide.viewCount + 1)
-                currentData.value = updatedGuide
-                return Transaction.success(currentData)
-            }
-
-            override fun onComplete(error: DatabaseError?, committed: Boolean, currentData: DataSnapshot?) {
-                if (error != null) {
-                    Log.e("GuideDetailActivity", "조회수 증가 실패: ${error.message}")
-                } else {
-                    Log.d("GuideDetailActivity", "조회수 증가 성공")
-                }
-            }
-        })
-
-        // 가이드 데이터 가져오기
-        database.get().addOnSuccessListener { snapshot ->
-            if (!snapshot.exists()) {
-                showErrorAndExit("해당 가이드를 찾을 수 없습니다.")
-                return@addOnSuccessListener
-            }
-
-            val guide = snapshot.getValue(Guide::class.java)
-            if (guide != null) {
-                currentGuide = guide
-                writerUid = guide.uId
-
-                updateUI(guide)
-
-                // 버튼 처리
-                val currentUserUid = auth.currentUser?.uid
-                if (currentUserUid == writerUid) {
-                    binding.btnChat.text = "수정하기"
-                    binding.btnChat.setOnClickListener {
-                        val intent = Intent(this, RegisterGuideActivity::class.java)
-                        intent.putExtra("guideId", guideId)
-                        startActivityForResult(intent, REQUEST_EDIT_GUIDE)
-                    }
-                } else {
-                    binding.btnChat.text = "대화하기"
-                    binding.btnChat.setOnClickListener {
-                        val intent = Intent(this, ChatActivity::class.java).apply {
-                            putExtra("uId", guideId)
-                            putExtra("nick", guide.nick)
-                            putExtra("profileImageUrl", guide.profileImageUrl)
-                        }
-                        startActivity(intent)
-                    }
-                }
-
-            } else {
-                showErrorAndExit("데이터를 불러오는 중 오류가 발생했습니다.")
-            }
-        }.addOnFailureListener {
-            showErrorAndExit("네트워크 오류가 발생했습니다. 다시 시도해주세요.")
-        }
-    }*/
-
     private fun updateUI(guide: Guide) {
         findViewById<TextView>(R.id.txt_title).text = guide.title
         findViewById<TextView>(R.id.txt_name).text = guide.nick
@@ -303,6 +241,7 @@ class GuideDetailActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.guide_detail_menu, menu)
 
         val currentUserUid = auth.currentUser?.uid
+            ?: prefs.getString("userId", null)
 
         if (currentUserUid == writerUid) {
             menu?.findItem(R.id.action_delete)?.isVisible = true

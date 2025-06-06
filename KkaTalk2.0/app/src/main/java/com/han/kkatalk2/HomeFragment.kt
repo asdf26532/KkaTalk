@@ -92,7 +92,7 @@ class HomeFragment : Fragment() {
         return view
     }
 
-    // 필터링된 리스트로 갱신하는 함수
+    // 필터링된 리스트로 갱신
     private fun updateList() {
         val selectedCity = spinnerCity.selectedItem.toString()
         filteredList.clear()
