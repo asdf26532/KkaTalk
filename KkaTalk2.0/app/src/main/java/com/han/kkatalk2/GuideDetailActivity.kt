@@ -197,8 +197,9 @@ class GuideDetailActivity : AppCompatActivity() {
         }
 
         val imageUrls = guide.imageUrls
-        imageAdapter = if (imageUrls.isEmpty()) {
-            GuideImageAdapter(listOf(R.drawable.image_default), true)
+        val imageAdapter = if (imageUrls.isEmpty()) {
+            val defaultImageUri = "android.resource://${packageName}/${R.drawable.image_default}"
+            GuideImageAdapter(listOf(defaultImageUri))
         } else {
             GuideImageAdapter(imageUrls)
         }

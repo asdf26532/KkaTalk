@@ -11,20 +11,28 @@ class GuideImageAdapter(
     private val imageList: List<String>
 ) : RecyclerView.Adapter<GuideImageAdapter.ImageViewHolder>() {
 
-    class ImageViewHolder(val photoView: PhotoView) : RecyclerView.ViewHolder(photoView)
+    class ImageViewHolder(val imageView: ImageView) : RecyclerView.ViewHolder(imageView)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
-        val photoView = LayoutInflater.from(parent.context)
-            .inflate(R.layout.activity_full_screen_image, parent, false) as PhotoView
-        return ImageViewHolder(photoView)
+        val imageView = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_image_pager, parent, false) as ImageView
+        return ImageViewHolder(imageView)
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-        Glide.with(holder.photoView.context)
-            .load(imageList[position])
+        val url = imageList[position]
+        Glide.with(holder.imageView.context)
+            .load(url)
             .placeholder(R.drawable.image_default)
             .error(R.drawable.image_default)
-            .into(holder.photoView)
+            .into(holder.imageView)
+
+        // 클릭 시 전체화면 보기
+        holder.imageView.setOnClickListener {
+            val context = holder.imageView.context
+            val intent = FullScreenImageActivity.newIntent(context, imageList, position)
+            context.startActivity(intent)
+        }
     }
 
     override fun getItemCount() = imageList.size
