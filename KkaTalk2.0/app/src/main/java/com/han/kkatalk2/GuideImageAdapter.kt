@@ -5,10 +5,10 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.github.chrisbanes.photoview.PhotoView
 
 class GuideImageAdapter(
-    private val imageList: List<String>
+    private val imageList: List<String>,
+    private val onImageClick: ((position: Int) -> Unit)? = null
 ) : RecyclerView.Adapter<GuideImageAdapter.ImageViewHolder>() {
 
     class ImageViewHolder(val imageView: ImageView) : RecyclerView.ViewHolder(imageView)
@@ -27,11 +27,9 @@ class GuideImageAdapter(
             .error(R.drawable.image_default)
             .into(holder.imageView)
 
-        // 클릭 시 전체화면 보기
+        // 외부에서 클릭 리스너가 주어졌을 때만 실행
         holder.imageView.setOnClickListener {
-            val context = holder.imageView.context
-            val intent = FullScreenImageActivity.newIntent(context, imageList, position)
-            context.startActivity(intent)
+            onImageClick?.invoke(position)
         }
     }
 

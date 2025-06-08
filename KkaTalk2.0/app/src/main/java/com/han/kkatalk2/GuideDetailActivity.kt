@@ -201,7 +201,10 @@ class GuideDetailActivity : AppCompatActivity() {
             val defaultImageUri = "android.resource://${packageName}/${R.drawable.image_default}"
             GuideImageAdapter(listOf(defaultImageUri))
         } else {
-            GuideImageAdapter(imageUrls)
+            GuideImageAdapter(imageUrls) { position ->
+                val intent = FullScreenImageActivity.newIntent(this, imageUrls, position)
+                startActivity(intent)
+            }
         }
 
         viewPager.adapter = imageAdapter

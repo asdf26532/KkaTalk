@@ -5,8 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
-import com.bumptech.glide.Glide
-import com.github.chrisbanes.photoview.PhotoView
 
 class FullScreenImageActivity : AppCompatActivity() {
 
