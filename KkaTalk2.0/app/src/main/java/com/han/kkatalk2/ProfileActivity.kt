@@ -40,6 +40,15 @@ class ProfileActivity : AppCompatActivity() {
         // 사용자 프로필 이미지 로드
         loadProfileImage()
 
+        // 프로필 이미지 클릭 시 전체 화면
+        binding.ivProfile.setOnClickListener {
+            if (profileImageUrl.isNotEmpty()) {
+                val imageList = listOf(profileImageUrl)
+                val intent = FullScreenImageActivity.newIntent(this@ProfileActivity, imageList, 0)
+                startActivity(intent)
+            }
+        }
+
         // 상태 메시지 표시
         loadStatusMessage()
 
