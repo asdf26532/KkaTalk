@@ -34,6 +34,10 @@ class ProfileActivity : AppCompatActivity() {
         userNick = intent.getStringExtra("nick") ?: ""
         profileImageUrl = intent.getStringExtra("profileImageUrl") ?: ""
 
+        Log.d("ProfileActivity", "Intent로 받은 userId: $userId")
+        Log.d("ProfileActivity", "Intent로 받은 nick: $userNick")
+        Log.d("ProfileActivity", "Intent로 받은 profileImageUrl: $profileImageUrl")
+
         // 닉네임 표시
         binding.tvNick.text = "닉네임: $userNick"
 
@@ -42,6 +46,7 @@ class ProfileActivity : AppCompatActivity() {
 
         // 프로필 이미지 클릭 시 전체 화면
         binding.ivProfile.setOnClickListener {
+            Log.d("ProfileActivity", "클릭된 profileImageUrl: $profileImageUrl")
             if (profileImageUrl.isNotEmpty()) {
                 val imageList = listOf(profileImageUrl)
                 val intent = FullScreenImageActivity.newIntent(this@ProfileActivity, imageList, 0)
@@ -91,19 +96,39 @@ class ProfileActivity : AppCompatActivity() {
         userRef.get().addOnSuccessListener { snapshot ->
             val user = snapshot.getValue(User::class.java)
             user?.let {
-                val profileImageUrl = it.profileImageUrl
-                if (profileImageUrl.isNotEmpty()) {
-                    // Glide를 사용해 URL을 바로 로드
-                    Glide.with(this@ProfileActivity)
-                        .load(profileImageUrl)
-                        .placeholder(R.drawable.profile_default)
-                        .error(R.drawable.profile_default) // 오류 시 기본 이미지 표시
-                        .into(binding.ivProfile)
+                Log.d("ProfileActivity", "DB에서 받은 profileImageUrl: ${it.profileImageUrl}")
+                val gsUrl = it.profileImageUrl
+                if (gsUrl.isNotEmpty()) {
+                    try {
+                        val storage = FirebaseStorage.getInstance(BuildConfig.STORAGE_BUCKET)
+                        val storageRef = storage.getReferenceFromUrl(gsUrl)
+                        storageRef.downloadUrl.addOnSuccessListener { uri ->
+                            val downloadUrl = uri.toString()
+                            Log.d("ProfileActivity", "변환된 downloadUrl: $downloadUrl")
+
+                            Glide.with(this@ProfileActivity)
+                                .load(downloadUrl)
+                                .placeholder(R.drawable.profile_default)
+                                .error(R.drawable.profile_default)
+                                .into(binding.ivProfile)
+
+                            profileImageUrl = downloadUrl
+
+                        }.addOnFailureListener {
+                            Log.e("ProfileActivity", "downloadUrl 변환 실패: ${it.message}")
+                            binding.ivProfile.setImageResource(R.drawable.profile_default)
+                        }
+                    } catch (e: IllegalArgumentException) {
+                        Log.e("ProfileActivity", "버킷 불일치 오류: ${e.message}")
+                        binding.ivProfile.setImageResource(R.drawable.profile_default)
+                    }
                 } else {
+                    Log.w("ProfileActivity", "profileImageUrl이 비어 있음 → 기본 이미지 사용")
                     binding.ivProfile.setImageResource(R.drawable.profile_default)
                 }
             }
         }.addOnFailureListener {
+            Log.e("ProfileActivity", "Firebase get() 실패: ${it.message}")
             binding.ivProfile.setImageResource(R.drawable.profile_default)
         }
     }
