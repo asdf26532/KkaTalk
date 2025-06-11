@@ -1,4 +1,5 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
@@ -11,15 +12,15 @@
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/view_pager"
             android:layout_width="match_parent"
-            android:layout_height="200dp"/>
+            android:layout_height="200dp" />
 
         <me.relex.circleindicator.CircleIndicator3
             android:id="@+id/indicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:backgroundTint="@color/black"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@color/black" />
 
         <View
             android:layout_width="match_parent"
@@ -33,7 +34,7 @@
             android:padding="5dp"
             android:text="글 제목"
             android:textSize="32sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/txt_location"
@@ -42,7 +43,7 @@
             android:text="지역"
             android:paddingStart="5dp"
             android:textSize="16sp"
-            android:layout_marginTop="4dp"/>
+            android:layout_marginTop="4dp" />
 
         <TextView
             android:id="@+id/txt_rate"
@@ -51,7 +52,7 @@
             android:text="요금"
             android:paddingStart="5dp"
             android:textSize="16sp"
-            android:layout_marginTop="4dp"/>
+            android:layout_marginTop="4dp" />
 
         <TextView
             android:id="@+id/txt_content"
@@ -72,7 +73,7 @@
             android:textSize="16sp"
             android:layout_gravity="end"
             android:layout_marginEnd="10dp"
-            android:textColor="#888888"/>
+            android:textColor="#888888" />
 
         <View
             android:layout_width="match_parent"
@@ -133,6 +134,6 @@
             android:text="대화하기"
             android:textSize="18sp"
             android:layout_gravity="center"
-            android:layout_marginTop="20dp"/>
+            android:layout_marginTop="20dp" />
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

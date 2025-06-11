@@ -24,6 +24,7 @@ import com.google.firebase.database.MutableData
 import com.google.firebase.database.Transaction
 import com.google.firebase.storage.FirebaseStorage
 import com.han.kkatalk2.databinding.ActivityGuideDetailBinding
+import me.relex.circleindicator.CircleIndicator3
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -208,7 +209,11 @@ class GuideDetailActivity : AppCompatActivity() {
         }
 
         viewPager.adapter = imageAdapter
-        findViewById<me.relex.circleindicator.CircleIndicator3>(R.id.indicator).setViewPager(viewPager)
+        val indicator = findViewById<CircleIndicator3>(R.id.indicator)
+
+        viewPager.post {
+            indicator.setViewPager(viewPager)
+        }
     }
 
     private fun showErrorAndExit(message: String) {
