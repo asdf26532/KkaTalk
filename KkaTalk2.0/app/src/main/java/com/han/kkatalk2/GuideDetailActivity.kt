@@ -15,6 +15,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
+import com.google.android.gms.common.internal.safeparcel.SafeParcelable.Indicator
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -25,9 +26,6 @@ import com.google.firebase.database.Transaction
 import com.google.firebase.storage.FirebaseStorage
 import com.han.kkatalk2.databinding.ActivityGuideDetailBinding
 import me.relex.circleindicator.CircleIndicator3
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class GuideDetailActivity : AppCompatActivity() {
 
@@ -39,6 +37,7 @@ class GuideDetailActivity : AppCompatActivity() {
     private var writerUid: String? = null
 
     private lateinit var viewPager: ViewPager2
+    private lateinit var indicator: CircleIndicator3
     private lateinit var imageAdapter: GuideImageAdapter
 
     private lateinit var guideId: String
@@ -70,6 +69,7 @@ class GuideDetailActivity : AppCompatActivity() {
 
         database = FirebaseDatabase.getInstance().getReference("guide").child(guideId)
         viewPager = findViewById(R.id.view_pager)
+        indicator = findViewById(R.id.indicator)
 
         // 가이드 정보 불러오기 및 조회수 증가
         loadGuide()
@@ -209,11 +209,8 @@ class GuideDetailActivity : AppCompatActivity() {
         }
 
         viewPager.adapter = imageAdapter
-        val indicator = findViewById<CircleIndicator3>(R.id.indicator)
+        indicator.setViewPager(viewPager)
 
-        viewPager.post {
-            indicator.setViewPager(viewPager)
-        }
     }
 
     private fun showErrorAndExit(message: String) {
