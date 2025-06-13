@@ -1,5 +1,6 @@
 package com.han.kkatalk2
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -14,8 +15,11 @@ class GuideImageAdapter(
     class ImageViewHolder(val imageView: ImageView) : RecyclerView.ViewHolder(imageView)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
-        val imageView = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_image_pager, parent, false) as ImageView
+        Log.d("GuideImageAdapter", "onCreateViewHolder 호출됨")
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_image_pager, parent, false)
+
+        val imageView = view.findViewById<ImageView>(R.id.image_view)
         return ImageViewHolder(imageView)
     }
 
@@ -33,5 +37,8 @@ class GuideImageAdapter(
         }
     }
 
-    override fun getItemCount() = imageList.size
+    override fun getItemCount(): Int {
+        Log.d("GuideImageAdapter", "getItemCount() = ${imageList.size}")
+        return imageList.size
+    }
 }

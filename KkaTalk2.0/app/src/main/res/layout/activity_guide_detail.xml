@@ -2,6 +2,7 @@
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:fillViewport="true">
 
     <LinearLayout
@@ -18,8 +19,14 @@
             android:id="@+id/indicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:layout_gravity="center"
-            android:layout_marginTop="8dp" />
+            app:ci_drawable="@drawable/indicator_unselected"
+            app:ci_drawable_selected="@drawable/indicator_selected"
+            app:ci_width="20dp"
+            app:ci_height="20dp"
+            app:ci_margin="4dp"
+           />
 
         <View
             android:layout_width="match_parent"
