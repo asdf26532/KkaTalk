@@ -9,14 +9,12 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
-import android.view.ViewTreeObserver
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -26,7 +24,9 @@ import com.google.firebase.database.MutableData
 import com.google.firebase.database.Transaction
 import com.google.firebase.storage.FirebaseStorage
 import com.han.kkatalk2.databinding.ActivityGuideDetailBinding
-import me.relex.circleindicator.CircleIndicator3
+import com.tbuonomo.viewpagerdotsindicator.DotsIndicator
+import com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
+
 
 class GuideDetailActivity : AppCompatActivity() {
 
@@ -38,7 +38,7 @@ class GuideDetailActivity : AppCompatActivity() {
     private var writerUid: String? = null
 
     private lateinit var viewPager: ViewPager2
-    private lateinit var indicator: CircleIndicator3
+    private lateinit var dotsIndicator: WormDotsIndicator
     private lateinit var imageAdapter: GuideImageAdapter
 
     private lateinit var guideId: String
@@ -70,7 +70,7 @@ class GuideDetailActivity : AppCompatActivity() {
 
         database = FirebaseDatabase.getInstance().getReference("guide").child(guideId)
         viewPager = findViewById(R.id.view_pager)
-        indicator = findViewById(R.id.indicator)
+        dotsIndicator = findViewById(R.id.dots_indicator)
 
         // 가이드 정보 불러오기 및 조회수 증가
         loadGuide()
@@ -208,26 +208,9 @@ class GuideDetailActivity : AppCompatActivity() {
                 startActivity(intent)
             }
         }
-
         viewPager.adapter = imageAdapter
-
-        indicator.visibility = View.VISIBLE
-        indicator.post {
-            indicator.setViewPager(viewPager)
-            indicator.createIndicators(imageAdapter.itemCount, 0)
-            Log.d("GuideDetail", "post 안에서 setViewPager & createIndicators 완료")
-        }
-        /*viewPager.adapter = imageAdapter
-        Log.d("GuideDetail", "ViewPager2 어댑터 설정 완료")
-
-        indicator.setViewPager(viewPager)
-        imageAdapter.registerAdapterDataObserver(indicator.adapterDataObserver)
-        Log.d("GuideDetail", "Indicator 연결됨. 어댑터 itemCount = ${imageAdapter.itemCount}")
-
-        indicator.viewTreeObserver.addOnGlobalLayoutListener {
-            Log.d("GuideDetail", "Indicator measured: width=${indicator.measuredWidth}, height=${indicator.measuredHeight}")
-        }*/
-
+        dotsIndicator.attachTo(viewPager)
+        Log.d("CHECK", "Adapter item count: ${imageAdapter.itemCount}")
     }
 
     private fun showErrorAndExit(message: String) {

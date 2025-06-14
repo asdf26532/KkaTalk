@@ -78,7 +78,8 @@ dependencies {
     // 사진 관련
     implementation ("com.github.chrisbanes:PhotoView:2.3.0")
     implementation ("com.github.Dhaval2404:ImagePicker:2.1")
-    implementation ("me.relex:circleindicator:2.1.6")
+    //implementation ("me.relex:circleindicator:2.1.6")
+    implementation ("com.tbuonomo:dotsindicator:4.3")
 
     // Firebase
     implementation(libs.firebase.database)
@@ -89,7 +90,7 @@ dependencies {
     implementation ("com.firebaseui:firebase-ui-auth:8.0.0")
     implementation("com.google.firebase:firebase-storage")
 
-    /*// admob
+    /*admob
     implementation("com.google.android.gms:play-services-ads:23.3.0")*/
 
     // glide
