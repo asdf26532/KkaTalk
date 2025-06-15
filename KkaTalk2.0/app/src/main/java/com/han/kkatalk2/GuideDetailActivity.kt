@@ -199,18 +199,25 @@ class GuideDetailActivity : AppCompatActivity() {
         }
 
         val imageUrls = guide.imageUrls
-        val imageAdapter = if (imageUrls.isEmpty()) {
+        Log.d("GuideDetailActivity", "Guide 이미지 리스트 크기: ${imageUrls.size}")
+        imageUrls.forEach {
+            Log.d("GuideDetailActivity", "이미지 URL: $it")
+        }
+             imageAdapter = if (imageUrls.isEmpty()) {
             val defaultImageUri = "android.resource://${packageName}/${R.drawable.image_default}"
             GuideImageAdapter(listOf(defaultImageUri))
         } else {
-            GuideImageAdapter(imageUrls) { position ->
+            GuideImageAdapter(imageUrls) { position, _ ->
                 val intent = FullScreenImageActivity.newIntent(this, imageUrls, position)
                 startActivity(intent)
             }
         }
         viewPager.adapter = imageAdapter
-        dotsIndicator.attachTo(viewPager)
-        Log.d("CHECK", "Adapter item count: ${imageAdapter.itemCount}")
+        viewPager.post {
+            dotsIndicator.attachTo(viewPager)
+            Log.d("CHECK", "Adapter item count: ${imageAdapter.itemCount}")
+        }
+
     }
 
     private fun showErrorAndExit(message: String) {
