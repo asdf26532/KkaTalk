@@ -69,8 +69,8 @@ class GuideDetailActivity : AppCompatActivity() {
         }
 
         database = FirebaseDatabase.getInstance().getReference("guide").child(guideId)
-        viewPager = findViewById(R.id.view_pager)
-        dotsIndicator = findViewById(R.id.dots_indicator)
+        viewPager = findViewById(R.id.viewPager)
+        dotsIndicator = findViewById(R.id.dotsIndicator)
 
         // 가이드 정보 불러오기 및 조회수 증가
         loadGuide()

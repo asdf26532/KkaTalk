@@ -10,24 +10,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/view_pager"
-            android:layout_width="match_parent"
-            android:layout_height="200dp" />
-
-        <com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
-            android:id="@+id/dots_indicator"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            app:dotsColor="@color/gray"
-            app:selectedDotColor="@color/black"
-            app:dotsSize="10dp"
-            app:dotsSpacing="8dp"
-            android:background="#22FF0000" />
-
+        <include layout="@layout/view_pager" />
 
         <View
             android:layout_width="match_parent"

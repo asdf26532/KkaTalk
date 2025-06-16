@@ -19,9 +19,7 @@ class GuideImageAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
-        if (BuildConfig.DEBUG) {
-            Log.d("GuideImageAdapter", "onCreateViewHolder 호출됨")
-        }
+        Log.d("GuideImageAdapter", "onCreateViewHolder 호출됨")
 
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_image_pager, parent, false)
@@ -30,6 +28,7 @@ class GuideImageAdapter(
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
+        Log.d("GuideImageAdapter", "onBindViewHolder position: $position")
         val url = imageList[position]
 
         Glide.with(holder.imageView.context)
