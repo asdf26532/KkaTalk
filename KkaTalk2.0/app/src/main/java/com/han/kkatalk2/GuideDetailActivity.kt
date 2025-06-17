@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -213,10 +214,21 @@ class GuideDetailActivity : AppCompatActivity() {
             }
         }
         viewPager.adapter = imageAdapter
-        viewPager.post {
+        dotsIndicator.attachTo(viewPager)
+
+        /*viewPager.postDelayed({
             dotsIndicator.attachTo(viewPager)
+        }, 50)*/
+
+        /*imageAdapter.notifyDataSetChanged()
+        viewPager.adapter = imageAdapter
+        dotsIndicator.attachTo(viewPager)*/
+
+        /*viewPager.post {
+            //dotsIndicator.setBackgroundColor(Color.RED)
+
             Log.d("CHECK", "Adapter item count: ${imageAdapter.itemCount}")
-        }
+        }*/
 
     }
 
