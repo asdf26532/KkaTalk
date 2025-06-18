@@ -216,20 +216,6 @@ class GuideDetailActivity : AppCompatActivity() {
         viewPager.adapter = imageAdapter
         dotsIndicator.attachTo(viewPager)
 
-        /*viewPager.postDelayed({
-            dotsIndicator.attachTo(viewPager)
-        }, 50)*/
-
-        /*imageAdapter.notifyDataSetChanged()
-        viewPager.adapter = imageAdapter
-        dotsIndicator.attachTo(viewPager)*/
-
-        /*viewPager.post {
-            //dotsIndicator.setBackgroundColor(Color.RED)
-
-            Log.d("CHECK", "Adapter item count: ${imageAdapter.itemCount}")
-        }*/
-
     }
 
     private fun showErrorAndExit(message: String) {

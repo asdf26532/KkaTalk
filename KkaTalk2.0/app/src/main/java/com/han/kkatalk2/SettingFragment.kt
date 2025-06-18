@@ -170,6 +170,57 @@ class SettingFragment : Fragment() {
     private fun loadUserData() {
         userRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
+                // Fragment가 아직 화면에 붙어있고, binding이 null이 아닐 때만 처리
+                if (!isAdded || _binding == null) {
+                    Log.e(TAG, "loadUserData() 호출 시 fragment가 detach 상태이거나 binding이 null입니다.")
+                    return
+                }
+
+                val nick = snapshot.child("nick").getValue(String::class.java) ?: "닉네임 없음"
+                val status = snapshot.child("statusMessage").getValue(String::class.java) ?: "상태메시지 없음"
+                val profileImageUrl = snapshot.child("profileImageUrl").getValue(String::class.java)
+
+                binding.tvCurrentNick.text = "현재 닉네임: $nick"
+                binding.tvCurrentStatus.text = "현재 상태 메시지: $status"
+                binding.progressBar.visibility = View.VISIBLE
+
+                if (!profileImageUrl.isNullOrEmpty()) {
+                    val storageRef = storage.getReferenceFromUrl(profileImageUrl)
+
+                    storageRef.downloadUrl.addOnSuccessListener { uri ->
+                        if (!isAdded || _binding == null) return@addOnSuccessListener
+
+                        Glide.with(this@SettingFragment)
+                            .load(uri)
+                            .placeholder(R.drawable.profile_default)
+                            .into(binding.ivProfile)
+
+                    }.addOnFailureListener {
+                        if (!isAdded || _binding == null) return@addOnFailureListener
+
+                        binding.ivProfile.setImageResource(R.drawable.profile_default)
+                    }.addOnCompleteListener {
+                        if (!isAdded || _binding == null) return@addOnCompleteListener
+
+                        binding.progressBar.visibility = View.GONE
+                    }
+                } else {
+                    binding.ivProfile.setImageResource(R.drawable.profile_default)
+                    binding.progressBar.visibility = View.GONE
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                if (!isAdded || _binding == null) return
+                Toast.makeText(requireContext(), "사용자를 찾을 수 없습니다", Toast.LENGTH_LONG).show()
+            }
+        })
+    }
+
+    // 현재 사용자 정보 불러오기
+   /* private fun loadUserData() {
+        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
                 val nick = snapshot.child("nick").getValue(String::class.java) ?: "닉네임 없음"
                 val status = snapshot.child("statusMessage").getValue(String::class.java) ?: "상태메시지 없음"
                 val profileImageUrl = snapshot.child("profileImageUrl").getValue(String::class.java)
@@ -209,7 +260,7 @@ class SettingFragment : Fragment() {
                 Toast.makeText(requireContext(), "사용자를 찾을 수 없습니다", Toast.LENGTH_LONG).show()
             }
         })
-    }
+    }*/
 
     // 닉네임 변경
     private fun updateNickname(newNick: String) {
