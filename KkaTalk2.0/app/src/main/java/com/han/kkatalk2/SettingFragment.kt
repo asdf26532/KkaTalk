@@ -170,7 +170,6 @@ class SettingFragment : Fragment() {
     private fun loadUserData() {
         userRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                // Fragment가 아직 화면에 붙어있고, binding이 null이 아닐 때만 처리
                 if (!isAdded || _binding == null) {
                     Log.e(TAG, "loadUserData() 호출 시 fragment가 detach 상태이거나 binding이 null입니다.")
                     return
@@ -216,51 +215,6 @@ class SettingFragment : Fragment() {
             }
         })
     }
-
-    // 현재 사용자 정보 불러오기
-   /* private fun loadUserData() {
-        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val nick = snapshot.child("nick").getValue(String::class.java) ?: "닉네임 없음"
-                val status = snapshot.child("statusMessage").getValue(String::class.java) ?: "상태메시지 없음"
-                val profileImageUrl = snapshot.child("profileImageUrl").getValue(String::class.java)
-
-                binding.tvCurrentNick.text = "현재 닉네임: $nick"
-                binding.tvCurrentStatus.text = "현재 상태 메시지: $status"
-                binding.progressBar.visibility = View.VISIBLE
-
-                if (!profileImageUrl.isNullOrEmpty()) {
-                    // Firebase Storage 참조 생성
-                    val storageRef = storage.getReferenceFromUrl(profileImageUrl)
-
-                    // Firebase Storage에서 이미지 URL 다운로드
-                    storageRef.downloadUrl.addOnSuccessListener { uri ->
-                        // Glide를 사용해 ImageView에 이미지 로드
-                        Glide.with(this@SettingFragment)
-                            .load(uri)
-                            .placeholder(R.drawable.profile_default) // 기본 이미지 설정
-                            .into(binding.ivProfile)
-
-                    }.addOnFailureListener {
-                        // 실패 시 기본 이미지 로드
-                        binding.ivProfile.setImageResource(R.drawable.profile_default)
-                    }.addOnCompleteListener {
-                        // 프로그래스바 숨기기
-                        progressBar.visibility = View.GONE
-                    }
-                } else {
-                    // profileImageUrl이 null이거나 비어있는 경우 기본 이미지를 설정
-                    binding.ivProfile.setImageResource(R.drawable.profile_default)
-                    progressBar.visibility = View.GONE
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                // 실패 처리
-                Toast.makeText(requireContext(), "사용자를 찾을 수 없습니다", Toast.LENGTH_LONG).show()
-            }
-        })
-    }*/
 
     // 닉네임 변경
     private fun updateNickname(newNick: String) {
