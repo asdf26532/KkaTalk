@@ -2,14 +2,17 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-
     <color name="red">#E53935</color>
     <color name="blue">#1EADE5</color>
     <color name="green">#4CAF51</color>
     <color name="gray">#0CFFFFFF</color>
-
     <color name="skyblue">#63CBF4</color>
-
     <color name="colorPrimary">#D2B7F8</color>
+
+    <color name="background">#FFFFFF</color>
+    <color name="text_primary">#000000</color>
+    <color name="text_secondary">#555555</color>
+    <color name="button_bg">#F0F0F0</color>
+    <color name="input_bg">#EEEEEE</color>
 
 </resources>
