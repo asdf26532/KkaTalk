@@ -3,6 +3,10 @@ package com.han.kkatalk2
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
@@ -55,3 +59,18 @@ class MainActivity : AppCompatActivity() {
         Log.d("MainActivity", "Fragment replaced: ${fragment.javaClass.simpleName}") // 추가 로그
     }
 }
+
+    // 커스텀 토스트
+    fun Context.showCustomToast(message: String) {
+        val toast = Toast(this)
+        val inflater = LayoutInflater.from(this)
+        val layout = inflater.inflate(R.layout.custom_toast_layout, null)
+
+        val text = layout.findViewById<TextView>(R.id.toast_text)
+        text.text = message
+
+        toast.view = layout
+        toast.duration = Toast.LENGTH_LONG
+        toast.setGravity(Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL, 0, 100)
+        toast.show()
+    }

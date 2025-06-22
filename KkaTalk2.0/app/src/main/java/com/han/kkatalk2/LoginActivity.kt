@@ -54,7 +54,7 @@ class LoginActivity : AppCompatActivity() {
             val password = binding.edtPassword.text.toString()
 
             if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "이메일과 비밀번호를 입력하세요.", Toast.LENGTH_LONG).show()
+                showCustomToast("이메일과 비밀번호를 입력하세요.")
             } else {
                 login(email, password)
             }
@@ -85,11 +85,10 @@ class LoginActivity : AppCompatActivity() {
                     // 성공 시 실행
                     val intent = Intent(this@LoginActivity, MainActivity::class.java)
                     startActivity(intent)
-                    Toast.makeText(this, "로그인 성공", Toast.LENGTH_LONG).show()
-                    //showInterstitialAdAndProceed()
+                    showCustomToast("로그인 성공")
                 } else {
                     // 실패 시 실행
-                    Toast.makeText(this, "로그인 실패", Toast.LENGTH_LONG).show()
+                    showCustomToast("로그인 실패")
                     Log.d("Login", "Error: ${task.exception}" )
                 }
             }
