@@ -16,7 +16,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.github.dhaval2404.imagepicker.ImagePicker
@@ -91,7 +90,7 @@ class RegisterGuideActivity : AppCompatActivity() {
 
         imgAdd.setOnClickListener {
             if (selectedImageUris.size >= MAX_IMAGE_COUNT) {
-                Toast.makeText(this, "사진은 최대 10장까지 선택 가능합니다.", Toast.LENGTH_SHORT).show()
+                showCustomToast("사진은 최대 10장까지 선택 가능합니다.")
                 return@setOnClickListener
             }
             ImagePicker.with(this)
@@ -133,12 +132,12 @@ class RegisterGuideActivity : AppCompatActivity() {
                         progressDialog.dismiss()
                     }
                 } else {
-                    Toast.makeText(this, "모든 필드를 입력하세요!", Toast.LENGTH_SHORT).show()
+                    showCustomToast("모든 칸을 입력해주세요.")
                 }
             }
         }.addOnFailureListener {
             Log.e("RegisterGuide", "유저 정보 로드 실패: ${it.message}")
-            Toast.makeText(this, "유저 정보를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
+            showCustomToast("유저 정보를 불러오지 못했습니다.")
         }
 
         btnBack.setOnClickListener {
@@ -202,17 +201,17 @@ class RegisterGuideActivity : AppCompatActivity() {
             guideRef.setValue(guide).addOnCompleteListener {
                 if (it.isSuccessful) {
                     Log.d("RegisterGuide", "등록 성공")
-                    Toast.makeText(this, "등록 완료!", Toast.LENGTH_SHORT).show()
+                    showCustomToast("등록 완료!")
                     setResult(RESULT_OK)
                     finish()
                 } else {
                     Log.e("RegisterGuide", "등록 실패: ${it.exception?.message}")
-                    Toast.makeText(this, "등록 실패", Toast.LENGTH_SHORT).show()
+                    showCustomToast("등록 실패 : ${it.exception?.message} ")
                 }
             }
 
         }.addOnFailureListener {
-            Toast.makeText(this, "viewCount 불러오기 실패", Toast.LENGTH_SHORT).show()
+            showCustomToast("viewCount 불러오기 실패")
         }
     }
 
@@ -225,7 +224,7 @@ class RegisterGuideActivity : AppCompatActivity() {
         if (resultCode == RESULT_OK && requestCode == 101) {
             try {
                 if (selectedImageUris.size >= 10) {
-                    Toast.makeText(this, "최대 10장까지 업로드할 수 있습니다.", Toast.LENGTH_SHORT).show()
+                    showCustomToast("최대 10장까지 업로드할 수 있습니다.")
                     Log.w("RegisterGuide", "이미 10장 이상 선택됨")
                     return
                 }
@@ -329,7 +328,7 @@ class RegisterGuideActivity : AppCompatActivity() {
             }
         }.addOnFailureListener {
             Log.e("RegisterGuide", "가이드 데이터 로드 실패: ${it.message}")
-            Toast.makeText(this, "가이드 정보를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
+            showCustomToast("가이드 정보를 불러오지 못했습니다")
         }
     }
 }

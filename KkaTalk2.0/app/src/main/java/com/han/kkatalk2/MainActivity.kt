@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         text.text = message
 
         toast.view = layout
-        toast.duration = Toast.LENGTH_LONG
+        toast.duration = Toast.LENGTH_SHORT
         toast.setGravity(Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL, 0, 100)
         toast.show()
     }

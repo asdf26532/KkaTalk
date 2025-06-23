@@ -3,7 +3,6 @@ package com.han.kkatalk2
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -112,7 +111,7 @@ class LoginActivity : AppCompatActivity() {
                 }
             } catch (e: ApiException) {
                 Log.w("LoginActivity", "Google sign in failed", e)
-                Toast.makeText(this, "Google 로그인 실패", Toast.LENGTH_SHORT).show()
+                showCustomToast("로그인 실패")
             }
         }
     }
@@ -142,14 +141,14 @@ class LoginActivity : AppCompatActivity() {
 
                     val intent = Intent(this@LoginActivity, MainActivity::class.java)
                     startActivity(intent)
-                    Toast.makeText(this, "Google 로그인 성공", Toast.LENGTH_LONG).show()
+                    showCustomToast("Google 로그인 성공")
 
                     // 전면 광고를 보여준 후 메인 화면으로 이동
                     //showInterstitialAdAndProceed()
                 } else {
                     // 로그인 실패 시
                     Log.w("LoginActivity", "signInWithCredential:failure", task.exception)
-                    Toast.makeText(this, "Google 로그인 실패", Toast.LENGTH_LONG).show()
+                    showCustomToast("Google 로그인 실패")
                 }
             }
     }
@@ -161,14 +160,14 @@ class LoginActivity : AppCompatActivity() {
         val callback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
             if (error != null) {
                 Log.e("KakaoLogin", "카카오 로그인 실패: ${error.message}")
-                Toast.makeText(this, "카카오 로그인 실패: ${error.message}", Toast.LENGTH_SHORT).show()
+                showCustomToast("카카오 로그인 실패: ${error.message}")
             } else if (token != null) {
                 Log.d("KakaoLogin", "카카오 로그인 성공, 토큰 획득")
                 // 로그인 성공 시 사용자 정보 업데이트
                 updateKakaoLoginUi()
                 val intent = Intent(this@LoginActivity, MainActivity::class.java)
                 startActivity(intent)
-                Toast.makeText(this, "카카오 로그인 성공", Toast.LENGTH_LONG).show()
+                showCustomToast("카카오 로그인 성공")
             }
         }
 
