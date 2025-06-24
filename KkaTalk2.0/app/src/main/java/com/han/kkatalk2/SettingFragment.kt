@@ -15,13 +15,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
@@ -84,7 +81,7 @@ class SettingFragment : Fragment() {
         if (userId.isNotEmpty()) {
             loadUserData()
         } else {
-            Toast.makeText(requireContext(), "사용자 정보를 불러올 수 없습니다.", Toast.LENGTH_LONG).show()
+            requireContext().showCustomToast("tk용자 정보를 불러올 수 없습니다")
             // 로그인 화면으로 이동
             val intent = Intent(requireContext(), LoginActivity::class.java)
             startActivity(intent)
@@ -211,7 +208,7 @@ class SettingFragment : Fragment() {
 
             override fun onCancelled(error: DatabaseError) {
                 if (!isAdded || _binding == null) return
-                Toast.makeText(requireContext(), "사용자를 찾을 수 없습니다", Toast.LENGTH_LONG).show()
+                requireContext().showCustomToast("사용자를 찾을 수 없습니다")
             }
         })
     }
@@ -225,10 +222,10 @@ class SettingFragment : Fragment() {
                     binding.edtNewNick.text.clear()
                     binding.edtNewNick.visibility = View.GONE
                     binding.btnSaveNewNick.visibility = View.GONE
-                    Toast.makeText(requireContext(), "닉네임이 변경되었습니다.", Toast.LENGTH_LONG).show()
+                    requireContext().showCustomToast("닉네임이 변경되었습니다")
                 }
                 .addOnFailureListener {
-                    Toast.makeText(requireContext(), "닉네임 변경에 실패했습니다.", Toast.LENGTH_LONG).show()
+                    requireContext().showCustomToast("닉네임 변경에 실패했습니다.")
                 }
         }
     }
@@ -243,7 +240,7 @@ class SettingFragment : Fragment() {
                     binding.btnSaveNewStatus.visibility = View.GONE
                 }
         }
-        Toast.makeText(requireContext(), "상태 메시지가 변경되었습니다.", Toast.LENGTH_LONG).show()
+        requireContext().showCustomToast("상태 메시지가 변경되었습니다.")
     }
 
     companion object {
@@ -360,11 +357,11 @@ class SettingFragment : Fragment() {
                 Log.d(TAG, "Profile image URL saved to database")
                 // 이미지가 성공적으로 저장되었으면 로드
                 loadUserData()
-                Toast.makeText(requireContext(),"프로필 사진이 변경되었습니다",Toast.LENGTH_LONG).show()
+                requireContext().showCustomToast("프로필 사진이 변경되었습니다.")
             }
             .addOnFailureListener {
                 Log.d(TAG, "Failed to save image URL to database")
-                Toast.makeText(requireContext(),"프로필 사진 변경 실패",Toast.LENGTH_LONG).show()
+                requireContext().showCustomToast("프로필 사진 변경 실패.")
             }
     }
 
@@ -387,16 +384,16 @@ class SettingFragment : Fragment() {
                 .addOnSuccessListener {
                     loadUserData()
                     // 상태 알림
-                    Toast.makeText(requireContext(), "기본 프로필 이미지가 적용되었습니다.", Toast.LENGTH_LONG).show()
+                    requireContext().showCustomToast("기본 프로필 이미지가 적용되었습니다.")
                 }
                 .addOnFailureListener {
                     Log.e(TAG, "Failed to delete profile image URL")
-                    Toast.makeText(requireContext(), "프로필 이미지를 삭제하는 중 오류가 발생했습니다.", Toast.LENGTH_LONG).show()
+                    requireContext().showCustomToast("프로필 이미지를 삭제하는 중 오류가 발생했습니다.")
                 }
         } else {
             // 사용자 ID가 비어있을 경우 기본 이미지 설정 및 알림
             binding.ivProfile.setImageResource(R.drawable.profile_default)
-            Toast.makeText(requireContext(), "기본 프로필 이미지가 적용되었습니다.", Toast.LENGTH_SHORT).show()
+            requireContext().showCustomToast("기본 프로필 이미지가 적용되었습니다.")
         }
     }
 
@@ -451,24 +448,24 @@ class SettingFragment : Fragment() {
                             currentUser.delete()
                                 .addOnCompleteListener { authTask ->
                                     if (authTask.isSuccessful) {
-                                        Toast.makeText(requireContext(), "회원 탈퇴가 완료되었습니다.", Toast.LENGTH_SHORT).show()
+                                        requireContext().showCustomToast("회원 탈퇴가 완료되었습니다.")
                                         FirebaseAuth.getInstance().signOut()
                                         redirectToLogin()
                                     } else {
-                                        Toast.makeText(requireContext(), "계정 삭제 실패: ${authTask.exception?.message}", Toast.LENGTH_LONG).show()
+                                        requireContext().showCustomToast("계정 삭제 실패: ${authTask.exception?.message}.")
                                     }
                                 }
                         } else {
                             // SNS 로그인 사용자: DB만 삭제됨
-                            Toast.makeText(requireContext(), "회원 데이터 삭제 완료되었습니다. (SNS 로그인 계정)", Toast.LENGTH_SHORT).show()
+                            requireContext().showCustomToast("회원 데이터 삭제 완료되었습니다. (SNS 로그인 계정)")
                             redirectToLogin()
                         }
                     } else {
-                        Toast.makeText(requireContext(), "데이터베이스 삭제 실패", Toast.LENGTH_LONG).show()
+                        requireContext().showCustomToast("데이터베이스 삭제 실패")
                     }
                 }
         } else {
-            Toast.makeText(requireContext(), "로그인된 사용자 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+            requireContext().showCustomToast("로그인된 사용자 정보가 없습니다.")
         }
     }
 

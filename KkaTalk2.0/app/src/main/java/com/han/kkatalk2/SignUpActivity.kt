@@ -37,25 +37,10 @@ class SignUpActivity : AppCompatActivity() {
             val password = binding.edtPassword.text.toString().trim()
             val nick = binding.edtNick.text.toString().trim()
 
-            // 닉네임 가공 (한글 포함 여부 확인 후 랜덤 생성)
-            //val nickToSave = if (containsKorean(originalNick)) generateRandomNick() else originalNick
-
             signUp(name, email, password, nick)
 
         }
     }
-
-  /*  // 한글 포함 여부 체크
-    private fun containsKorean(text: String): Boolean {
-        return text.any { it in '\uAC00'..'\uD7A3' }
-    }
-
-    // 랜덤 닉네임 생성
-    private fun generateRandomNick(): String {
-        val chars = "abcdefghijklmnopqrstuvwxyz0123456789"
-        val random = (1..6).map { chars.random() }.joinToString("")
-        return "user_$random"
-    }*/
 
     // 회원 가입 기능
     private fun signUp(name:String, email:String, password:String, nick:String) {
