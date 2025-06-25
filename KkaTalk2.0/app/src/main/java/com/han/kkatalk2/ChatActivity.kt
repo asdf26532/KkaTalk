@@ -14,14 +14,11 @@ import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.LinearLayout
-
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
@@ -122,12 +119,12 @@ class ChatActivity : AppCompatActivity() {
             val message = binding.edtMessage.text.toString().trim()
             // 메시지가 비어 있는지 확인
             if (message.isEmpty()) {
-                Toast.makeText(this, "내용을 입력하세요.", Toast.LENGTH_SHORT).show()
+                showCustomToast("내용을 입력하세요.")
                 return@setOnClickListener
             }
 
             if (blockedUserIds.contains(receiverUid)) {
-                Toast.makeText(this, "차단한 사용자에게 메시지를 보낼 수 없습니다.", Toast.LENGTH_LONG).show()
+                showCustomToast("차단한 사용자에게 메시지를 보낼 수 없습니다.")
                 return@setOnClickListener
             }
 
@@ -305,7 +302,7 @@ class ChatActivity : AppCompatActivity() {
             if (fileUri != null) {
                 uploadFileToFirebase(fileUri)
             } else {
-                Toast.makeText(this, "파일 선택 실패", Toast.LENGTH_SHORT).show()
+                showCustomToast("파일 선택 실패")
             }
         }
     }
@@ -323,7 +320,7 @@ class ChatActivity : AppCompatActivity() {
                 sendMessageWithFile(fileUrl)
             }
         }.addOnFailureListener {
-            Toast.makeText(this, "파일 업로드 실패", Toast.LENGTH_SHORT).show()
+            showCustomToast("파일 업로드 실패")
         }
     }
 
@@ -358,7 +355,7 @@ class ChatActivity : AppCompatActivity() {
         val reactions = listOf("❤️", "👍", "👎", "😂", "😮", "😢", "✅") // 리액션 목록
         val userId = FirebaseAuth.getInstance().currentUser?.uid
         if (userId == null) {
-            Toast.makeText(this, "로그인 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+            showCustomToast("로그인 정보가 없습니다.")
             return
         }
 
@@ -389,7 +386,7 @@ class ChatActivity : AppCompatActivity() {
                 setOnClickListener {
                     updateReactions(senderMessagesRef, message, userId, reaction)
                     updateReactions(receiverMessagesRef, message, userId, reaction)
-                    Toast.makeText(this@ChatActivity, "$reaction 리액션이 추가되었습니다.", Toast.LENGTH_SHORT).show()
+                    showCustomToast("$reaction 리액션이 추가되었습니다.")
                     dialog.dismiss()
                 }
             }
@@ -401,7 +398,7 @@ class ChatActivity : AppCompatActivity() {
             val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("Copied Message", message.message)
             clipboard.setPrimaryClip(clip)
-            Toast.makeText(this, "메시지가 복사되었습니다.", Toast.LENGTH_SHORT).show()
+            showCustomToast("메시지가 복사되었습니다.")
             dialog.dismiss()
         }
 
@@ -480,7 +477,7 @@ class ChatActivity : AppCompatActivity() {
             val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("Copied Message", message.message)
             clipboard.setPrimaryClip(clip)
-            Toast.makeText(this, "메시지가 복사되었습니다.", Toast.LENGTH_SHORT).show()
+            showCustomToast("메시지가 복사되었습니다.")
             dialog.dismiss()
         }
 
@@ -507,7 +504,7 @@ class ChatActivity : AppCompatActivity() {
             if (message.sendId == FirebaseAuth.getInstance().currentUser?.uid) {
                     deleteMessage(senderRoom, receiverRoom, message)
             } else {
-                    Toast.makeText(this, "자신이 보낸 메시지만 삭제할 수 있습니다.", Toast.LENGTH_SHORT).show()
+                    showCustomToast("자신이 보낸 메시지만 삭제할 수 있습니다.")
                 }
                 dialog.dismiss()
                 }
@@ -632,7 +629,7 @@ class ChatActivity : AppCompatActivity() {
             val blockData = mapOf("timestamp" to blockTime)
 
             userRef.setValue(blockData).addOnSuccessListener {
-                Toast.makeText(this, "사용자를 차단했습니다.", Toast.LENGTH_SHORT).show()
+                showCustomToast("사용자를 차단했습니다.")
 
                 // 차단 성공 시 결과 전달
                 val intent = Intent()
@@ -640,10 +637,10 @@ class ChatActivity : AppCompatActivity() {
                 setResult(Activity.RESULT_OK, intent)
 
             }.addOnFailureListener {
-                Toast.makeText(this, "차단에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+                showCustomToast("차단에 실패했습니다. 다시 시도해주세요.")
             }
         } else {
-            Toast.makeText(this, "로그인 상태를 확인하세요.", Toast.LENGTH_SHORT).show()
+            showCustomToast("로그인 상태를 확인하세요.")
         }
     }
 
@@ -675,11 +672,11 @@ class ChatActivity : AppCompatActivity() {
             .child("user").child(currentUserId).child("blockedUsers").child(blockedUserId)
             .removeValue()
             .addOnSuccessListener {
-                Toast.makeText(this, "차단을 해제했습니다.", Toast.LENGTH_SHORT).show()
+                showCustomToast("차단을 해제했습니다.")
                 invalidateOptionsMenu() // 메뉴 다시 로드해서 "차단"으로 변경
             }
             .addOnFailureListener {
-                Toast.makeText(this, "차단 해제에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                showCustomToast("차단 해제 실패")
             }
     }
 

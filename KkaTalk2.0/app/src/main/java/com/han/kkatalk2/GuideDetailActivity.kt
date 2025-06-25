@@ -5,14 +5,12 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
@@ -25,7 +23,6 @@ import com.google.firebase.database.MutableData
 import com.google.firebase.database.Transaction
 import com.google.firebase.storage.FirebaseStorage
 import com.han.kkatalk2.databinding.ActivityGuideDetailBinding
-import com.tbuonomo.viewpagerdotsindicator.DotsIndicator
 import com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
 
 
@@ -64,7 +61,7 @@ class GuideDetailActivity : AppCompatActivity() {
         val profileImageUrl = intent.getStringExtra("profileImageUrl")
 
         if (guideId.isEmpty()) {
-            Toast.makeText(this, "잘못된 접근입니다.", Toast.LENGTH_SHORT).show()
+            showCustomToast("잘못된 접근입니다.")
             finish()
             return
         }
@@ -219,7 +216,7 @@ class GuideDetailActivity : AppCompatActivity() {
     }
 
     private fun showErrorAndExit(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        showCustomToast(message)
         finish()
     }
 
@@ -227,7 +224,7 @@ class GuideDetailActivity : AppCompatActivity() {
     private fun reloadGuideData() {
         database.get().addOnSuccessListener { snapshot ->
             if (!snapshot.exists()) {
-                showErrorAndExit("해당 가이드를 찾을 수 없습니다.")
+                showCustomToast("해당 가이드를 찾을 수 없습니다.")
                 return@addOnSuccessListener
             }
 
@@ -281,7 +278,7 @@ class GuideDetailActivity : AppCompatActivity() {
                     .setPositiveButton("삭제") { _, _ ->
                         currentGuide?.let {
                             deleteGuide(guideId, it.imageUrls ?: emptyList())
-                        } ?: Toast.makeText(this, "가이드 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+                        } ?: showCustomToast("가이드 정보가 없습니다.")
                     }
                     .setNegativeButton("취소", null)
                     .show()
@@ -301,7 +298,7 @@ class GuideDetailActivity : AppCompatActivity() {
             }
 
             R.id.action_report -> {
-                Toast.makeText(this, "신고하기 클릭됨", Toast.LENGTH_SHORT).show()
+                showCustomToast("신고하기 클릭됨")
                 true
             }
 
@@ -329,11 +326,11 @@ class GuideDetailActivity : AppCompatActivity() {
             .child(guideId)
             .removeValue()
             .addOnSuccessListener {
-                Toast.makeText(this, "게시글이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                showCustomToast("게시글이 삭제되었습니다")
                 finish()
             }
             .addOnFailureListener {
-                Toast.makeText(this, "삭제 실패: ${it.message}", Toast.LENGTH_SHORT).show()
+                showCustomToast("게시글 삭제 실패: ${it.message} ")
             }
     }
 
@@ -345,7 +342,7 @@ class GuideDetailActivity : AppCompatActivity() {
         guideRef.get().addOnSuccessListener { snapshot ->
             val guide = snapshot.getValue(Guide::class.java)
             if (guide == null) {
-                Toast.makeText(this, "가이드 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                showCustomToast("가이드 정보를 불러올 수 없습니다.")
                 return@addOnSuccessListener
             }
 
@@ -357,24 +354,27 @@ class GuideDetailActivity : AppCompatActivity() {
                 val remaining = twentyFourHoursMillis - (currentTime - lastTimestamp)
                 val hours = remaining / (60 * 60 * 1000)
                 val minutes = (remaining % (60 * 60 * 1000)) / (60 * 1000)
-                Toast.makeText(this, "끌어올리기는 24시간에 한 번만 가능합니다.\n남은 시간: ${hours}시간 ${minutes}분", Toast.LENGTH_LONG).show()
+                showCustomToast("끌어올리기는 24시간에 한 번만 가능합니다.\n" + "남은 시간: ${hours}시간 ${minutes}분")
                 return@addOnSuccessListener
             }
 
             // timestamp 업데이트
             guideRef.child("timestamp").setValue(currentTime)
                 .addOnSuccessListener {
-                    Toast.makeText(this, "끌어올리기가 완료되었습니다!", Toast.LENGTH_SHORT).show()
+                    showCustomToast("끌어올리기 성공")
                     reloadGuideData()
                 }
                 .addOnFailureListener {
-                    Toast.makeText(this, "끌어올리기 실패: ${it.message}", Toast.LENGTH_SHORT).show()
+                    showCustomToast("끌어올리기 실패: ${it.message}")
                 }
 
         }.addOnFailureListener {
-            Toast.makeText(this, "데이터 불러오기 실패: ${it.message}", Toast.LENGTH_SHORT).show()
+            showCustomToast("데이터 불러오기 실패: ${it.message}")
         }
-
-
     }
+
+
+
+
+
 }
