@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -298,7 +299,7 @@ class GuideDetailActivity : AppCompatActivity() {
             }
 
             R.id.action_report -> {
-                showCustomToast("신고하기 클릭됨")
+                showReportDialog(guideId, writerUid)
                 true
             }
 
@@ -373,7 +374,51 @@ class GuideDetailActivity : AppCompatActivity() {
         }
     }
 
+    // 신고하기 다이얼로그
+    private fun showReportDialog(guideId: String, targetUserId: String?) {
+        val editText = EditText(this).apply {
+            hint = "신고 사유를 입력하세요"
+            setPadding(32, 32, 32, 32)
+        }
 
+        AlertDialog.Builder(this)
+            .setTitle("신고하기")
+            .setView(editText)
+            .setPositiveButton("신고") { _, _ ->
+                val reason = editText.text.toString().trim()
+                if (reason.isNotEmpty()) {
+                    submitReport(guideId, targetUserId, reason)
+                } else {
+                    showCustomToast("신고 사유를 입력해주세요.")
+                }
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
+
+    // 신고 전송
+    private fun submitReport(guideId: String, targetUserId: String?, reason: String) {
+        val currentUserId = auth.currentUser?.uid ?: prefs.getString("userId", null).orEmpty()
+        val reportRef = FirebaseDatabase.getInstance()
+            .getReference("reports")
+            .child(guideId)
+            .push()
+
+        val reportData = mapOf(
+            "reporterId" to currentUserId,
+            "reportedUserId" to (targetUserId ?: ""),
+            "reason" to reason,
+            "timestamp" to System.currentTimeMillis()
+        )
+
+        reportRef.setValue(reportData)
+            .addOnSuccessListener {
+                showCustomToast("신고가 접수되었습니다.")
+            }
+            .addOnFailureListener {
+                showCustomToast("신고 실패: ${it.message}")
+            }
+    }
 
 
 
