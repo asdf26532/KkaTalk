@@ -20,35 +20,35 @@
 
         <Button
             android:id="@+id/btnReportManagement"
-            android:text="1. 신고 관리"
+            android:text="신고 관리"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp" />
 
         <Button
             android:id="@+id/btnUserManagement"
-            android:text="2. 사용자 관리"
+            android:text="사용자 관리"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp" />
 
         <Button
             android:id="@+id/btnPostManagement"
-            android:text="3. 게시글 관리"
+            android:text="게시글 관리"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp" />
 
         <Button
             android:id="@+id/btnBlockedUsers"
-            android:text="4. 차단된 사용자 보기"
+            android:text="차단된 사용자 보기"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp" />
 
         <Button
             android:id="@+id/btnStatistics"
-            android:text="5. 통계 보기"
+            android:text="통계 보기"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp" />

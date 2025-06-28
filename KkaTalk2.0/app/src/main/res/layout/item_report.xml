@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <TextView android:id="@+id/txtReporter"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="신고자: "
+            android:textSize="14sp"/>
+
+        <TextView android:id="@+id/txtAccused"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="피신고자: "
+            android:textSize="14sp"/>
+
+        <TextView android:id="@+id/txtReason"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="신고 사유: "
+            android:textSize="14sp"/>
+
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
+
