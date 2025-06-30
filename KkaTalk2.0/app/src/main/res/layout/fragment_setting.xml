@@ -163,6 +163,15 @@
             android:layout_gravity="center"
             android:layout_marginTop="16dp" />
 
+        <Button
+            android:id="@+id/btn_admin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="관리자 페이지"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"/>
+
     </LinearLayout>
 
 </ScrollView>

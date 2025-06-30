@@ -10,10 +10,12 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SwitchCompat
@@ -34,8 +36,11 @@ class SettingFragment : Fragment() {
     private lateinit var userRef: DatabaseReference
     private lateinit var prefs: SharedPreferences
     private lateinit var storage: FirebaseStorage
-    private var userId: String = ""
     private lateinit var progressBar: ProgressBar
+    private var userId: String = ""
+
+    private var adminClickCount = 0
+    private var lastClickTime = 0L
 
     private val TAG = "SettingFragment"
     private val defaultProfileImageUrl = "${BuildConfig.STORAGE_BUCKET}/profile_default.png"
@@ -81,7 +86,7 @@ class SettingFragment : Fragment() {
         if (userId.isNotEmpty()) {
             loadUserData()
         } else {
-            requireContext().showCustomToast("tk용자 정보를 불러올 수 없습니다")
+            requireContext().showCustomToast("사용자 정보를 불러올 수 없습니다")
             // 로그인 화면으로 이동
             val intent = Intent(requireContext(), LoginActivity::class.java)
             startActivity(intent)
@@ -155,6 +160,8 @@ class SettingFragment : Fragment() {
             appPrefs.edit().putBoolean("DARK_MODE", isChecked).apply()
             applyDarkMode(isChecked)
         }
+
+        setupHiddenAdminAccess()
 
     }
 
@@ -477,4 +484,45 @@ class SettingFragment : Fragment() {
         )
     }
 
+    private fun setupHiddenAdminAccess() {
+        binding.tvCurrentNick.setOnClickListener {
+            val currentTime = System.currentTimeMillis()
+            Log.d("AdminAccess", "닉네임 클릭됨: 시간차=${currentTime - lastClickTime}ms")
+
+            if (currentTime - lastClickTime > 1000L) {
+                Log.d("AdminAccess", "1초 초과 - 클릭 카운트 초기화")
+                adminClickCount = 0
+            }
+
+            lastClickTime = currentTime
+            adminClickCount++
+            Log.d("AdminAccess", "클릭 카운트: $adminClickCount")
+
+            if (adminClickCount >= 5) {
+                Log.d("AdminAccess", "관리자 진입 조건 충족 - 비밀번호 다이얼로그 표시")
+                showAdminPasswordDialog()
+                adminClickCount = 0
+            }
+        }
+    }
+
+    private fun showAdminPasswordDialog() {
+        val editText = EditText(requireContext())
+        editText.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("관리자 비밀번호 입력")
+            .setView(editText)
+            .setPositiveButton("확인") { _, _ ->
+                val inputPassword = editText.text.toString()
+                if (inputPassword == "2653") {
+                    val intent = Intent(requireContext(), AdminActivity::class.java)
+                    startActivity(intent)
+                } else {
+                    requireContext().showCustomToast("비밀번호가 틀렸습니다")
+                }
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
 }
