@@ -18,11 +18,11 @@ class AdminActivity : AppCompatActivity() {
             startActivity(Intent(this, ReportManagementActivity::class.java))
         }
 
-        /*findViewById<Button>(R.id.btnUserManagement).setOnClickListener {
+        findViewById<Button>(R.id.btnUserManagement).setOnClickListener {
             startActivity(Intent(this, UserManagementActivity::class.java))
         }
 
-        findViewById<Button>(R.id.btnPostManagement).setOnClickListener {
+        /*findViewById<Button>(R.id.btnPostManagement).setOnClickListener {
             startActivity(Intent(this, PostManagementActivity::class.java))
         }
 

@@ -299,7 +299,7 @@ class GuideDetailActivity : AppCompatActivity() {
             }
 
             R.id.action_report -> {
-                showReportDialog(guideId, writerUid)
+                showReportDialog(guideId)
                 true
             }
 
@@ -375,7 +375,7 @@ class GuideDetailActivity : AppCompatActivity() {
     }
 
     // 신고하기 다이얼로그
-    private fun showReportDialog(guideId: String, targetUserId: String?) {
+    private fun showReportDialog(guideId: String) {
         val editText = EditText(this).apply {
             hint = "신고 사유를 입력하세요"
             setPadding(32, 32, 32, 32)
@@ -387,7 +387,7 @@ class GuideDetailActivity : AppCompatActivity() {
             .setPositiveButton("신고") { _, _ ->
                 val reason = editText.text.toString().trim()
                 if (reason.isNotEmpty()) {
-                    submitReport(guideId, targetUserId, reason)
+                    submitReport(guideId,reason)
                 } else {
                     showCustomToast("신고 사유를 입력해주세요.")
                 }
@@ -397,16 +397,17 @@ class GuideDetailActivity : AppCompatActivity() {
     }
 
     // 신고 전송
-    private fun submitReport(guideId: String, targetUserId: String?, reason: String) {
-        val currentUserId = auth.currentUser?.uid ?: prefs.getString("userId", null).orEmpty()
+    private fun submitReport(guideId: String, reason: String) {
+        val currentUserUid = auth.currentUser?.uid
+            ?: prefs.getString("userId", null).orEmpty()
+
         val reportRef = FirebaseDatabase.getInstance()
             .getReference("reports")
-            .child(guideId)
             .push()
 
         val reportData = mapOf(
-            "reporterId" to currentUserId,
-            "reportedUserId" to (targetUserId ?: ""),
+            "reporterUid" to currentUserUid,
+            "accusedUid" to (guideId ?: ""),
             "reason" to reason,
             "timestamp" to System.currentTimeMillis()
         )
