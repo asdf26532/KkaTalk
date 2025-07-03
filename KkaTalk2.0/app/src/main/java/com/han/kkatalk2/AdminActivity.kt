@@ -14,25 +14,22 @@ class AdminActivity : AppCompatActivity() {
         supportActionBar?.title = "관리자 대시보드"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        // 신고 관리
         findViewById<Button>(R.id.btnReportManagement).setOnClickListener {
             startActivity(Intent(this, ReportManagementActivity::class.java))
         }
 
+        // 유저 관리
         findViewById<Button>(R.id.btnUserManagement).setOnClickListener {
             startActivity(Intent(this, UserManagementActivity::class.java))
         }
 
-        /*findViewById<Button>(R.id.btnPostManagement).setOnClickListener {
-            startActivity(Intent(this, PostManagementActivity::class.java))
-        }
-
-        findViewById<Button>(R.id.btnBlockedUsers).setOnClickListener {
-            startActivity(Intent(this, BlockedUserActivity::class.java))
-        }
-
+        // 통계 정보
         findViewById<Button>(R.id.btnStatistics).setOnClickListener {
             startActivity(Intent(this, StatisticsActivity::class.java))
-        }*/
+        }
+
+
     }
 
     // 뒤로가기 눌렀을 때 종료
