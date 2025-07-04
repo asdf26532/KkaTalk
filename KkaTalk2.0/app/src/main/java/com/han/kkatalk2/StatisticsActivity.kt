@@ -1,78 +1,81 @@
 package com.han.kkatalk2
 
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.data.*
 import com.google.firebase.database.*
-import com.han.kkatalk2.databinding.ActivityStatisticsBinding
-import java.text.SimpleDateFormat
-import java.util.*
 
 class StatisticsActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityStatisticsBinding
-    private lateinit var database: DatabaseReference
+    private lateinit var userCountText: TextView
+    private lateinit var reportCountText: TextView
+    private lateinit var userChart: LineChart
 
-    private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    private lateinit var dbRef: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityStatisticsBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContentView(R.layout.activity_statistics)
 
-        supportActionBar?.title = "통계 정보"
+        supportActionBar?.title = "앱 통계"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        database = FirebaseDatabase.getInstance().reference
+        userCountText = findViewById(R.id.tvUserCount)
+        reportCountText = findViewById(R.id.tvReportCount)
+        userChart = findViewById(R.id.userChart)
 
-        loadStatistics()
+        dbRef = FirebaseDatabase.getInstance().reference
+
+        fetchUserCount()
+        fetchReportCount()
+        fetchUserGrowthTrend()
     }
 
-    private fun loadStatistics() {
-        val today = dateFormat.format(Date())
-        var totalUsers = 0
-        var totalReports = 0
-        var todayUsers = 0
-        var todayGuides = 0
-        var todayReports = 0
-
-        // 사용자 수
-        database.child("user").get().addOnSuccessListener { snapshot ->
-            for (child in snapshot.children) {
-                totalUsers++
-                val timestamp = child.child("timestamp").getValue(Long::class.java) ?: 0L
-                if (isToday(timestamp)) todayUsers++
+    private fun fetchUserCount() {
+        dbRef.child("user").addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val userCount = snapshot.childrenCount
+                userCountText.text = userCount.toString()
             }
-            binding.txtTotalUsers.text = "총 사용자 수: $totalUsers"
-            binding.txtTodayUsers.text = "오늘 가입자 수: $todayUsers"
-        }
 
-        // 신고 수
-        database.child("reports").get().addOnSuccessListener { snapshot ->
-            for (child in snapshot.children) {
-                totalReports++
-                val timestamp = child.child("timestamp").getValue(Long::class.java) ?: 0L
-                if (isToday(timestamp)) todayReports++
-            }
-            binding.txtTotalReports.text = "총 신고 수: $totalReports"
-            binding.txtTodayReports.text = "오늘 신고 수: $todayReports"
-        }
-
-        // 가이드 수
-        database.child("guide").get().addOnSuccessListener { snapshot ->
-            for (child in snapshot.children) {
-                val timestamp = child.child("timestamp").getValue(Long::class.java) ?: 0L
-                if (isToday(timestamp)) todayGuides++
-            }
-            binding.txtTodayGuides.text = "오늘 등록된 가이드 수: $todayGuides"
-        }
+            override fun onCancelled(error: DatabaseError) {}
+        })
     }
 
-    private fun isToday(timestamp: Long): Boolean {
-        val date = Date(timestamp)
-        val nowDate = dateFormat.format(Date())
-        val compareDate = dateFormat.format(date)
-        return nowDate == compareDate
+    private fun fetchReportCount() {
+        dbRef.child("reports").addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val reportCount = snapshot.childrenCount
+                reportCountText.text = reportCount.toString()
+            }
+
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
+
+    // 사용자 가입 증가 추이 시뮬레이션
+    private fun fetchUserGrowthTrend() {
+        dbRef.child("user").orderByChild("timestamp")  // User에 timestamp 필요
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val entries = mutableListOf<Entry>()
+                    var index = 0f
+                    snapshot.children.forEach {
+                        entries.add(Entry(index, ++index)) // 임의 데이터
+                    }
+                    val dataSet = LineDataSet(entries, "가입자 수 증가 추이")
+                    dataSet.setDrawFilled(true)
+                    dataSet.color = getColor(R.color.purple_700)
+                    userChart.data = LineData(dataSet)
+                    userChart.invalidate()
+                }
+
+                override fun onCancelled(error: DatabaseError) {}
+            })
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

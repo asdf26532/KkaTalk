@@ -78,7 +78,6 @@ dependencies {
     // 사진 관련
     implementation ("com.github.chrisbanes:PhotoView:2.3.0")
     implementation ("com.github.Dhaval2404:ImagePicker:2.1")
-    //implementation ("me.relex:circleindicator:2.1.6")
     implementation ("com.tbuonomo:dotsindicator:4.3")
 
     // Firebase
@@ -102,6 +101,7 @@ dependencies {
     implementation ("com.kakao.sdk:v2-user:2.20.3")
     implementation ("com.kakao.sdk:v2-all:2.20.3") // 전체 모듈 설치, 2.11.0 버전부터 지원
 
+    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
 
     testImplementation(libs.junit)
