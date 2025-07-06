@@ -1,7 +1,11 @@
 package com.han.kkatalk2
 
+import android.app.Activity
+import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +18,7 @@ class ReportManagementActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ReportAdapter
     private val reportList = mutableListOf<Report>()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,8 +35,10 @@ class ReportManagementActivity : AppCompatActivity() {
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
         }
+
     }
-    
+
+
     // 신고 내역 불러오기
     private fun fetchReports() {
         val reportsRef = FirebaseDatabase.getInstance().getReference("reports")
@@ -39,7 +46,7 @@ class ReportManagementActivity : AppCompatActivity() {
             reportList.clear()
             for (child in snapshot.children) {
                 val report = child.getValue(Report::class.java)
-                if (report != null) {
+                if (report != null && !report.isHandled) { // 처리된 신고 제외
                     reportList.add(report)
                 }
             }

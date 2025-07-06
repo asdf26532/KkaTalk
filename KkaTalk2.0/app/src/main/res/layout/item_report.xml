@@ -8,31 +8,57 @@
     app:cardCornerRadius="8dp"
     app:cardElevation="4dp">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:padding="12dp">
 
-        <TextView android:id="@+id/txtReporter"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
+        <ImageView
+            android:id="@+id/btn_report_menu"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_more_vert"
+            android:contentDescription="메뉴"
+            android:padding="4dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="4dp" />
+
+        <TextView
+            android:id="@+id/txtReporter"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:text="신고자: "
-            android:textSize="14sp"/>
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btn_report_menu"
+            android:layout_marginEnd="8dp"/>
 
-        <TextView android:id="@+id/txtAccused"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
+        <TextView
+            android:id="@+id/txtAccused"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:text="피신고자: "
-            android:textSize="14sp"/>
+            android:textSize="14sp"
+            app:layout_constraintTop_toBottomOf="@id/txtReporter"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp"/>
 
-        <TextView android:id="@+id/txtReason"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
+        <TextView
+            android:id="@+id/txtReason"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:text="신고 사유: "
-            android:textSize="14sp"/>
-
-
-    </LinearLayout>
+            android:textSize="14sp"
+            app:layout_constraintTop_toBottomOf="@id/txtAccused"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>
-

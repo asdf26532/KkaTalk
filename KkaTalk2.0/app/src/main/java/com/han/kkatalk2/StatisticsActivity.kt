@@ -60,7 +60,6 @@ class StatisticsActivity : AppCompatActivity() {
         })
     }
 
-    // 사용자 가입 증가 추이 시뮬레이션
     /*private fun fetchUserGrowthTrend() {
         dbRef.child("user").orderByChild("timestamp")  // User에 timestamp 필요
             .addListenerForSingleValueEvent(object : ValueEventListener {
@@ -81,6 +80,7 @@ class StatisticsActivity : AppCompatActivity() {
             })
     }*/
 
+    // 신규 가입자 확인
     private fun fetchTodayUserCountBar() {
         val todayStart = getStartOfTodayMillis()
         val todayEnd = todayStart + 24 * 60 * 60 * 1000

@@ -6,7 +6,8 @@ data class Report(
     val accusedUid: String,
     val reason: String,
     val timestamp: Long,
-    val guideId: String?
+    val guideId: String?,
+    val isHandled: Boolean
 ){
-    constructor():this("","","","",0L,null)
+    constructor():this("","","","",0L,null,false)
 }
