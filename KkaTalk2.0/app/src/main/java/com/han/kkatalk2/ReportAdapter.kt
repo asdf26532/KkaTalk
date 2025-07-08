@@ -1,5 +1,7 @@
 package com.han.kkatalk2
 
+import android.app.AlertDialog
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -58,7 +60,51 @@ class ReportAdapter(private val reports: List<Report>) :
                             true
                         }
 
-                        // TODO: 이후에 action_view_detail, action_ban_user 등도 여기에 추가
+                        R.id.action_view_detail -> {
+                            if (!report.guideId.isNullOrEmpty()) {
+                                // 게시물 ID가 있는 경우 GuideDetailActivity로 이동
+                                val intent = Intent(itemView.context, GuideDetailActivity::class.java)
+                                intent.putExtra("guideId", report.guideId)
+                                itemView.context.startActivity(intent)
+                            } else {
+                                // 게시물이 아닌 사용자 프로필만 존재할 경우
+                                val intent = Intent(itemView.context, ProfileActivity::class.java)
+                                intent.putExtra("uId", report.accusedUid)
+                                itemView.context.startActivity(intent)
+                            }
+                            true
+                        }
+
+                        R.id.action_ban_user -> {
+                            val context = itemView.context
+                            val options = arrayOf("1일", "3일", "7일", "30일", "영구 정지")
+                            val durations = arrayOf(1, 3, 7, 30, -1)
+
+                            AlertDialog.Builder(context)
+                                .setTitle("계정 정지 기간 선택")
+                                .setItems(options) { _, which ->
+                                    val suspendDays = durations[which]
+                                    val bannedUntil = if (suspendDays == -1) {
+                                        Long.MAX_VALUE // 영구정지
+                                    } else {
+                                        System.currentTimeMillis() + suspendDays * 24 * 60 * 60 * 1000
+                                    }
+
+                                    FirebaseDatabase.getInstance().getReference("user")
+                                        .child(report.accusedUid)
+                                        .child("bannedUntil")
+                                        .setValue(bannedUntil)
+                                        .addOnSuccessListener {
+                                            Toast.makeText(context, "계정이 정지되었습니다.", Toast.LENGTH_SHORT).show()
+                                        }
+                                        .addOnFailureListener {
+                                            Toast.makeText(context, "정지 실패: ${it.message}", Toast.LENGTH_SHORT).show()
+                                        }
+                                }
+                                .setNegativeButton("취소", null)
+                                .show()
+                            true
+                        }
                         else -> false
                     }
                 }
