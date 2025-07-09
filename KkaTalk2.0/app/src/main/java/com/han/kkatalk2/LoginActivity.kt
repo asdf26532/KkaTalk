@@ -82,9 +82,14 @@ class LoginActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     // 성공 시 실행
-                    val intent = Intent(this@LoginActivity, MainActivity::class.java)
-                    startActivity(intent)
-                    showCustomToast("로그인 성공")
+                    val uid = task.result.user?.uid ?: return@addOnCompleteListener
+
+                    checkBanAndProceed(uid) {
+                        val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                        startActivity(intent)
+                        showCustomToast("로그인 성공")
+                        finish()
+                    }
                 } else {
                     // 실패 시 실행
                     showCustomToast("로그인 실패")
@@ -203,8 +208,7 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-
-
+    // DB에 저장
     private fun addUserToDatabase(name: String, email: String, uId: String, nick: String) {
 
         val storage = FirebaseStorage.getInstance(BuildConfig.STORAGE_BUCKET)
@@ -224,4 +228,25 @@ class LoginActivity : AppCompatActivity() {
                 Firebase.database.reference.child("user").child(uId).setValue(user)
             }
     }
+
+    // 밴유저 확인
+    private fun checkBanAndProceed(uid: String, onAllowed: () -> Unit) {
+        val userRef = Firebase.database.reference.child("user").child(uid)
+
+        userRef.child("banUntil").get().addOnSuccessListener { snapshot ->
+            val banUntil = snapshot.getValue(Long::class.java) ?: 0L
+            val now = System.currentTimeMillis()
+
+            if (banUntil > now) {
+                val untilFormatted = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault()).format(java.util.Date(banUntil))
+                showCustomToast("해당 계정은 정지 중입니다.\n해제 시간: $untilFormatted")
+                FirebaseAuth.getInstance().signOut()
+            } else {
+                onAllowed()
+            }
+        }.addOnFailureListener {
+            showCustomToast("접속 권한 확인 실패: ${it.message}")
+        }
+    }
+
 }
