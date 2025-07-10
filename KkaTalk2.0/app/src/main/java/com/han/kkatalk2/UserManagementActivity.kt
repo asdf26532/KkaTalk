@@ -72,7 +72,7 @@ class UserManagementActivity : AppCompatActivity() {
     }
 
     private fun showUserOptions(user: User) {
-        val options = arrayOf("프로필 보기", "대화하기", "신고 처리", "취소")
+        val options = arrayOf("프로필 보기", "대화하기", "신고 처리", "정지 해제", "취소")
 
         AlertDialog.Builder(this)
             .setTitle("${user.nick}님 선택")
@@ -100,10 +100,26 @@ class UserManagementActivity : AppCompatActivity() {
                         startActivity(intent)
                     }
 
+                    "정지 해제" -> {
+                        unbanUser(user.uId)
+                    }
+
                     else -> dialog.dismiss()
                 }
             }
             .show()
+    }
+
+    private fun unbanUser(uid: String) {
+        val userRef = Firebase.database.reference.child("user").child(uid)
+
+        userRef.child("banUntil").setValue(0L)
+            .addOnSuccessListener {
+                showCustomToast("계정 정지가 해제되었습니다.")
+            }
+            .addOnFailureListener {
+                showCustomToast("정지 해제 실패: ${it.message}")
+            }
     }
 
     // 뒤로 가기 버튼

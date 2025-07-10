@@ -92,7 +92,7 @@ class ReportAdapter(private val reports: List<Report>) :
 
                                     FirebaseDatabase.getInstance().getReference("user")
                                         .child(report.accusedUid)
-                                        .child("bannedUntil")
+                                        .child("banUntil")
                                         .setValue(bannedUntil)
                                         .addOnSuccessListener {
                                             Toast.makeText(context, "계정이 정지되었습니다.", Toast.LENGTH_SHORT).show()
