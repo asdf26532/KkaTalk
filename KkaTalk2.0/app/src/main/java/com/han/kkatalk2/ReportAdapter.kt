@@ -61,16 +61,31 @@ class ReportAdapter(private val reports: List<Report>) :
                         }
 
                         R.id.action_view_detail -> {
-                            if (!report.guideId.isNullOrEmpty()) {
-                                // 게시물 ID가 있는 경우 GuideDetailActivity로 이동
-                                val intent = Intent(itemView.context, GuideDetailActivity::class.java)
-                                intent.putExtra("guideId", report.guideId)
-                                itemView.context.startActivity(intent)
-                            } else {
-                                // 게시물이 아닌 사용자 프로필만 존재할 경우
-                                val intent = Intent(itemView.context, ProfileActivity::class.java)
-                                intent.putExtra("uId", report.accusedUid)
-                                itemView.context.startActivity(intent)
+                            when (report.targetType) {
+                                "GUIDE" -> {
+                                    val intent = Intent(itemView.context, GuideDetailActivity::class.java)
+                                    intent.putExtra("guideId", report.guideId)
+                                    itemView.context.startActivity(intent)
+                                }
+
+                                "USER" -> {
+                                    val intent = Intent(itemView.context, ProfileActivity::class.java)
+                                    intent.putExtra("uId", report.accusedUid)
+                                    itemView.context.startActivity(intent)
+                                }
+
+                                else -> {
+                                    // guideId 유무로 추론 (하위 호환)
+                                    if (!report.guideId.isNullOrEmpty()) {
+                                        val intent = Intent(itemView.context, GuideDetailActivity::class.java)
+                                        intent.putExtra("guideId", report.guideId)
+                                        itemView.context.startActivity(intent)
+                                    } else {
+                                        val intent = Intent(itemView.context, ProfileActivity::class.java)
+                                        intent.putExtra("uId", report.accusedUid)
+                                        itemView.context.startActivity(intent)
+                                    }
+                                }
                             }
                             true
                         }

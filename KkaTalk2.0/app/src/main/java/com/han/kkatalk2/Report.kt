@@ -7,7 +7,8 @@ data class Report(
     val reason: String,
     val timestamp: Long,
     val guideId: String?,
-    val isHandled: Boolean
+    val isHandled: Boolean,
+    val targetType: String?
 ){
-    constructor():this("","","","",0L,null,false)
+    constructor():this("","","","",0L,null,false,null)
 }
