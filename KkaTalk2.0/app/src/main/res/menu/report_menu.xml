@@ -5,7 +5,7 @@
         android:title="처리 완료" />
     <item
         android:id="@+id/action_view_detail"
-        android:title="신고된 게시물(사용자) 확인" />
+        android:title="신고된 게시물 확인" />
     <item
         android:id="@+id/action_ban_user"
         android:title="피신고자 제재" />

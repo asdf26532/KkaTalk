@@ -31,12 +31,14 @@ class ReportAdapter(private val reports: List<Report>) :
     inner class ReportViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val txtReporter: TextView = itemView.findViewById(R.id.txtReporter)
         private val txtAccused: TextView = itemView.findViewById(R.id.txtAccused)
+        private val txtGuideTitle: TextView = itemView.findViewById(R.id.txtGuideTitle)
         private val txtReason: TextView = itemView.findViewById(R.id.txtReason)
         private val btnMenu: ImageView = itemView.findViewById(R.id.btn_report_menu)
 
         fun bind(report: Report) {
             txtReporter.text = "신고자: ${report.reporterUid}"
             txtAccused.text = "피신고자: ${report.accusedUid}"
+            txtGuideTitle.text = "게시물 제목: ${report.guideTitle}"
             txtReason.text = "사유: ${report.reason}"
 
             btnMenu.setOnClickListener {
@@ -61,31 +63,12 @@ class ReportAdapter(private val reports: List<Report>) :
                         }
 
                         R.id.action_view_detail -> {
-                            when (report.targetType) {
-                                "GUIDE" -> {
-                                    val intent = Intent(itemView.context, GuideDetailActivity::class.java)
-                                    intent.putExtra("guideId", report.guideId)
-                                    itemView.context.startActivity(intent)
-                                }
-
-                                "USER" -> {
-                                    val intent = Intent(itemView.context, ProfileActivity::class.java)
-                                    intent.putExtra("uId", report.accusedUid)
-                                    itemView.context.startActivity(intent)
-                                }
-
-                                else -> {
-                                    // guideId 유무로 추론 (하위 호환)
-                                    if (!report.guideId.isNullOrEmpty()) {
-                                        val intent = Intent(itemView.context, GuideDetailActivity::class.java)
-                                        intent.putExtra("guideId", report.guideId)
-                                        itemView.context.startActivity(intent)
-                                    } else {
-                                        val intent = Intent(itemView.context, ProfileActivity::class.java)
-                                        intent.putExtra("uId", report.accusedUid)
-                                        itemView.context.startActivity(intent)
-                                    }
-                                }
+                            if (!report.guideId.isNullOrEmpty()) {
+                                val intent = Intent(itemView.context, GuideDetailActivity::class.java)
+                                intent.putExtra("guideId", report.guideId)
+                                itemView.context.startActivity(intent)
+                            } else {
+                                Toast.makeText(itemView.context, "신고된 게시물을 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
                             }
                             true
                         }
