@@ -1,14 +1,14 @@
 package com.han.kkatalk2
 
 data class Report(
-    val reportId: String,
-    val reporterUid: String,
-    val accusedUid: String,
-    val reason: String,
-    val timestamp: Long,
-    val guideId: String?,
-    val guideTitle: String,
-    val isHandled: Boolean
+    var reportId: String,
+    var reporterUid: String,
+    var accusedUid: String,
+    var reason: String,
+    var timestamp: Long,
+    var guideId: String?,
+    var guideTitle: String,
+    var isHandled: Boolean
 ){
     constructor():this("","","","",0L,null,"",false)
 }

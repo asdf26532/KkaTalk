@@ -38,7 +38,6 @@ class ReportManagementActivity : AppCompatActivity() {
 
     }
 
-
     // 신고 내역 불러오기
     fun fetchReports() {
         val reportsRef = FirebaseDatabase.getInstance().getReference("reports")
@@ -46,13 +45,15 @@ class ReportManagementActivity : AppCompatActivity() {
             reportList.clear()
             for (child in snapshot.children) {
                 val report = child.getValue(Report::class.java)
-                if (report != null && !report.isHandled) { // 처리된 신고 제외
+                Log.d("ReportCheck", "reportId=${report?.reportId}, isHandled=${report?.isHandled}")
+
+                if (report != null && !report.isHandled) {
                     reportList.add(report)
                 }
             }
             adapter.notifyDataSetChanged()
         }.addOnFailureListener {
-            showCustomToast("신고 불러오기 실패")
+            showCustomToast("신고 불러오기 실패: ${it.message}")
         }
     }
 

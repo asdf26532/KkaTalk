@@ -407,7 +407,7 @@ class GuideDetailActivity : AppCompatActivity() {
 
         val reportRef = FirebaseDatabase.getInstance()
             .getReference("reports")
-            .push()
+            .child(reportId)
 
         val reportData = mapOf(
             "reportId" to reportId,
