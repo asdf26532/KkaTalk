@@ -40,7 +40,7 @@ class ReportManagementActivity : AppCompatActivity() {
 
 
     // 신고 내역 불러오기
-    private fun fetchReports() {
+    fun fetchReports() {
         val reportsRef = FirebaseDatabase.getInstance().getReference("reports")
         reportsRef.get().addOnSuccessListener { snapshot ->
             reportList.clear()

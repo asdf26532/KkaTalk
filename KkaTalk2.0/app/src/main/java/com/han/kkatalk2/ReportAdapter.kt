@@ -48,16 +48,19 @@ class ReportAdapter(private val reports: List<Report>) :
                 popupMenu.setOnMenuItemClickListener { menuItem ->
                     when (menuItem.itemId) {
                         R.id.action_handled -> {
+                            val context = itemView.context
                             val reportRef = FirebaseDatabase.getInstance()
                                 .getReference("reports")
                                 .child(report.reportId)
 
                             reportRef.child("isHandled").setValue(true)
                                 .addOnSuccessListener {
-                                    Toast.makeText(itemView.context, "신고가 처리되었습니다.", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "신고가 처리되었습니다.", Toast.LENGTH_SHORT).show()
+
+                                    (context as? ReportManagementActivity)?.fetchReports()
                                 }
                                 .addOnFailureListener {
-                                    Toast.makeText(itemView.context, "처리 실패: ${it.message}", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "처리 실패: ${it.message}", Toast.LENGTH_SHORT).show()
                                 }
                             true
                         }

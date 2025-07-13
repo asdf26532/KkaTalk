@@ -416,6 +416,7 @@ class GuideDetailActivity : AppCompatActivity() {
             "guideTitle" to guideTitle,
             "reason" to reason,
             "timestamp" to System.currentTimeMillis(),
+            "isHandled" to false
         )
 
         reportRef.setValue(reportData)
