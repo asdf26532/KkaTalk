@@ -2,6 +2,7 @@ package com.han.kkatalk2
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -66,12 +67,20 @@ class ReportAdapter(private val reports: List<Report>) :
                         }
 
                         R.id.action_view_detail -> {
-                            if (!report.guideId.isNullOrEmpty()) {
-                                val intent = Intent(itemView.context, GuideDetailActivity::class.java)
-                                intent.putExtra("guideId", report.guideId)
-                                itemView.context.startActivity(intent)
+                            val context = itemView.context
+
+                            if (report.accusedUid.isNotEmpty()) {
+                                Log.d("ReportAdapter", "accusedUid 확인됨: ${report.accusedUid}")
+
+                                val intent = Intent(context, GuideDetailActivity::class.java).apply {
+                                    putExtra("guideId", report.accusedUid)
+                                }
+
+                                Log.d("ReportAdapter", "GuideDetailActivity 인텐트 시작")
+                                context.startActivity(intent)
                             } else {
-                                Toast.makeText(itemView.context, "신고된 게시물을 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                                Log.w("ReportAdapter", "guideId가 null 또는 빈 문자열임 → 게시물 없음 메시지 표시")
+                                Toast.makeText(context, "신고된 게시물을 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
                             }
                             true
                         }

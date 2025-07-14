@@ -6,9 +6,8 @@ data class Report(
     var accusedUid: String,
     var reason: String,
     var timestamp: Long,
-    var guideId: String?,
     var guideTitle: String,
     var isHandled: Boolean
 ){
-    constructor():this("","","","",0L,null,"",false)
+    constructor():this("","","","",0L,"",false)
 }
