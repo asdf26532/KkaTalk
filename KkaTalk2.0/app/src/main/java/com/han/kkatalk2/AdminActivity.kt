@@ -24,6 +24,12 @@ class AdminActivity : AppCompatActivity() {
             startActivity(Intent(this, UserManagementActivity::class.java))
         }
 
+        // 공지 작성
+        findViewById<Button>(R.id.btnWriteNotice).setOnClickListener {
+            val intent = Intent(this, NoticeActivity::class.java)
+            startActivity(intent)
+        }
+
         // 통계 정보
         findViewById<Button>(R.id.btnStatistics).setOnClickListener {
             startActivity(Intent(this, StatisticsActivity::class.java))
