@@ -9,6 +9,8 @@
     android:gravity="center"
     tools:context=".HomeFragment">
 
+    <include layout="@layout/view_notice_banner"/>
+
     <Spinner
         android:id="@+id/spinner_city"
         android:layout_width="wrap_content"

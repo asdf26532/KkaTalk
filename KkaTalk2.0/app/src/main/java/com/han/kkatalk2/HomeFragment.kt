@@ -2,12 +2,15 @@ package com.han.kkatalk2
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.LinearLayout
 import android.widget.Spinner
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -106,5 +109,33 @@ class HomeFragment : Fragment() {
         }
 
         guideAdapter.notifyDataSetChanged()
+    }
+
+    private fun loadLatestNotice() {
+        val noticeRef = FirebaseDatabase.getInstance().getReference("notices")
+        noticeRef.orderByChild("timestamp").limitToLast(1).get()
+            .addOnSuccessListener { snapshot ->
+                if (snapshot.exists()) {
+                    for (child in snapshot.children) {
+                        val notice = child.getValue(Notice::class.java)
+                        if (notice != null) {
+                            showNoticeBanner(notice)
+                        }
+                    }
+                }
+            }
+            .addOnFailureListener {
+                Log.e("NoticeLoad", "공지사항 로드 실패: ${it.message}")
+            }
+    }
+
+    private fun showNoticeBanner(notice: Notice) {
+        val banner = view?.findViewById<LinearLayout>(R.id.noticeBanner)
+        val titleView = banner?.findViewById<TextView>(R.id.tvNoticeTitle)
+        val contentView = banner?.findViewById<TextView>(R.id.tvNoticeContent)
+
+        banner?.visibility = View.VISIBLE
+        titleView?.text = notice.title
+        contentView?.text = notice.content
     }
 }
