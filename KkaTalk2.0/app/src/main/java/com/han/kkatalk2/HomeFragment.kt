@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
@@ -62,6 +63,9 @@ class HomeFragment : Fragment() {
             override fun onCancelled(error: DatabaseError) {}
         })
 
+        // 공지 사항
+        loadLatestNotice()
+
         // Spinner 셋업
         ArrayAdapter.createFromResource(
             requireContext(),
@@ -111,31 +115,44 @@ class HomeFragment : Fragment() {
         guideAdapter.notifyDataSetChanged()
     }
 
+    // 최신 공지사항 불러오기
     private fun loadLatestNotice() {
         val noticeRef = FirebaseDatabase.getInstance().getReference("notices")
-        noticeRef.orderByChild("timestamp").limitToLast(1).get()
+        noticeRef.orderByChild("timestamp").limitToLast(1)
+            .get()
             .addOnSuccessListener { snapshot ->
                 if (snapshot.exists()) {
-                    for (child in snapshot.children) {
-                        val notice = child.getValue(Notice::class.java)
-                        if (notice != null) {
-                            showNoticeBanner(notice)
-                        }
+                    val latestNotice = snapshot.children.first().getValue(Notice::class.java)
+                    latestNotice?.let {
+                        showNoticeBanner(it)
                     }
+                } else {
+                    hideNoticeBanner()
                 }
             }
             .addOnFailureListener {
-                Log.e("NoticeLoad", "공지사항 로드 실패: ${it.message}")
+                hideNoticeBanner()
             }
     }
 
+    // 공지 배너
     private fun showNoticeBanner(notice: Notice) {
-        val banner = view?.findViewById<LinearLayout>(R.id.noticeBanner)
-        val titleView = banner?.findViewById<TextView>(R.id.tvNoticeTitle)
-        val contentView = banner?.findViewById<TextView>(R.id.tvNoticeContent)
+        val bannerLayout = view?.findViewById<View>(R.id.noticeBanner)
+        val titleText = view?.findViewById<TextView>(R.id.tvNoticeTitle)
+        val contentText = view?.findViewById<TextView>(R.id.tvNoticeContent)
+        val btnClose = view?.findViewById<ImageButton>(R.id.btnCloseNotice)
 
-        banner?.visibility = View.VISIBLE
-        titleView?.text = notice.title
-        contentView?.text = notice.content
+        bannerLayout?.visibility = View.VISIBLE
+        titleText?.text = notice.title
+        contentText?.text = notice.content
+
+        btnClose?.setOnClickListener {
+            bannerLayout?.visibility = View.GONE
+        }
+    }
+
+    // 공지 배너 숨기기
+    private fun hideNoticeBanner() {
+        view?.findViewById<View>(R.id.noticeBanner)?.visibility = View.GONE
     }
 }

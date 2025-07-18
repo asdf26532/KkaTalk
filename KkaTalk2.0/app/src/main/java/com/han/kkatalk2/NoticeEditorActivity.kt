@@ -7,7 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.database.FirebaseDatabase
 
-class NoticeActivity : AppCompatActivity() {
+class NoticeEditorActivity : AppCompatActivity() {
 
     private lateinit var editTitle: EditText
     private lateinit var editContent: EditText
@@ -15,7 +15,7 @@ class NoticeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_notice)
+        setContentView(R.layout.activity_notice_editor)
 
         editTitle = findViewById(R.id.editTitle)
         editContent = findViewById(R.id.editContent)

@@ -26,7 +26,7 @@ class AdminActivity : AppCompatActivity() {
 
         // 공지 작성
         findViewById<Button>(R.id.btnWriteNotice).setOnClickListener {
-            val intent = Intent(this, NoticeActivity::class.java)
+            val intent = Intent(this, NoticeEditorActivity::class.java)
             startActivity(intent)
         }
 
