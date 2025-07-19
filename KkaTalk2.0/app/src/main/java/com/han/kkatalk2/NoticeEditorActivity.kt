@@ -21,22 +21,37 @@ class NoticeEditorActivity : AppCompatActivity() {
         editContent = findViewById(R.id.editContent)
         btnSubmit = findViewById(R.id.btnSubmitNotice)
 
-        btnSubmit.setOnClickListener {
-            val title = editTitle.text.toString().trim()
-            val content = editContent.text.toString().trim()
+        // 전달받은 공지사항 정보가 있다면 -> 보기 모드
+        val receivedTitle = intent.getStringExtra("notice_title")
+        val receivedContent = intent.getStringExtra("notice_content")
 
-            if (title.isEmpty() || content.isEmpty()) {
-                Toast.makeText(this, "제목과 내용을 입력해주세요.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+        if (receivedTitle != null && receivedContent != null) {
+            // 보기 전용 모드
+            editTitle.setText(receivedTitle)
+            editContent.setText(receivedContent)
+
+            // 수정 못하게 막기
+            editTitle.isEnabled = false
+            editContent.isEnabled = false
+            btnSubmit.visibility = Button.GONE
+        } else {
+            // 작성 모드
+            btnSubmit.setOnClickListener {
+                val title = editTitle.text.toString().trim()
+                val content = editContent.text.toString().trim()
+
+                if (title.isEmpty() || content.isEmpty()) {
+                    Toast.makeText(this, "제목과 내용을 입력해주세요.", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
+                postNotice(title, content)
             }
-
-            postNotice(title, content)
         }
     }
 
     private fun postNotice(title: String, content: String) {
-        val noticeId =
-            FirebaseDatabase.getInstance().reference.child("notices").push().key ?: return
+        val noticeId = FirebaseDatabase.getInstance().reference.child("notices").push().key ?: return
         val notice = mapOf(
             "noticeId" to noticeId,
             "title" to title,
@@ -54,5 +69,4 @@ class NoticeEditorActivity : AppCompatActivity() {
                 showCustomToast("등록 실패: ${it.message}")
             }
     }
-
 }
