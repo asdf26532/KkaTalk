@@ -24,11 +24,11 @@ import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
-import com.han.kkatalk2.databinding.FragmentTestBinding
+import com.han.kkatalk2.databinding.FragmentSettingBinding
 import com.kakao.sdk.user.UserApiClient
 
 class SettingFragment : Fragment() {
-    private var _binding: FragmentTestBinding? = null
+    private var _binding: FragmentSettingBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var auth: FirebaseAuth
@@ -55,7 +55,7 @@ class SettingFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentTestBinding.inflate(inflater, container, false)
+        _binding = FragmentSettingBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -135,6 +135,12 @@ class SettingFragment : Fragment() {
         // 프로필 삭제
         binding.btnDeleteProfile.setOnClickListener {
             deleteProfileImage()
+        }
+
+        // 공지사항 리스트
+        binding.btnNoticeList.setOnClickListener {
+            val intent = Intent(requireContext(), NoticeListActivity::class.java)
+            startActivity(intent)
         }
 
         // 로그아웃
