@@ -9,16 +9,26 @@
         android:id="@+id/editTitle"
         android:hint="공지 제목"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:inputType="textCapSentences"
+        android:backgroundTint="@color/black"/>
 
     <EditText
         android:id="@+id/editContent"
-        android:hint="공지 내용"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:gravity="top"
-        android:inputType="textMultiLine" />
+        android:hint="공지 내용"
+        android:gravity="top|start"
+        android:inputType="textMultiLine"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:backgroundTint="@android:color/black"
+        android:padding="12dp"
+        android:overScrollMode="always"
+        android:scrollbars="vertical" />
 
     <Button
         android:id="@+id/btnSubmitNotice"
