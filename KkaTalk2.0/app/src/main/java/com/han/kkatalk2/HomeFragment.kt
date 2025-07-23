@@ -122,9 +122,21 @@ class HomeFragment : Fragment() {
             .get()
             .addOnSuccessListener { snapshot ->
                 if (snapshot.exists()) {
-                    val latestNotice = snapshot.children.first().getValue(Notice::class.java)
+                    val latestSnapshot = snapshot.children.first()
+                    val latestNotice = latestSnapshot.getValue(Notice::class.java)
+                    val noticeKey = latestSnapshot.key
+
                     latestNotice?.let {
-                        showNoticeBanner(it)
+                        // SharedPreferences에 저장된 닫힌 공지 키를 확인
+                        val prefs = requireContext().getSharedPreferences("notice_prefs", 0)
+                        val dismissedKey = prefs.getString("dismissed_notice_key", null)
+
+                        // 만약 닫은 공지와 다르면 보여주기
+                        if (noticeKey != dismissedKey) {
+                            showNoticeBanner(it, noticeKey)
+                        } else {
+                            hideNoticeBanner()
+                        }
                     }
                 } else {
                     hideNoticeBanner()
@@ -136,7 +148,7 @@ class HomeFragment : Fragment() {
     }
 
     // 공지 배너
-    private fun showNoticeBanner(notice: Notice) {
+    private fun showNoticeBanner(notice: Notice, noticeKey: String?) {
         val bannerLayout = view?.findViewById<View>(R.id.noticeBanner)
         val titleText = view?.findViewById<TextView>(R.id.tvNoticeTitle)
         val contentText = view?.findViewById<TextView>(R.id.tvNoticeContent)
@@ -147,6 +159,11 @@ class HomeFragment : Fragment() {
         contentText?.text = notice.content
 
         btnClose?.setOnClickListener {
+            // 닫은 공지 키 저장
+            noticeKey?.let {
+                val prefs = requireContext().getSharedPreferences("notice_prefs", 0)
+                prefs.edit().putString("dismissed_notice_key", it).apply()
+            }
             bannerLayout?.visibility = View.GONE
         }
     }
