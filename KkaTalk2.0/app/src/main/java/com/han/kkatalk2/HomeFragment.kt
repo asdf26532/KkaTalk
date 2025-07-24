@@ -2,14 +2,12 @@ package com.han.kkatalk2
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.ImageButton
-import android.widget.LinearLayout
+import android.widget.Button
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -17,6 +15,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.*
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class HomeFragment : Fragment() {
 
@@ -27,6 +28,8 @@ class HomeFragment : Fragment() {
 
     private lateinit var spinnerCity: Spinner
     private lateinit var recyclerView: RecyclerView
+
+    private var dismissedNoticeKeyInSession: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -127,16 +130,26 @@ class HomeFragment : Fragment() {
                     val noticeKey = latestSnapshot.key
 
                     latestNotice?.let {
-                        // SharedPreferences에 저장된 닫힌 공지 키를 확인
                         val prefs = requireContext().getSharedPreferences("notice_prefs", 0)
-                        val dismissedKey = prefs.getString("dismissed_notice_key", null)
 
-                        // 만약 닫은 공지와 다르면 보여주기
-                        if (noticeKey != dismissedKey) {
-                            showNoticeBanner(it, noticeKey)
-                        } else {
+                        // "오늘 하루 보지 않기" 확인
+                        val dontShowDate = prefs.getString("dont_show_notice_date", null)
+                        val today = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
+
+                        if (dontShowDate == today) {
                             hideNoticeBanner()
+                            return@addOnSuccessListener
                         }
+
+                        // "닫기"로 숨긴 경우 (앱 종료되면 풀림)
+                        val dismissedKey = dismissedNoticeKeyInSession
+                        if (noticeKey == dismissedKey) {
+                            hideNoticeBanner()
+                            return@addOnSuccessListener
+                        }
+
+                        // 그 외에는 공지 보여줌
+                        showNoticeBanner(it, noticeKey)
                     }
                 } else {
                     hideNoticeBanner()
@@ -147,23 +160,28 @@ class HomeFragment : Fragment() {
             }
     }
 
+
     // 공지 배너
     private fun showNoticeBanner(notice: Notice, noticeKey: String?) {
         val bannerLayout = view?.findViewById<View>(R.id.noticeBanner)
         val titleText = view?.findViewById<TextView>(R.id.tvNoticeTitle)
         val contentText = view?.findViewById<TextView>(R.id.tvNoticeContent)
-        val btnClose = view?.findViewById<ImageButton>(R.id.btnCloseNotice)
+        val btnClose = view?.findViewById<Button>(R.id.btnCloseNotice)
+        val btnDontShowToday = view?.findViewById<Button>(R.id.btnDontShowToday)
 
         bannerLayout?.visibility = View.VISIBLE
         titleText?.text = notice.title
         contentText?.text = notice.content
 
         btnClose?.setOnClickListener {
-            // 닫은 공지 키 저장
-            noticeKey?.let {
-                val prefs = requireContext().getSharedPreferences("notice_prefs", 0)
-                prefs.edit().putString("dismissed_notice_key", it).apply()
-            }
+            dismissedNoticeKeyInSession = noticeKey // 앱 켜져 있는 동안만 숨김
+            bannerLayout?.visibility = View.GONE
+        }
+
+        btnDontShowToday?.setOnClickListener {
+            val today = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
+            val prefs = requireContext().getSharedPreferences("notice_prefs", 0)
+            prefs.edit().putString("dont_show_notice_date", today).apply()
             bannerLayout?.visibility = View.GONE
         }
     }

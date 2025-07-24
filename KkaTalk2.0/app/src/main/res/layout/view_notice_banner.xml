@@ -1,45 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/noticeBanner"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="vertical"
     android:background="@color/colorPrimary"
     android:padding="16dp"
-    android:visibility="visible"
-    android:elevation="4dp">
+    android:elevation="4dp"
+    android:backgroundTint="#FFFFF0"
+    android:gravity="center">
 
-    <ImageButton
-        android:id="@+id/btnCloseNotice"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
-        android:background="?android:selectableItemBackgroundBorderless"
-        android:src="@android:drawable/ic_menu_close_clear_cancel"
-        android:contentDescription="닫기"/>
-
+    <!-- 공지 제목/내용 -->
     <TextView
         android:id="@+id/tvNoticeTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toStartOf="@id/btnCloseNotice"
-        android:layout_alignParentStart="true"
-        android:layout_marginEnd="8dp"
-        android:text="공지 제목 예시"
-        android:textStyle="bold"
+        android:text="공지 제목"
         android:textSize="16sp"
-        android:textColor="@android:color/black" />
+        android:textStyle="bold"
+        android:paddingBottom="4dp" />
 
     <TextView
         android:id="@+id/tvNoticeContent"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/tvNoticeTitle"
-        android:layout_alignParentStart="true"
-        android:text="공지 내용 예시입니다"
+        android:text="공지 내용."
         android:textSize="14sp"
-        android:textColor="@android:color/black"
-        android:layout_marginTop="4dp"
-        android:layout_toStartOf="@id/btnCloseNotice"
-        android:layout_marginEnd="8dp"/>
-</RelativeLayout>
+        android:paddingBottom="8dp" />
+
+    <!-- 버튼 두 개 가로로 나열 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/btnDontShowToday"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="오늘 하루 보지 않기"
+            android:layout_marginRight="10dp"
+            android:textSize="13sp" />
+
+        <Button
+            android:id="@+id/btnCloseNotice"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="닫기"
+            android:textSize="13sp" />
+    </LinearLayout>
+</LinearLayout>

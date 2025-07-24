@@ -19,7 +19,7 @@ class NoticeEditorActivity : AppCompatActivity() {
 
         editTitle = findViewById(R.id.editTitle)
         editContent = findViewById(R.id.editContent)
-        btnSubmit = findViewById(R.id.btnSubmitNotice)
+        btnSubmit = findViewById(R.id.btnSubmit)
 
         // 전달받은 공지사항 정보가 있다면 -> 보기 모드
         val receivedTitle = intent.getStringExtra("notice_title")
