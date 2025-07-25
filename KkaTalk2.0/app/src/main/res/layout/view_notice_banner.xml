@@ -8,6 +8,7 @@
     android:padding="16dp"
     android:elevation="4dp"
     android:backgroundTint="#FFFFF0"
+    android:visibility="gone"
     android:gravity="center">
 
     <!-- 공지 제목/내용 -->
