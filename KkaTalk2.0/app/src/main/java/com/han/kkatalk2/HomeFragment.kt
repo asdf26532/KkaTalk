@@ -136,19 +136,21 @@ class HomeFragment : Fragment() {
                     latestNotice?.let {
                         val prefs = requireContext().getSharedPreferences("notice_prefs", 0)
                         val dontShowDate = prefs.getString("dont_show_notice_date", null)
+                        val dontShowKey = prefs.getString("dont_show_notice_key", null)
+                        val dismissedKey = prefs.getString("dismissed_notice_key_in_session", null)
                         val today = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
 
                         Log.d("Notice", "Today=$today, don'tShow=$dontShowDate, dismissedKey=$dismissedNoticeKeyInSession, currentKey=$noticeKey")
 
                         // 오늘 하루 숨기기 체크
-                        if (dontShowDate == today) {
+                        if (dontShowDate == today && noticeKey == dontShowKey) {
                             Log.d("Notice", "오늘 숨기기 설정됨. 배너 숨김")
                             hideNoticeBanner()
                             return@addOnSuccessListener
                         }
 
                         // 세션 중 닫은 배너
-                        if (noticeKey == dismissedNoticeKeyInSession) {
+                        if (noticeKey == dismissedKey) {
                             Log.d("Notice", "세션 중 닫힌 공지와 같음. 배너 숨김")
                             hideNoticeBanner()
                             return@addOnSuccessListener
@@ -190,6 +192,8 @@ class HomeFragment : Fragment() {
 
         btnClose?.setOnClickListener {
             dismissedNoticeKeyInSession = noticeKey
+            val prefs = requireContext().getSharedPreferences("notice_prefs", 0)
+            prefs.edit().putString("dismissed_notice_key_in_session", noticeKey).apply()
             Log.d("Notice", "닫기 버튼 클릭됨. dismissedNoticeKeyInSession = $dismissedNoticeKeyInSession")
             bannerLayout.visibility = View.GONE
         }
@@ -197,7 +201,10 @@ class HomeFragment : Fragment() {
         btnDontShowToday?.setOnClickListener {
             val today = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
             val prefs = requireContext().getSharedPreferences("notice_prefs", 0)
-            prefs.edit().putString("dont_show_notice_date", today).apply()
+            prefs.edit()
+                .putString("dont_show_notice_date", today)
+                .putString("dont_show_notice_key", noticeKey) // 추가!
+                .apply()
             Log.d("Notice", "오늘 숨기기 클릭됨. SharedPreferences 저장 완료")
             bannerLayout.visibility = View.GONE
         }

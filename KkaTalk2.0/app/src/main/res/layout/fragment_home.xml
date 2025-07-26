@@ -1,38 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
     tools:context=".HomeFragment">
 
-    <include layout="@layout/view_notice_banner"/>
-
-    <Spinner
-        android:id="@+id/spinner_city"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="8dp"
-        android:layout_gravity="start"
-        android:background="@android:drawable/btn_dropdown"
-        android:spinnerMode="dropdown" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_guide"
+    <!-- 홈 화면 콘텐츠 전체 묶기 -->
+    <LinearLayout
+        android:id="@+id/homeContent"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        tools:listitem="@layout/guide_card"/>
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/btn_add_guide"
-        android:layout_width="wrap_content"
+        <Spinner
+            android:id="@+id/spinner_city"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:layout_gravity="start"
+            android:background="@android:drawable/btn_dropdown"
+            android:spinnerMode="dropdown" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_guide"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            tools:listitem="@layout/guide_card"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btn_add_guide"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:layout_margin="16dp"
+            app:srcCompat="@android:drawable/ic_input_add"/>
+    </LinearLayout>
+
+    <!-- 공지 배너: 화면 위에 겹쳐서 위치 -->
+    <include
+        layout="@layout/view_notice_banner"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_margin="16dp"
-        app:srcCompat="@android:drawable/ic_input_add"/>
+        android:visibility="gone"
+        android:layout_gravity="top" />
 
-</LinearLayout>
+</FrameLayout>
