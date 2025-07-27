@@ -6,9 +6,10 @@ data class User(
     var uId: String,
     var nick: String,
     var profileImageUrl: String,
-    var statusMessage: String? = null
+    var statusMessage: String?,
+    var role: String
 ){
-    constructor(): this("", "", "", "","",null)
+    constructor(): this("", "", "", "","",null,"user")
 }
 
 

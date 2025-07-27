@@ -81,8 +81,6 @@ class SettingFragment : Fragment() {
 
         userRef = database.getReference("user").child(userId)
 
-
-        // 유저 정보 불러오기
         if (userId.isNotEmpty()) {
             loadUserData()
         } else {

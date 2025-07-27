@@ -219,12 +219,12 @@ class LoginActivity : AppCompatActivity() {
                 val profileImageUrl = uri.toString()
                 Log.d("DEBUG", "다운로드 URL: $profileImageUrl")
 
-                val user = User(name, email, uId, nick, profileImageUrl, defaultStatusMessage)
+                val user = User(name, email, uId, nick, profileImageUrl, defaultStatusMessage,"user")
                 Firebase.database.reference.child("user").child(uId).setValue(user)
             }
             .addOnFailureListener { exception ->
                 Log.e("LoginActivity", "프로필 이미지 URL 가져오기 실패: ${exception.message}")
-                val user = User(name, email, uId, nick, "", defaultStatusMessage)
+                val user = User(name, email, uId, nick, "", defaultStatusMessage,"user")
                 Firebase.database.reference.child("user").child(uId).setValue(user)
             }
     }
