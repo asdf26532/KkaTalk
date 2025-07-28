@@ -8,8 +8,11 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
-import com.han.kkatalk2.util.PreferenceUtil
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 class NoticeEditorActivity : AppCompatActivity() {
 
@@ -21,17 +24,19 @@ class NoticeEditorActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var database: FirebaseDatabase
-    private lateinit var prefs: PreferenceUtil
-
-    private lateinit var userId: String
     private lateinit var userRef: DatabaseReference
+    private lateinit var prefs: android.content.SharedPreferences
 
-    private var isAdmin: Boolean = false
-    private var noticeId: String? = null // 삭제 시 필요
+    private var userId: String = ""
+    private var isAdmin = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_notice_editor)
+
+        auth = FirebaseAuth.getInstance()
+        database = FirebaseDatabase.getInstance()
+        prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE)
 
         editTitle = findViewById(R.id.editTitle)
         editContent = findViewById(R.id.editContent)
@@ -39,41 +44,41 @@ class NoticeEditorActivity : AppCompatActivity() {
         btnEdit = findViewById(R.id.btnEdit)
         btnDelete = findViewById(R.id.btnDelete)
 
-        auth = FirebaseAuth.getInstance()
-        database = FirebaseDatabase.getInstance()
-        prefs = PreferenceUtil(this)
-
-        // 유저 ID 가져오기
+        // userId 불러오기
         val currentUser = auth.currentUser
         userId = if (currentUser != null) {
-            currentUser.uid.also { Log.d("NoticeEditor", "userId: $it") }
+            currentUser.uid.also { Log.d("NoticeEditor", "userid: $it") }
         } else {
-            prefs.getString("userId", null) ?: ""
+            prefs.getString("userId", null) ?: "".also { Log.d("NoticeEditor", "userid: $it") }
         }
 
-        // 유저 role 확인
         userRef = database.getReference("user").child(userId)
+
+
+        checkUserRoleAndSetupUI()
+    }
+
+    private fun checkUserRoleAndSetupUI() {
         userRef.child("role").addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val role = snapshot.getValue(String::class.java)
                 isAdmin = role == "admin"
-                setupMode()
+                setupNoticeEditor()
             }
 
             override fun onCancelled(error: DatabaseError) {
-                showToast("권한 확인 실패: ${error.message}")
-                setupMode() // 실패해도 최소한 보기/작성 모드는 보여야 함
+                Toast.makeText(this@NoticeEditorActivity, "권한 확인 실패", Toast.LENGTH_SHORT).show()
             }
         })
     }
 
-    private fun setupMode() {
+    private fun setupNoticeEditor() {
         val receivedTitle = intent.getStringExtra("notice_title")
         val receivedContent = intent.getStringExtra("notice_content")
-        noticeId = intent.getStringExtra("notice_id") // 삭제 시 필요
+        val noticeId = intent.getStringExtra("notice_id")
 
         if (receivedTitle != null && receivedContent != null) {
-            // 📌 보기 모드
+            // 보기 모드
             editTitle.setText(receivedTitle)
             editContent.setText(receivedContent)
 
@@ -82,6 +87,7 @@ class NoticeEditorActivity : AppCompatActivity() {
             btnSubmit.visibility = View.GONE
 
             if (isAdmin) {
+                // 관리자만 수정/삭제 버튼 보이기
                 btnEdit.visibility = View.VISIBLE
                 btnDelete.visibility = View.VISIBLE
 
@@ -93,30 +99,39 @@ class NoticeEditorActivity : AppCompatActivity() {
                 }
 
                 btnDelete.setOnClickListener {
-                    deleteNotice()
+                    if (noticeId != null) {
+                        deleteNotice(noticeId)
+                    } else {
+                        Toast.makeText(this, "공지 ID 없음", Toast.LENGTH_SHORT).show()
+                    }
                 }
 
                 btnSubmit.setOnClickListener {
-                    val title = editTitle.text.toString().trim()
-                    val content = editContent.text.toString().trim()
-                    if (title.isEmpty() || content.isEmpty()) {
-                        showToast("제목과 내용을 입력해주세요.")
-                        return@setOnClickListener
+                    val newTitle = editTitle.text.toString().trim()
+                    val newContent = editContent.text.toString().trim()
+
+                    if (noticeId != null) {
+                        updateNotice(noticeId, newTitle, newContent)
                     }
-                    updateNotice(title, content)
                 }
             }
         } else {
-            // ✏️ 작성 모드
-            btnSubmit.visibility = View.VISIBLE
+            // 작성 모드 (관리자만 가능)
+            if (!isAdmin) {
+                Toast.makeText(this, "접근 권한이 없습니다.", Toast.LENGTH_SHORT).show()
+                finish()
+                return
+            }
+
             btnSubmit.setOnClickListener {
                 val title = editTitle.text.toString().trim()
                 val content = editContent.text.toString().trim()
 
                 if (title.isEmpty() || content.isEmpty()) {
-                    showToast("제목과 내용을 입력해주세요.")
+                    Toast.makeText(this, "제목과 내용을 입력해주세요.", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
+
                 postNotice(title, content)
             }
         }
@@ -134,46 +149,44 @@ class NoticeEditorActivity : AppCompatActivity() {
         database.reference.child("notices").child(noticeId)
             .setValue(notice)
             .addOnSuccessListener {
-                showToast("공지사항이 등록되었습니다.")
+                showCustomToast("공지사항이 등록되었습니다.")
                 finish()
             }
             .addOnFailureListener {
-                showToast("등록 실패: ${it.message}")
+                showCustomToast("등록 실패: ${it.message}")
             }
     }
 
-    private fun updateNotice(title: String, content: String) {
-        val id = noticeId ?: return
-        val updated = mapOf(
-            "title" to title,
-            "content" to content
+    private fun updateNotice(noticeId: String, newTitle: String, newContent: String) {
+        val updates = mapOf(
+            "title" to newTitle,
+            "content" to newContent
         )
 
-        database.reference.child("notices").child(id)
-            .updateChildren(updated)
+        database.reference.child("notices").child(noticeId)
+            .updateChildren(updates)
             .addOnSuccessListener {
-                showToast("공지사항이 수정되었습니다.")
+                showCustomToast("공지사항이 수정되었습니다.")
                 finish()
             }
             .addOnFailureListener {
-                showToast("수정 실패: ${it.message}")
+                showCustomToast("수정 실패: ${it.message}")
             }
     }
 
-    private fun deleteNotice() {
-        val id = noticeId ?: return
-        database.reference.child("notices").child(id)
+    private fun deleteNotice(noticeId: String) {
+        database.reference.child("notices").child(noticeId)
             .removeValue()
             .addOnSuccessListener {
-                showToast("공지사항이 삭제되었습니다.")
+                showCustomToast("공지사항이 삭제되었습니다.")
                 finish()
             }
             .addOnFailureListener {
-                showToast("삭제 실패: ${it.message}")
+                showCustomToast("삭제 실패: ${it.message}")
             }
     }
 
-    private fun showToast(message: String) {
+    private fun showCustomToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }
