@@ -76,6 +76,7 @@ class NoticeEditorActivity : AppCompatActivity() {
         val receivedTitle = intent.getStringExtra("notice_title")
         val receivedContent = intent.getStringExtra("notice_content")
         val noticeId = intent.getStringExtra("notice_id")
+        Log.d("NoticeEditor", "받은 데이터 - 제목: $receivedTitle, 내용: $receivedContent, ID: $noticeId")
 
         if (receivedTitle != null && receivedContent != null) {
             // 보기 모드
@@ -96,6 +97,7 @@ class NoticeEditorActivity : AppCompatActivity() {
                     editContent.isEnabled = true
                     btnSubmit.visibility = View.VISIBLE
                     btnEdit.visibility = View.GONE
+                    btnDelete.visibility = View.GONE
                 }
 
                 btnDelete.setOnClickListener {
@@ -127,6 +129,7 @@ class NoticeEditorActivity : AppCompatActivity() {
                 val title = editTitle.text.toString().trim()
                 val content = editContent.text.toString().trim()
 
+
                 if (title.isEmpty() || content.isEmpty()) {
                     Toast.makeText(this, "제목과 내용을 입력해주세요.", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
@@ -157,6 +160,7 @@ class NoticeEditorActivity : AppCompatActivity() {
             }
     }
 
+    // 공지 수정
     private fun updateNotice(noticeId: String, newTitle: String, newContent: String) {
         val updates = mapOf(
             "title" to newTitle,
@@ -174,6 +178,7 @@ class NoticeEditorActivity : AppCompatActivity() {
             }
     }
 
+    // 공지 삭제
     private fun deleteNotice(noticeId: String) {
         database.reference.child("notices").child(noticeId)
             .removeValue()

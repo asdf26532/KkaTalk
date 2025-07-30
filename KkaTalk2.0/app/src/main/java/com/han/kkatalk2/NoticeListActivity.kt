@@ -23,6 +23,7 @@ class NoticeListActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         noticeAdapter = NoticeAdapter(noticeList) { notice ->
             val intent = Intent(this, NoticeEditorActivity::class.java)
+            intent.putExtra("notice_id", notice.noticeId)
             intent.putExtra("notice_title", notice.title)
             intent.putExtra("notice_content", notice.content)
 
@@ -30,6 +31,11 @@ class NoticeListActivity : AppCompatActivity() {
         }
         recyclerView.adapter = noticeAdapter
 
+        loadAllNotices()
+    }
+
+    override fun onResume() {
+        super.onResume()
         loadAllNotices()
     }
 
