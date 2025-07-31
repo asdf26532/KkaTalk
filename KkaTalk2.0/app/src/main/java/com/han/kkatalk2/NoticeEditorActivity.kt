@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -101,11 +102,30 @@ class NoticeEditorActivity : AppCompatActivity() {
                 }
 
                 btnDelete.setOnClickListener {
-                    if (noticeId != null) {
-                        deleteNotice(noticeId)
-                    } else {
-                        Toast.makeText(this, "공지 ID 없음", Toast.LENGTH_SHORT).show()
-                    }
+                    AlertDialog.Builder(this)
+                        .setTitle("공지 삭제")
+                        .setMessage("정말 이 공지를 삭제하시겠습니까?")
+                        .setPositiveButton("예") { dialog, _ ->
+                            val noticeId = intent.getStringExtra("notice_id")
+                            if (noticeId != null) {
+                                val ref = FirebaseDatabase.getInstance().getReference("notices").child(noticeId)
+                                ref.removeValue()
+                                    .addOnSuccessListener {
+                                        Toast.makeText(this, "공지 삭제 완료", Toast.LENGTH_SHORT).show()
+                                        finish()
+                                    }
+                                    .addOnFailureListener {
+                                        Toast.makeText(this, "공지 삭제 실패", Toast.LENGTH_SHORT).show()
+                                    }
+                            } else {
+                                Toast.makeText(this, "공지 ID 없음", Toast.LENGTH_SHORT).show()
+                            }
+                            dialog.dismiss()
+                        }
+                        .setNegativeButton("아니오") { dialog, _ ->
+                            dialog.dismiss()
+                        }
+                        .show()
                 }
 
                 btnSubmit.setOnClickListener {
