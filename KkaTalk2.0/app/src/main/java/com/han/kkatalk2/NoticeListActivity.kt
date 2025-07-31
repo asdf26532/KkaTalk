@@ -9,11 +9,19 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 class NoticeListActivity : AppCompatActivity() {
     private lateinit var noticeAdapter: NoticeAdapter
     private val noticeList = mutableListOf<Notice>()
+
+    private val pageSize = 10
+    private var lastLoadedKey: String? = null
+    private var isLoading = false
+    private var isLastPage = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,15 +39,73 @@ class NoticeListActivity : AppCompatActivity() {
         }
         recyclerView.adapter = noticeAdapter
 
-        loadAllNotices()
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val totalItemCount = layoutManager.itemCount
+                val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+
+                if (!isLoading && !isLastPage && totalItemCount <= (lastVisibleItem + 2)) {
+                    loadNotices()
+                }
+            }
+        })
+
+        loadNotices()
+
     }
 
     override fun onResume() {
         super.onResume()
-        loadAllNotices()
+        loadNotices()
     }
 
-    private fun loadAllNotices() {
+    private fun loadNotices() {
+        isLoading = true
+        val ref = FirebaseDatabase.getInstance().getReference("notices")
+        var query = ref.orderByKey().limitToFirst(pageSize + 1) // +1은 다음 페이지 유무 확인용
+
+        if (lastLoadedKey != null) {
+            query = query.startAfter(lastLoadedKey!!)
+        }
+
+        query.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val newItems = mutableListOf<Notice>()
+                var count = 0
+                var newLastKey: String? = null
+
+                for (child in snapshot.children) {
+                    val notice = child.getValue(Notice::class.java)
+                    notice?.let {
+                        if (count < pageSize) {
+                            newItems.add(it)
+                            newLastKey = child.key
+                        }
+                        count++
+                    }
+                }
+
+                if (count <= pageSize) {
+                    isLastPage = true
+                }
+
+                lastLoadedKey = newLastKey
+                noticeList.addAll(newItems)
+                noticeAdapter.notifyDataSetChanged()
+                isLoading = false
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                isLoading = false
+                showCustomToast("불러오기 실패")
+
+            }
+        })
+    }
+
+   /* private fun loadAllNotices() {
         val ref = FirebaseDatabase.getInstance().getReference("notices")
         ref.orderByChild("timestamp").get()
             .addOnSuccessListener { snapshot ->
@@ -56,5 +122,5 @@ class NoticeListActivity : AppCompatActivity() {
             .addOnFailureListener { error ->
                 Log.e("NoticeDebug", "공지 불러오기 실패: ${error.message}", error)
             }
-    }
+    }*/
 }
