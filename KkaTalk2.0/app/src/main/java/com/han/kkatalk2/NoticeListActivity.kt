@@ -2,26 +2,23 @@ package com.han.kkatalk2
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import androidx.activity.enableEdgeToEdge
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
+import kotlin.math.ceil
 
 class NoticeListActivity : AppCompatActivity() {
+
     private lateinit var noticeAdapter: NoticeAdapter
+    private val allNotices = mutableListOf<Notice>()
     private val noticeList = mutableListOf<Notice>()
 
-    private val pageSize = 10
-    private var lastLoadedKey: String? = null
-    private var isLoading = false
-    private var isLastPage = false
+    private var currentPage = 1
+    private val pageSize = 5
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,98 +26,72 @@ class NoticeListActivity : AppCompatActivity() {
 
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewNotice)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        noticeAdapter = NoticeAdapter(noticeList) { notice ->
-            val intent = Intent(this, NoticeEditorActivity::class.java)
-            intent.putExtra("notice_id", notice.noticeId)
-            intent.putExtra("notice_title", notice.title)
-            intent.putExtra("notice_content", notice.content)
 
+        noticeAdapter = NoticeAdapter(noticeList) { notice ->
+            val intent = Intent(this, NoticeEditorActivity::class.java).apply {
+                putExtra("notice_id", notice.noticeId)
+                putExtra("notice_title", notice.title)
+                putExtra("notice_content", notice.content)
+            }
             startActivity(intent)
         }
         recyclerView.adapter = noticeAdapter
 
-        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-                val totalItemCount = layoutManager.itemCount
-                val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
-
-                if (!isLoading && !isLastPage && totalItemCount <= (lastVisibleItem + 2)) {
-                    loadNotices()
-                }
-            }
-        })
-
-        loadNotices()
-
+        loadAllNotices()
     }
 
-    override fun onResume() {
-        super.onResume()
-        loadNotices()
-    }
-
-    private fun loadNotices() {
-        isLoading = true
+    private fun loadAllNotices() {
         val ref = FirebaseDatabase.getInstance().getReference("notices")
-        var query = ref.orderByKey().limitToFirst(pageSize + 1) // +1은 다음 페이지 유무 확인용
-
-        if (lastLoadedKey != null) {
-            query = query.startAfter(lastLoadedKey!!)
-        }
-
-        query.addListenerForSingleValueEvent(object : ValueEventListener {
+        ref.orderByChild("timestamp").addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val newItems = mutableListOf<Notice>()
-                var count = 0
-                var newLastKey: String? = null
-
+                allNotices.clear()
                 for (child in snapshot.children) {
                     val notice = child.getValue(Notice::class.java)
-                    notice?.let {
-                        if (count < pageSize) {
-                            newItems.add(it)
-                            newLastKey = child.key
-                        }
-                        count++
-                    }
+                    if (notice != null) allNotices.add(notice)
                 }
-
-                if (count <= pageSize) {
-                    isLastPage = true
-                }
-
-                lastLoadedKey = newLastKey
-                noticeList.addAll(newItems)
-                noticeAdapter.notifyDataSetChanged()
-                isLoading = false
+                allNotices.reverse() // 최신순 정렬
+                displayPage(1)
+                setupPaginationButtons()
             }
 
             override fun onCancelled(error: DatabaseError) {
-                isLoading = false
                 showCustomToast("불러오기 실패")
-
             }
         })
     }
 
-   /* private fun loadAllNotices() {
-        val ref = FirebaseDatabase.getInstance().getReference("notices")
-        ref.orderByChild("timestamp").get()
-            .addOnSuccessListener { snapshot ->
-                Log.d("NoticeDebug", "총 공지 수: ${snapshot.childrenCount}")
-                noticeList.clear()
-                for (child in snapshot.children) {
-                    val notice = child.getValue(Notice::class.java)
-                    Log.d("NoticeDebug", "불러온 공지: ${notice?.title}")
-                    if (notice != null) noticeList.add(notice)
+    private fun displayPage(page: Int) {
+        currentPage = page
+        val start = (page - 1) * pageSize
+        val end = minOf(start + pageSize, allNotices.size)
+        val visibleList = allNotices.subList(start, end)
+
+        noticeList.clear()
+        noticeList.addAll(visibleList)
+        noticeAdapter.notifyDataSetChanged()
+    }
+
+    private fun setupPaginationButtons() {
+        val container = findViewById<LinearLayout>(R.id.paginationContainer)
+        container.removeAllViews()
+        val totalPages = ceil(allNotices.size / pageSize.toDouble()).toInt()
+
+        for (i in 1..totalPages) {
+            val button = Button(this).apply {
+                text = i.toString()
+                layoutParams = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    marginEnd = 8
                 }
-                noticeList.reverse() // 최신순 정렬
-                noticeAdapter.notifyDataSetChanged()
+                setOnClickListener { displayPage(i) }
             }
-            .addOnFailureListener { error ->
-                Log.e("NoticeDebug", "공지 불러오기 실패: ${error.message}", error)
-            }
-    }*/
+            container.addView(button)
+        }
+    }
+
+    private fun showCustomToast(message: String) {
+        // TODO: 사용자 정의 토스트 처리
+    }
 }
