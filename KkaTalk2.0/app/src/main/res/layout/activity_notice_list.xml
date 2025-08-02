@@ -1,10 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    tools:context=".NoticeListActivity">
+
+    <TextView
+        android:id="@+id/tvNoticeTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="📢 공지사항"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginTop="5dp"
+        android:layout_marginStart="5dp"
+        android:textColor="@android:color/black"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- 공지사항 리스트 -->
     <androidx.recyclerview.widget.RecyclerView
@@ -13,7 +29,23 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
+        android:layout_marginTop="10dp"
         android:paddingBottom="8dp" />
+
+
+        <!-- << 첫 페이지 -->
+        <Button
+            android:id="@+id/btnFirstPage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="<<" />
+
+        <!-- < 이전 페이지 -->
+        <Button
+            android:id="@+id/btnPrevPage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="<" />
 
     <!-- 페이지네이션 버튼 컨테이너 -->
     <HorizontalScrollView
@@ -21,7 +53,6 @@
         android:layout_height="wrap_content"
         android:fillViewport="true"
         android:scrollbars="none">
-
         <LinearLayout
             android:id="@+id/paginationContainer"
             android:layout_width="wrap_content"
@@ -29,5 +60,20 @@
             android:orientation="horizontal"
             android:gravity="center" />
     </HorizontalScrollView>
+        <!-- > 다음 페이지 -->
+        <Button
+            android:id="@+id/btnNextPage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=">" />
+
+        <!-- >> 마지막 페이지 -->
+        <Button
+            android:id="@+id/btnLastPage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=">>" />
+
+
 
 </LinearLayout>

@@ -1,6 +1,7 @@
 package com.han.kkatalk2
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.ViewGroup
 import android.widget.Button
@@ -85,13 +86,12 @@ class NoticeListActivity : AppCompatActivity() {
                 ).apply {
                     marginEnd = 8
                 }
+                setBackgroundColor(Color.TRANSPARENT)
+                setPadding(20, 10, 20, 10)
+
                 setOnClickListener { displayPage(i) }
             }
             container.addView(button)
         }
-    }
-
-    private fun showCustomToast(message: String) {
-        // TODO: 사용자 정의 토스트 처리
     }
 }
