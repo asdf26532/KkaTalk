@@ -32,48 +32,12 @@
         android:layout_marginTop="10dp"
         android:paddingBottom="8dp" />
 
-
-        <!-- << 첫 페이지 -->
-        <Button
-            android:id="@+id/btnFirstPage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="<<" />
-
-        <!-- < 이전 페이지 -->
-        <Button
-            android:id="@+id/btnPrevPage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="<" />
-
-    <!-- 페이지네이션 버튼 컨테이너 -->
-    <HorizontalScrollView
-        android:layout_width="match_parent"
+    <!-- 페이지 버튼 컨테이너 -->
+    <LinearLayout
+        android:id="@+id/paginationContainer"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fillViewport="true"
-        android:scrollbars="none">
-        <LinearLayout
-            android:id="@+id/paginationContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center" />
-    </HorizontalScrollView>
-        <!-- > 다음 페이지 -->
-        <Button
-            android:id="@+id/btnNextPage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=">" />
-
-        <!-- >> 마지막 페이지 -->
-        <Button
-            android:id="@+id/btnLastPage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=">>" />
-
-
+        android:orientation="horizontal"
+        android:gravity="center" />
 
 </LinearLayout>

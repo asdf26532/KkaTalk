@@ -20,6 +20,7 @@ class NoticeListActivity : AppCompatActivity() {
 
     private var currentPage = 1
     private val pageSize = 5
+    private var totalPages = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,7 +53,6 @@ class NoticeListActivity : AppCompatActivity() {
                 }
                 allNotices.reverse() // 최신순 정렬
                 displayPage(1)
-                setupPaginationButtons()
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -70,28 +70,84 @@ class NoticeListActivity : AppCompatActivity() {
         noticeList.clear()
         noticeList.addAll(visibleList)
         noticeAdapter.notifyDataSetChanged()
+
+        setupPaginationButtons()
     }
 
     private fun setupPaginationButtons() {
         val container = findViewById<LinearLayout>(R.id.paginationContainer)
         container.removeAllViews()
-        val totalPages = ceil(allNotices.size / pageSize.toDouble()).toInt()
 
-        for (i in 1..totalPages) {
+        // << 버튼
+        val firstButton = createNavButton("<<") {
+            displayPage(1)
+        }
+        container.addView(firstButton)
+
+        // < 버튼
+        val prevButton = createNavButton("<") {
+            if (currentPage > 1) displayPage(currentPage - 1)
+        }
+        container.addView(prevButton)
+
+        // 페이지 숫자 (최대 3개만 보여주기)
+        val pagesToShow = getVisiblePageNumbers(currentPage, totalPages)
+        for (page in pagesToShow) {
             val button = Button(this).apply {
-                text = i.toString()
+                text = if (page == -1) "..." else page.toString()
+                setBackgroundColor(Color.TRANSPARENT)
+                setPadding(20, 10, 20, 10)
+                setTextColor(if (page == currentPage) Color.BLACK else Color.GRAY)
                 layoutParams = LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 ).apply {
+                    marginStart = 8
                     marginEnd = 8
                 }
-                setBackgroundColor(Color.TRANSPARENT)
-                setPadding(20, 10, 20, 10)
-
-                setOnClickListener { displayPage(i) }
+                if (page != -1) {
+                    setOnClickListener { displayPage(page) }
+                }
             }
             container.addView(button)
         }
+
+        // > 버튼
+        val nextButton = createNavButton(">") {
+            if (currentPage < totalPages) displayPage(currentPage + 1)
+        }
+        container.addView(nextButton)
+
+        // >> 버튼
+        val lastButton = createNavButton(">>") {
+            displayPage(totalPages)
+        }
+        container.addView(lastButton)
     }
+
+    private fun createNavButton(text: String, onClick: () -> Unit): Button {
+        return Button(this).apply {
+            this.text = text
+            setBackgroundColor(Color.TRANSPARENT)
+            setPadding(20, 10, 20, 10)
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                marginStart = 8
+                marginEnd = 8
+            }
+            setOnClickListener { onClick() }
+        }
+    }
+
+    private fun getVisiblePageNumbers(current: Int, total: Int): List<Int> {
+        return when {
+            total <= 3 -> (1..total).toList()
+            current <= 2 -> listOf(1, 2, 3, -1)
+            current >= total - 1 -> listOf(-1, total - 2, total - 1, total)
+            else -> listOf(-1, current - 1, current, current + 1, -1)
+        }
+    }
+
 }
