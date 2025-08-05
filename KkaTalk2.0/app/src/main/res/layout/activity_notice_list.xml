@@ -33,80 +33,20 @@
         android:paddingBottom="8dp" />
 
     <HorizontalScrollView
+        android:id="@+id/paginationScrollView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"
+        android:fillViewport="true"
+        android:overScrollMode="never"
         android:scrollbars="none"
-        android:background="@android:color/white">
+        android:layout_marginTop="12dp">
 
         <LinearLayout
-            android:id="@+id/paginationContainer"
+            android:id="@+id/paginationLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_gravity="center">
-
-            <!-- First Page (≪) -->
-            <Button
-                android:id="@+id/button_first"
-                style="@style/PaginationButtonStyle"
-                android:text="&lt;&lt;" />
-
-            <!-- Prev Page (<) -->
-            <Button
-                android:id="@+id/button_prev"
-                style="@style/PaginationButtonStyle"
-                android:text="&lt;" />
-
-            <!-- Numbered pages (1~5) -->
-            <Button
-                android:id="@+id/page1"
-                style="@style/PaginationButtonStyle"
-                android:text="1"
-                android:background="@drawable/page_selected" />
-
-            <Button
-                android:id="@+id/page2"
-                style="@style/PaginationButtonStyle"
-                android:text="2" />
-
-            <Button
-                android:id="@+id/page3"
-                style="@style/PaginationButtonStyle"
-                android:text="3" />
-
-            <Button
-                android:id="@+id/page4"
-                style="@style/PaginationButtonStyle"
-                android:text="4" />
-
-            <Button
-                android:id="@+id/page5"
-                style="@style/PaginationButtonStyle"
-                android:text="5" />
-
-            <!-- Next Page (>) -->
-            <Button
-                android:id="@+id/button_next"
-                style="@style/PaginationButtonStyle"
-                android:text="&gt;" />
-
-            <!-- Last Page (≫) -->
-            <Button
-                android:id="@+id/button_last"
-                style="@style/PaginationButtonStyle"
-                android:text="&gt;&gt;" />
-
-        </LinearLayout>
+            android:layout_gravity="center"/>
     </HorizontalScrollView>
-
-    <!-- 페이지 버튼 컨테이너 -->
-    <!--<LinearLayout
-        android:id="@+id/paginationContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center" />-->
 
 </LinearLayout>

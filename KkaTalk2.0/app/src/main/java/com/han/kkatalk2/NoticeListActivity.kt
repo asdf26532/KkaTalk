@@ -56,9 +56,7 @@ class NoticeListActivity : AppCompatActivity() {
                     if (notice != null) allNotices.add(notice)
                 }
                 allNotices.reverse() // 최신순 정렬
-
                 totalPages = ceil(allNotices.size / pageSize.toDouble()).toInt()
-
                 displayPage(1)
             }
 
@@ -82,8 +80,34 @@ class NoticeListActivity : AppCompatActivity() {
     }
 
     private fun setupPaginationButtons() {
-        val container = findViewById<LinearLayout>(R.id.paginationContainer)
+        val container = findViewById<LinearLayout>(R.id.paginationLayout)
         container.removeAllViews()
+
+
+        fun createButton(text: String, enabled: Boolean = true, onClick: (() -> Unit)? = null): Button {
+            val button = Button(this).apply {
+                this.text = text
+                textSize = 14f
+                isEnabled = enabled
+                setPadding(20, 10, 20, 10)
+                setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
+                setTextColor(ContextCompat.getColor(context, android.R.color.black))
+                layoutParams = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    setMargins(8, 0, 8, 0)
+                }
+            }
+            onClick?.let { button.setOnClickListener { it() } }
+            return button
+        }
+
+        if (currentPage > 1) {
+            container.addView(createButton("<") {
+                displayPage(currentPage - 1)
+            })
+        }
 
         val maxVisiblePages = 3
         var startPage = max(1, currentPage - 1)
@@ -93,56 +117,36 @@ class NoticeListActivity : AppCompatActivity() {
             startPage = max(1, endPage - maxVisiblePages + 1)
         }
 
-        // < 버튼
-        val prevButton = createPageButton("<").apply {
-            isEnabled = currentPage > 1
-            setOnClickListener { if (currentPage > 1) displayPage(currentPage - 1) }
+        if (startPage > 1) {
+            container.addView(createButton("1") { displayPage(1) })
+            if (startPage > 2) {
+                container.addView(createButton("...").apply { isEnabled = false })
+            }
         }
-        container.addView(prevButton)
 
-        // 숫자 버튼
         for (i in startPage..endPage) {
-            val button = createPageButton(i.toString())
+            val button = createButton(i.toString(), i != currentPage) {
+                displayPage(i)
+            }
             if (i == currentPage) {
                 button.setTypeface(null, Typeface.BOLD)
                 button.setBackgroundResource(R.drawable.current_page_background)
-            } else {
-                button.setOnClickListener { displayPage(i) }
             }
             container.addView(button)
         }
 
-        // ... + 마지막 페이지 버튼
         if (endPage < totalPages) {
-            val ellipsis = createPageButton("...").apply { isEnabled = false }
-            container.addView(ellipsis)
-
-            val lastPageButton = createPageButton(totalPages.toString()).apply {
-                setOnClickListener { displayPage(totalPages) }
+            if (endPage < totalPages - 1) {
+                container.addView(createButton("...").apply { isEnabled = false })
             }
-            container.addView(lastPageButton)
+            container.addView(createButton(totalPages.toString()) { displayPage(totalPages) })
         }
 
-        // > 버튼
-        val nextButton = createPageButton(">").apply {
-            isEnabled = currentPage < totalPages
-            setOnClickListener { if (currentPage < totalPages) displayPage(currentPage + 1) }
+        if (currentPage < totalPages) {
+            container.addView(createButton(">") {
+                displayPage(currentPage + 1)
+            })
         }
-        container.addView(nextButton)
     }
 
-    private fun createPageButton(text: String): Button {
-        return Button(this).apply {
-            this.text = text
-            setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
-            setPadding(20, 10, 20, 10)
-            layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            ).apply {
-                marginStart = 8
-                marginEnd = 8
-            }
-        }
-    }
 }
