@@ -83,7 +83,6 @@ class NoticeListActivity : AppCompatActivity() {
         val container = findViewById<LinearLayout>(R.id.paginationLayout)
         container.removeAllViews()
 
-
         fun createButton(text: String, enabled: Boolean = true, onClick: (() -> Unit)? = null): Button {
             val button = Button(this).apply {
                 this.text = text
@@ -103,12 +102,17 @@ class NoticeListActivity : AppCompatActivity() {
             return button
         }
 
-        if (currentPage > 1) {
-            container.addView(createButton("<") {
-                displayPage(currentPage - 1)
-            })
-        }
+        // << 첫 페이지
+        container.addView(createButton("≪") {
+            displayPage(1)
+        })
 
+        // < 이전 페이지
+        container.addView(createButton("<") {
+            displayPage(max(1, currentPage - 1))
+        })
+
+        // 페이지 버튼 계산 (최대 3개)
         val maxVisiblePages = 3
         var startPage = max(1, currentPage - 1)
         var endPage = min(totalPages, startPage + maxVisiblePages - 1)
@@ -117,13 +121,12 @@ class NoticeListActivity : AppCompatActivity() {
             startPage = max(1, endPage - maxVisiblePages + 1)
         }
 
-        if (startPage > 1) {
-            container.addView(createButton("1") { displayPage(1) })
-            if (startPage > 2) {
-                container.addView(createButton("...").apply { isEnabled = false })
-            }
+        // 앞쪽 생략 표시 (...)
+        if (startPage > 2) {
+            container.addView(createButton("...").apply { isEnabled = false })
         }
 
+        // 페이지 숫자 버튼
         for (i in startPage..endPage) {
             val button = createButton(i.toString(), i != currentPage) {
                 displayPage(i)
@@ -135,18 +138,20 @@ class NoticeListActivity : AppCompatActivity() {
             container.addView(button)
         }
 
-        if (endPage < totalPages) {
-            if (endPage < totalPages - 1) {
-                container.addView(createButton("...").apply { isEnabled = false })
-            }
-            container.addView(createButton(totalPages.toString()) { displayPage(totalPages) })
+        // 뒤쪽 생략 표시 (...)
+        if (endPage < totalPages - 1) {
+            container.addView(createButton("...").apply { isEnabled = false })
         }
 
-        if (currentPage < totalPages) {
-            container.addView(createButton(">") {
-                displayPage(currentPage + 1)
-            })
-        }
+        // > 다음 페이지
+        container.addView(createButton(">") {
+            displayPage(min(totalPages, currentPage + 1))
+        })
+
+        // >> 마지막 페이지
+        container.addView(createButton("≫") {
+            displayPage(totalPages)
+        })
     }
 
 }
