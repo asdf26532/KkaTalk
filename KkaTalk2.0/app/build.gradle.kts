@@ -74,6 +74,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
     // 사진 관련
     implementation ("com.github.chrisbanes:PhotoView:2.3.0")

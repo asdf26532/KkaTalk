@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.firebase.database.*
 import kotlin.math.ceil
 import kotlin.math.max
@@ -18,6 +19,7 @@ import kotlin.math.min
 
 class NoticeListActivity : AppCompatActivity() {
 
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var noticeAdapter: NoticeAdapter
     private val allNotices = mutableListOf<Notice>()
     private val noticeList = mutableListOf<Notice>()
@@ -29,6 +31,12 @@ class NoticeListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_notice_list)
+
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
+
+        swipeRefreshLayout.setOnRefreshListener {
+            loadAllNotices()
+        }
 
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewNotice)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -58,6 +66,8 @@ class NoticeListActivity : AppCompatActivity() {
                 allNotices.reverse() // 최신순 정렬
                 totalPages = ceil(allNotices.size / pageSize.toDouble()).toInt()
                 displayPage(1)
+
+                findViewById<SwipeRefreshLayout>(R.id.swipeRefreshLayout).isRefreshing = false
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -88,14 +98,15 @@ class NoticeListActivity : AppCompatActivity() {
                 this.text = text
                 textSize = 14f
                 isEnabled = enabled
-                setPadding(20, 10, 20, 10)
+                setPadding(8, 4, 8, 4)
                 setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
                 setTextColor(ContextCompat.getColor(context, android.R.color.black))
                 layoutParams = LinearLayout.LayoutParams(
+                    0,
                     ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
+                    1f
                 ).apply {
-                    setMargins(8, 0, 8, 0)
+                    setMargins(4, 0, 4, 0)
                 }
             }
             onClick?.let { button.setOnClickListener { it() } }
