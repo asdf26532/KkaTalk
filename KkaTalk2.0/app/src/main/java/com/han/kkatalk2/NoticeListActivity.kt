@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
@@ -52,22 +53,35 @@ class NoticeListActivity : AppCompatActivity() {
         recyclerView.adapter = noticeAdapter
 
         loadAllNotices()
+
+        // 툴바 뒤로가기
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
     private fun loadAllNotices() {
         val ref = FirebaseDatabase.getInstance().getReference("notices")
         ref.orderByChild("timestamp").addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
+                val previousPage = currentPage // 기존 페이지 저장
+
                 allNotices.clear()
                 for (child in snapshot.children) {
                     val notice = child.getValue(Notice::class.java)
                     if (notice != null) allNotices.add(notice)
                 }
                 allNotices.reverse() // 최신순 정렬
-                totalPages = ceil(allNotices.size / pageSize.toDouble()).toInt()
-                displayPage(1)
 
-                findViewById<SwipeRefreshLayout>(R.id.swipeRefreshLayout).isRefreshing = false
+
+                // 페이지 수 재계산
+                totalPages = ceil(allNotices.size / pageSize.toDouble()).toInt()
+                if (totalPages < 1) totalPages = 1
+
+                // 페이지 범위 보정
+                currentPage = min(previousPage, totalPages)
+
+                displayPage(currentPage)
+
+                swipeRefreshLayout.isRefreshing = false
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -163,6 +177,17 @@ class NoticeListActivity : AppCompatActivity() {
         container.addView(createButton("≫") {
             displayPage(totalPages)
         })
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressedDispatcher.onBackPressed()
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
 }
