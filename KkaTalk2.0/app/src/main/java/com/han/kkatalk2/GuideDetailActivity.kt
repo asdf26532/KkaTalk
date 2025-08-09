@@ -270,7 +270,7 @@ class GuideDetailActivity : AppCompatActivity() {
             android.R.id.home -> {
                 val intent = Intent()
                 setResult(Activity.RESULT_OK, intent)
-                finish()
+                onBackPressedDispatcher.onBackPressed()
                 true
             }
 

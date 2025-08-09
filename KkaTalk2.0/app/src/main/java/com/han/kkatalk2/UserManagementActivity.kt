@@ -127,7 +127,7 @@ class UserManagementActivity : AppCompatActivity() {
         return when (item.itemId) {
             android.R.id.home -> { // 뒤로가기 버튼 클릭 이벤트 처리
                 Log.d("ProfileActivity", "뒤로가기 버튼 클릭됨")
-                finish()
+                onBackPressedDispatcher.onBackPressed()
                 return true
             }
             else -> super.onOptionsItemSelected(item)

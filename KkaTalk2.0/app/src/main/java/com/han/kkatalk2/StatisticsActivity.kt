@@ -60,26 +60,6 @@ class StatisticsActivity : AppCompatActivity() {
         })
     }
 
-    /*private fun fetchUserGrowthTrend() {
-        dbRef.child("user").orderByChild("timestamp")  // User에 timestamp 필요
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val entries = mutableListOf<Entry>()
-                    var index = 0f
-                    snapshot.children.forEach {
-                        entries.add(Entry(index, ++index)) // 임의 데이터
-                    }
-                    val dataSet = LineDataSet(entries, "가입자 수 증가 추이")
-                    dataSet.setDrawFilled(true)
-                    dataSet.color = getColor(R.color.colorPrimary)
-                    userChart.data = LineData(dataSet)
-                    userChart.invalidate()
-                }
-
-                override fun onCancelled(error: DatabaseError) {}
-            })
-    }*/
-
     // 신규 가입자 확인
     private fun fetchTodayUserCountBar() {
         val todayStart = getStartOfTodayMillis()
@@ -126,7 +106,7 @@ class StatisticsActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            finish()
+            onBackPressedDispatcher.onBackPressed()
             return true
         }
         return super.onOptionsItemSelected(item)

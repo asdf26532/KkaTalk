@@ -14,6 +14,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.*
 import java.text.SimpleDateFormat
@@ -22,6 +23,7 @@ import java.util.Locale
 
 class HomeFragment : Fragment() {
 
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var database: DatabaseReference
     private lateinit var guideAdapter: GuideAdapter
     private var guideList = mutableListOf<Guide>()
@@ -38,6 +40,7 @@ class HomeFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
+        swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout)
         spinnerCity = view.findViewById(R.id.spinner_city)
         recyclerView = view.findViewById(R.id.rv_guide)
         val btnAddGuide = view.findViewById<FloatingActionButton>(R.id.btn_add_guide)
@@ -48,24 +51,13 @@ class HomeFragment : Fragment() {
 
         database = FirebaseDatabase.getInstance().getReference("guide")
 
-        // Firebase에서 가이드 리스트 가져오기
-        database.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                guideList.clear()
-                for (guideSnapshot in snapshot.children) {
-                    val guide = guideSnapshot.getValue(Guide::class.java)
-                    if (guide != null) {
-                        guideList.add(guide)
-                    }
-                }
-                // 시간순 정렬
-                guideList.sortByDescending { it.timestamp }
+        // SwipeRefresh 새로고침 동작
+        swipeRefreshLayout.setOnRefreshListener {
+            loadGuideList()
+        }
 
-                updateList()
-            }
-
-            override fun onCancelled(error: DatabaseError) {}
-        })
+        // 첫 로딩
+        loadGuideList()
 
         // 공지 사항
         loadLatestNotice()
@@ -101,6 +93,31 @@ class HomeFragment : Fragment() {
         }
 
         return view
+    }
+
+    // Firebase에서 가이드 리스트 불러오기
+    private fun loadGuideList() {
+        swipeRefreshLayout.isRefreshing = true // 로딩 표시 시작
+
+        database.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                guideList.clear()
+                for (guideSnapshot in snapshot.children) {
+                    val guide = guideSnapshot.getValue(Guide::class.java)
+                    if (guide != null) {
+                        guideList.add(guide)
+                    }
+                }
+                guideList.sortByDescending { it.timestamp }
+                updateList()
+
+                swipeRefreshLayout.isRefreshing = false // 로딩 표시 종료
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                swipeRefreshLayout.isRefreshing = false // 에러 시 종료
+            }
+        })
     }
 
     // 필터링된 리스트로 갱신

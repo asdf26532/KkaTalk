@@ -41,7 +41,7 @@ class AdminActivity : AppCompatActivity() {
     // 뒤로가기 눌렀을 때 종료
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            finish()
+            onBackPressedDispatcher.onBackPressed()
             return true
         }
         return super.onOptionsItemSelected(item)
