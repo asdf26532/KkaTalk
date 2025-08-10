@@ -8,6 +8,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
+import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -54,6 +56,7 @@ class RegisterGuideActivity : AppCompatActivity() {
 
         val edtTitle = findViewById<EditText>(R.id.edt_title)
         val spinnerLocation = findViewById<Spinner>(R.id.spinner_location)
+        val edtLocation = findViewById<EditText>(R.id.edit_location)
         val edtRate = findViewById<EditText>(R.id.edt_rate)
         val edtPhone = findViewById<EditText>(R.id.edt_phone)
         val edtContent = findViewById<EditText>(R.id.edt_content)
@@ -71,6 +74,23 @@ class RegisterGuideActivity : AppCompatActivity() {
         ).also { adapter ->
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinnerLocation.adapter = adapter
+        }
+
+        spinnerLocation.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                if (spinnerLocation.getItemAtPosition(position).toString() == "직접 입력") {
+                    edtLocation.visibility = View.VISIBLE
+                } else {
+                    edtLocation.visibility = View.GONE
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
         userId = auth.currentUser?.uid
@@ -106,10 +126,14 @@ class RegisterGuideActivity : AppCompatActivity() {
 
             btnRegister.setOnClickListener {
                 val title = edtTitle.text.toString()
-                val location = spinnerLocation.selectedItem.toString()
+                var location = spinnerLocation.selectedItem.toString()
                 val rate = edtRate.text.toString()
                 val phone = edtPhone.text.toString()
                 val content = edtContent.text.toString()
+
+                if (location == "직접 입력") {
+                    location = edtLocation.text.toString().trim()
+                }
 
                 Log.d("RegisterGuide", "입력값 - name: $title, location: $location, rate: $rate, phone: $phone, content: $content")
 

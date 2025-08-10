@@ -36,16 +36,16 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             tools:listitem="@layout/guide_card"/>
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btn_add_guide"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end|bottom"
-            android:layout_margin="16dp"
-            app:srcCompat="@android:drawable/ic_input_add"/>
     </LinearLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btn_add_guide"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="16dp"
+        app:srcCompat="@android:drawable/ic_input_add"/>
 
     <!-- 공지 배너: 화면 위에 겹쳐서 위치 -->
     <include

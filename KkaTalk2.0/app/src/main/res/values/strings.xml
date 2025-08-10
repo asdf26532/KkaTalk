@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">KkaTalk2</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string-array name="city_list">
+    <!--home-->
+    <string-array name="home_city_list">
         <item>전체</item>
+        <item>서울</item>
         <item>도쿄</item>
         <item>오사카</item>
         <item>방콕</item>
@@ -14,6 +14,21 @@
         <item>뉴욕</item>
         <item>LA</item>
         <item>시드니</item>
+    </string-array>
+    <!--register-->
+    <string-array name="city_list">
+        <item>서울</item>
+        <item>도쿄</item>
+        <item>오사카</item>
+        <item>방콕</item>
+        <item>파리</item>
+        <item>런던</item>
+        <item>로마</item>
+        <item>하와이</item>
+        <item>뉴욕</item>
+        <item>LA</item>
+        <item>시드니</item>
+        <item>직접 입력</item>
     </string-array>
     <!-- Preference Titles -->
     <string name="messages_header">Messages</string>

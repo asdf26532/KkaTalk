@@ -62,6 +62,14 @@
         android:background="@android:drawable/btn_dropdown"/>
 
     <EditText
+        android:id="@+id/edit_location"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="도시 이름 입력"
+        android:visibility="gone"
+        android:inputType="textCapWords" />
+
+    <EditText
         android:id="@+id/edt_rate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
