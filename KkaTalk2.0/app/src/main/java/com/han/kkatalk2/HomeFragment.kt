@@ -95,6 +95,11 @@ class HomeFragment : Fragment() {
         return view
     }
 
+    override fun onResume() {
+        super.onResume()
+        loadGuideList()
+    }
+
     // Firebase에서 가이드 리스트 불러오기
     private fun loadGuideList() {
         swipeRefreshLayout.isRefreshing = true // 로딩 표시 시작
