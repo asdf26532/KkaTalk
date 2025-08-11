@@ -125,14 +125,28 @@ class HomeFragment : Fragment() {
         val selectedCity = spinnerCity.selectedItem.toString()
         filteredList.clear()
 
-        if (selectedCity == "전체") {
-            filteredList.addAll(guideList)
-        } else {
-            filteredList.addAll(guideList.filter {
-                it.locate.contains(selectedCity, ignoreCase = true)
-            })
-        }
+        when (selectedCity) {
+            "전체" -> {
+                filteredList.addAll(guideList)
+            }
+            "기타" -> {
+                // home_city_list 배열에 있는 도시 목록 가져오기
+                val cityArray = resources.getStringArray(R.array.home_city_list)
+                    .filter { it != "전체" && it != "기타" }
 
+                // locate 값이 배열에 있는 도시 중 아무것도 포함하지 않는 경우만 필터링
+                filteredList.addAll(guideList.filter { guide ->
+                    cityArray.none { cityName ->
+                        guide.locate.contains(cityName, ignoreCase = true)
+                    }
+                })
+            }
+            else -> {
+                filteredList.addAll(guideList.filter {
+                    it.locate.contains(selectedCity, ignoreCase = true)
+                })
+            }
+        }
         guideAdapter.notifyDataSetChanged()
     }
 

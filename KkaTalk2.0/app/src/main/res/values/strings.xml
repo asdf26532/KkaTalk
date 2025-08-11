@@ -14,6 +14,7 @@
         <item>뉴욕</item>
         <item>LA</item>
         <item>시드니</item>
+        <item>기타</item>
     </string-array>
     <!--register-->
     <string-array name="city_list">
