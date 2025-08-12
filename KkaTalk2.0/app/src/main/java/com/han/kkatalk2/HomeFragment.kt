@@ -4,11 +4,15 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.SearchView
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -91,6 +95,8 @@ class HomeFragment : Fragment() {
             val intent = Intent(requireContext(), RegisterGuideActivity::class.java)
             startActivity(intent)
         }
+
+        setHasOptionsMenu(true)
 
         return view
     }
@@ -250,5 +256,44 @@ class HomeFragment : Fragment() {
     private fun hideNoticeBanner() {
         Log.d("Notice", "공지 배너 숨김 처리")
         view?.findViewById<View>(R.id.noticeBanner)?.visibility = View.GONE
+    }
+
+    // 가이드 검색
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_home, menu)
+        val searchItem = menu.findItem(R.id.action_search)
+        val searchView = searchItem.actionView as SearchView
+
+        searchView.queryHint = "가이드 검색"
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                filterGuideList(query)
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                filterGuideList(newText)
+                return true
+            }
+        })
+
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    private fun filterGuideList(query: String?) {
+        val searchText = query?.lowercase()?.trim() ?: ""
+        filteredList.clear()
+
+        if (searchText.isEmpty()) {
+            filteredList.addAll(guideList) // 검색어 없으면 전체
+        } else {
+            filteredList.addAll(
+                guideList.filter {
+                    it.title.lowercase().contains(searchText) ||
+                            it.content.lowercase().contains(searchText)
+                }
+            )
+        }
+        guideAdapter.notifyDataSetChanged()
     }
 }
