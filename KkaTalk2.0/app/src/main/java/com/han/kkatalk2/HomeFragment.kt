@@ -1,5 +1,6 @@
 package com.han.kkatalk2
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -12,6 +13,8 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
 import android.widget.SearchView
 import android.widget.Spinner
 import android.widget.TextView
@@ -35,6 +38,7 @@ class HomeFragment : Fragment() {
 
     private lateinit var spinnerCity: Spinner
     private lateinit var recyclerView: RecyclerView
+    private lateinit var ivSearch: ImageView
 
     private var dismissedNoticeKeyInSession: String? = null
 
@@ -47,6 +51,7 @@ class HomeFragment : Fragment() {
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout)
         spinnerCity = view.findViewById(R.id.spinner_city)
         recyclerView = view.findViewById(R.id.rv_guide)
+        ivSearch = view.findViewById(R.id.iv_search)
         val btnAddGuide = view.findViewById<FloatingActionButton>(R.id.btn_add_guide)
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -90,13 +95,17 @@ class HomeFragment : Fragment() {
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
+        // 검색 아이콘 클릭 → 검색 다이얼로그
+        ivSearch.setOnClickListener {
+            showSearchDialog()
+        }
+
+
         // 가이드 등록 버튼
         btnAddGuide.setOnClickListener {
             val intent = Intent(requireContext(), RegisterGuideActivity::class.java)
             startActivity(intent)
         }
-
-        setHasOptionsMenu(true)
 
         return view
     }
@@ -157,6 +166,39 @@ class HomeFragment : Fragment() {
                     it.locate.contains(selectedCity, ignoreCase = true)
                 })
             }
+        }
+        guideAdapter.notifyDataSetChanged()
+    }
+
+    // 가이드 검색 다이얼로그
+    private fun showSearchDialog() {
+        val editText = EditText(requireContext())
+        editText.hint = "가이드 검색"
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("검색")
+            .setView(editText)
+            .setPositiveButton("검색") { _, _ ->
+                filterGuideList(editText.text.toString())
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
+
+    // 필터링
+    private fun filterGuideList(query: String?) {
+        val searchText = query?.lowercase()?.trim() ?: ""
+        filteredList.clear()
+
+        if (searchText.isEmpty()) {
+            filteredList.addAll(guideList)
+        } else {
+            filteredList.addAll(
+                guideList.filter {
+                    it.title.lowercase().contains(searchText) ||
+                            it.content.lowercase().contains(searchText)
+                }
+            )
         }
         guideAdapter.notifyDataSetChanged()
     }
@@ -259,7 +301,7 @@ class HomeFragment : Fragment() {
     }
 
     // 가이드 검색
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    /*override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_home, menu)
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
@@ -295,5 +337,5 @@ class HomeFragment : Fragment() {
             )
         }
         guideAdapter.notifyDataSetChanged()
-    }
+    }*/
 }
