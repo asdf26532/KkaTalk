@@ -1,6 +1,12 @@
 package com.han.kkatalk2
 
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.Typeface
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +16,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
-class GuideAdapter(private val guideList: List<Guide>) : RecyclerView.Adapter<GuideAdapter.GuideViewHolder>() {
+class GuideAdapter(
+    private val guideList: List<Guide>,
+    private var searchQuery: String = ""
+) : RecyclerView.Adapter<GuideAdapter.GuideViewHolder>() {
 
     // ViewHolder 클래스 정의
     class GuideViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -62,4 +71,35 @@ class GuideAdapter(private val guideList: List<Guide>) : RecyclerView.Adapter<Gu
     }
 
     override fun getItemCount(): Int = guideList.size
+
+    // 검색어 하이라이트 처리
+    private fun getHighlightedText(fullText: String, keyword: String): SpannableString {
+        val spannable = SpannableString(fullText)
+        if (keyword.isEmpty()) return spannable
+
+        val lowerFull = fullText.lowercase()
+        val lowerKeyword = keyword.lowercase()
+
+        var startIndex = lowerFull.indexOf(lowerKeyword)
+        while (startIndex >= 0) {
+            val endIndex = startIndex + keyword.length
+            spannable.setSpan(
+                ForegroundColorSpan(Color.RED), // 색상
+                startIndex, endIndex,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            spannable.setSpan(
+                StyleSpan(Typeface.BOLD), // 굵게
+                startIndex, endIndex,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            startIndex = lowerFull.indexOf(lowerKeyword, endIndex)
+        }
+        return spannable
+    }
+
+    fun updateSearchQuery(query: String) {
+        searchQuery = query
+        notifyDataSetChanged()
+    }
 }
