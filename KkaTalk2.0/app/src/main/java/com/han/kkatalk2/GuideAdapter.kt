@@ -18,8 +18,9 @@ import com.bumptech.glide.Glide
 
 class GuideAdapter(
     private val guideList: List<Guide>,
-    private var searchQuery: String = ""
 ) : RecyclerView.Adapter<GuideAdapter.GuideViewHolder>() {
+
+    private var highlightedQuery: String = ""
 
     // ViewHolder 클래스 정의
     class GuideViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -39,6 +40,23 @@ class GuideAdapter(
     // 데이터 바인딩
     override fun onBindViewHolder(holder: GuideViewHolder, position: Int) {
         val guide = guideList[position]
+        val title = guide.title ?: ""
+
+        if (highlightedQuery.isNotEmpty() && title.contains(highlightedQuery, ignoreCase = true)) {
+            val startIndex = title.lowercase().indexOf(highlightedQuery.lowercase())
+            val endIndex = startIndex + highlightedQuery.length
+
+            val spannable = SpannableString(title)
+            spannable.setSpan(
+                ForegroundColorSpan(Color.RED), // 하이라이트 색상
+                startIndex,
+                endIndex,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            holder.guideTitle.text = spannable
+        } else {
+            holder.guideTitle.text = title
+        }
 
         holder.guideTitle.text = guide.title
         holder.guideLocation.text = guide.locate
@@ -72,34 +90,17 @@ class GuideAdapter(
 
     override fun getItemCount(): Int = guideList.size
 
-    // 검색어 하이라이트 처리
-    private fun getHighlightedText(fullText: String, keyword: String): SpannableString {
-        val spannable = SpannableString(fullText)
-        if (keyword.isEmpty()) return spannable
-
-        val lowerFull = fullText.lowercase()
-        val lowerKeyword = keyword.lowercase()
-
-        var startIndex = lowerFull.indexOf(lowerKeyword)
-        while (startIndex >= 0) {
-            val endIndex = startIndex + keyword.length
-            spannable.setSpan(
-                ForegroundColorSpan(Color.RED), // 색상
-                startIndex, endIndex,
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-            spannable.setSpan(
-                StyleSpan(Typeface.BOLD), // 굵게
-                startIndex, endIndex,
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-            startIndex = lowerFull.indexOf(lowerKeyword, endIndex)
-        }
-        return spannable
-    }
-
-    fun updateSearchQuery(query: String) {
-        searchQuery = query
+    fun highlightGuide(query: String) {
+        highlightedQuery = query
         notifyDataSetChanged()
     }
+
+    /*fun highlightGuide(query: String) {
+        val lowerQuery = query.lowercase()
+        guideList.forEachIndexed { index, guide ->
+            val highlighted = guide.title.contains(query, ignoreCase = true)
+            guideList[index] = guide.copy(highlighted = highlighted)
+            notifyItemChanged(index)
+        }
+    }*/
 }

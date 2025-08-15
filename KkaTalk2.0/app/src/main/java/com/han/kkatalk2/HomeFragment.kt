@@ -200,7 +200,8 @@ class HomeFragment : Fragment() {
                 }
             )
         }
-        guideAdapter.notifyDataSetChanged()
+        guideAdapter.highlightGuide(searchText)
+        //guideAdapter.notifyDataSetChanged()
     }
 
     // 최신 공지사항 불러오기
@@ -257,7 +258,6 @@ class HomeFragment : Fragment() {
             }
     }
 
-
     // 공지 배너
     private fun showNoticeBanner(notice: Notice, noticeKey: String?) {
         val bannerLayout = view?.findViewById<View>(R.id.noticeBanner)
@@ -300,42 +300,4 @@ class HomeFragment : Fragment() {
         view?.findViewById<View>(R.id.noticeBanner)?.visibility = View.GONE
     }
 
-    // 가이드 검색
-    /*override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_home, menu)
-        val searchItem = menu.findItem(R.id.action_search)
-        val searchView = searchItem.actionView as SearchView
-
-        searchView.queryHint = "가이드 검색"
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                filterGuideList(query)
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                filterGuideList(newText)
-                return true
-            }
-        })
-
-        super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    private fun filterGuideList(query: String?) {
-        val searchText = query?.lowercase()?.trim() ?: ""
-        filteredList.clear()
-
-        if (searchText.isEmpty()) {
-            filteredList.addAll(guideList) // 검색어 없으면 전체
-        } else {
-            filteredList.addAll(
-                guideList.filter {
-                    it.title.lowercase().contains(searchText) ||
-                            it.content.lowercase().contains(searchText)
-                }
-            )
-        }
-        guideAdapter.notifyDataSetChanged()
-    }*/
 }
