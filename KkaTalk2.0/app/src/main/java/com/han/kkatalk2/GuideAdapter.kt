@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.text.Spannable
 import android.text.SpannableString
+import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import android.util.Log
@@ -20,7 +21,7 @@ class GuideAdapter(
     private val guideList: List<Guide>,
 ) : RecyclerView.Adapter<GuideAdapter.GuideViewHolder>() {
 
-    private var highlightedQuery: String = ""
+        private var highlightedQuery: String = ""
 
     // ViewHolder 클래스 정의
     class GuideViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -42,13 +43,21 @@ class GuideAdapter(
         val guide = guideList[position]
         val title = guide.title ?: ""
 
+        // 검색어 하이라이트 설정
         if (highlightedQuery.isNotEmpty() && title.contains(highlightedQuery, ignoreCase = true)) {
             val startIndex = title.lowercase().indexOf(highlightedQuery.lowercase())
             val endIndex = startIndex + highlightedQuery.length
 
             val spannable = SpannableString(title)
+
             spannable.setSpan(
-                ForegroundColorSpan(Color.RED), // 하이라이트 색상
+                BackgroundColorSpan(Color.YELLOW),
+                startIndex,
+                endIndex,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            spannable.setSpan(
+                ForegroundColorSpan(Color.RED),
                 startIndex,
                 endIndex,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
@@ -58,13 +67,11 @@ class GuideAdapter(
             holder.guideTitle.text = title
         }
 
-        holder.guideTitle.text = guide.title
         holder.guideLocation.text = guide.locate
         holder.guideRate.text = guide.rate
         holder.guideViewCount.text= "조회수: " + guide.viewCount.toString()
 
-
-        // 썸네일 이미지 설정 (imageUrls[0] 또는 기본 이미지)ㅅ
+        // 썸네일 이미지 설정 (imageUrls[0] 또는 기본 이미지)
         if (!guide.imageUrls.isNullOrEmpty()) {
             Glide.with(holder.itemView.context)
                 .load(guide.imageUrls[0])
@@ -94,13 +101,4 @@ class GuideAdapter(
         highlightedQuery = query
         notifyDataSetChanged()
     }
-
-    /*fun highlightGuide(query: String) {
-        val lowerQuery = query.lowercase()
-        guideList.forEachIndexed { index, guide ->
-            val highlighted = guide.title.contains(query, ignoreCase = true)
-            guideList[index] = guide.copy(highlighted = highlighted)
-            notifyItemChanged(index)
-        }
-    }*/
 }

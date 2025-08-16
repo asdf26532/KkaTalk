@@ -36,6 +36,8 @@ class HomeFragment : Fragment() {
     private var guideList = mutableListOf<Guide>()
     private var filteredList = mutableListOf<Guide>()
 
+    private var isSearching = false
+
     private lateinit var spinnerCity: Spinner
     private lateinit var recyclerView: RecyclerView
     private lateinit var ivSearch: ImageView
@@ -97,9 +99,21 @@ class HomeFragment : Fragment() {
 
         // 검색 아이콘 클릭 → 검색 다이얼로그
         ivSearch.setOnClickListener {
-            showSearchDialog()
-        }
+            if (isSearching) {
+                // 검색 취소 → 원래 리스트 복원
+                filteredList.clear()
+                filteredList.addAll(guideList)
+                guideAdapter.highlightGuide("") // 하이라이트 초기화
+                guideAdapter.notifyDataSetChanged()
 
+                // 아이콘 돋보기로 변경
+                ivSearch.setImageResource(android.R.drawable.ic_menu_search)
+                isSearching = false
+            } else {
+                // 검색 시작 → 다이얼로그 열기
+                showSearchDialog()
+            }
+        }
 
         // 가이드 등록 버튼
         btnAddGuide.setOnClickListener {
@@ -180,6 +194,10 @@ class HomeFragment : Fragment() {
             .setView(editText)
             .setPositiveButton("검색") { _, _ ->
                 filterGuideList(editText.text.toString())
+
+                // 검색모드로 전환
+                ivSearch.setImageResource(R.drawable.ic_cancel)
+                isSearching = true
             }
             .setNegativeButton("취소", null)
             .show()
@@ -201,7 +219,6 @@ class HomeFragment : Fragment() {
             )
         }
         guideAdapter.highlightGuide(searchText)
-        //guideAdapter.notifyDataSetChanged()
     }
 
     // 최신 공지사항 불러오기
