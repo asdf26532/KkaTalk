@@ -42,6 +42,10 @@ class HomeFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var ivSearch: ImageView
 
+    private lateinit var spinnerSort: Spinner
+
+    private var currentSortType: String = "최신순"
+
     private var dismissedNoticeKeyInSession: String? = null
 
     override fun onCreateView(
@@ -54,6 +58,7 @@ class HomeFragment : Fragment() {
         spinnerCity = view.findViewById(R.id.spinner_city)
         recyclerView = view.findViewById(R.id.rv_guide)
         ivSearch = view.findViewById(R.id.iv_search)
+        spinnerSort = view.findViewById(R.id.sortSpinner)
         val btnAddGuide = view.findViewById<FloatingActionButton>(R.id.btn_add_guide)
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -107,7 +112,7 @@ class HomeFragment : Fragment() {
                 guideAdapter.notifyDataSetChanged()
 
                 // 아이콘 돋보기로 변경
-                ivSearch.setImageResource(android.R.drawable.ic_menu_search)
+                ivSearch.setImageResource(R.drawable.ic_search)
                 isSearching = false
             } else {
                 // 검색 시작 → 다이얼로그 열기
@@ -119,6 +124,28 @@ class HomeFragment : Fragment() {
         btnAddGuide.setOnClickListener {
             val intent = Intent(requireContext(), RegisterGuideActivity::class.java)
             startActivity(intent)
+        }
+
+        // 정렬 스피너 어댑터
+        ArrayAdapter.createFromResource(
+            requireContext(),
+            R.array.sort_options,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerSort.adapter = adapter
+        }
+
+        // 정렬 선택 리스너
+        spinnerSort.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?, view: View?, position: Int, id: Long
+            ) {
+                currentSortType = parent?.getItemAtPosition(position).toString()
+                updateList() // 정렬 반영
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
         return view

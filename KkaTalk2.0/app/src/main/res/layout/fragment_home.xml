@@ -42,6 +42,14 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1" />
 
+            <Spinner
+                android:id="@+id/sortSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:entries="@array/sort_options"
+                android:spinnerMode="dropdown"
+                android:layout_margin="8dp"/>
+
             <ImageView
                 android:id="@+id/iv_search"
                 android:layout_width="wrap_content"

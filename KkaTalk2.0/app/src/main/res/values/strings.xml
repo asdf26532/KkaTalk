@@ -31,6 +31,13 @@
         <item>시드니</item>
         <item>직접 입력</item>
     </string-array>
+    <!--정렬 옵션-->
+    <string-array name="sort_options">
+        <item>최신순</item>
+        <item>오래된순</item>
+        <item>인기순</item>
+    </string-array>
+
     <!-- Preference Titles -->
     <string name="messages_header">Messages</string>
     <string name="sync_header">Sync</string>
