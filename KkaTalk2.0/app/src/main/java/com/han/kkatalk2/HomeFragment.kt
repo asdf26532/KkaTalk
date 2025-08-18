@@ -78,7 +78,7 @@ class HomeFragment : Fragment() {
         // 공지 사항
         loadLatestNotice()
 
-        // Spinner 셋업
+        // 도시 선택 스피너 어댑터
         ArrayAdapter.createFromResource(
             requireContext(),
             R.array.home_city_list,
@@ -91,15 +91,34 @@ class HomeFragment : Fragment() {
         // 도시 선택 리스너
         spinnerCity.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
-                parent: AdapterView<*>,
-                view: View?,
-                position: Int,
-                id: Long
+                parent: AdapterView<*>, view: View?, position: Int, id: Long
             ) {
                 updateList()
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
+
+        // 정렬 스피너 어댑터
+        ArrayAdapter.createFromResource(
+            requireContext(),
+            R.array.sort_options,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerSort.adapter = adapter
+        }
+
+        // 정렬 선택 리스너
+        spinnerSort.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?, view: View?, position: Int, id: Long
+            ) {
+                currentSortType = parent?.getItemAtPosition(position).toString()
+                updateList() // 정렬 반영
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
         // 검색 아이콘 클릭 → 검색 다이얼로그
@@ -124,28 +143,6 @@ class HomeFragment : Fragment() {
         btnAddGuide.setOnClickListener {
             val intent = Intent(requireContext(), RegisterGuideActivity::class.java)
             startActivity(intent)
-        }
-
-        // 정렬 스피너 어댑터
-        ArrayAdapter.createFromResource(
-            requireContext(),
-            R.array.sort_options,
-            android.R.layout.simple_spinner_item
-        ).also { adapter ->
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinnerSort.adapter = adapter
-        }
-
-        // 정렬 선택 리스너
-        spinnerSort.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?, view: View?, position: Int, id: Long
-            ) {
-                currentSortType = parent?.getItemAtPosition(position).toString()
-                updateList() // 정렬 반영
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
         return view
@@ -208,6 +205,13 @@ class HomeFragment : Fragment() {
                 })
             }
         }
+
+        when (currentSortType) {
+            "최신순" -> filteredList.sortByDescending { it.timestamp }
+            "오래된순" -> filteredList.sortBy { it.timestamp }
+            "조회순" -> filteredList.sortByDescending { it.viewCount }
+        }
+
         guideAdapter.notifyDataSetChanged()
     }
 
