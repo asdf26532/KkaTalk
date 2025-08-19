@@ -58,7 +58,7 @@ class HomeFragment : Fragment() {
         spinnerCity = view.findViewById(R.id.spinner_city)
         recyclerView = view.findViewById(R.id.rv_guide)
         ivSearch = view.findViewById(R.id.iv_search)
-        spinnerSort = view.findViewById(R.id.sortSpinner)
+        spinnerSort = view.findViewById(R.id.spinner_sort)
         val btnAddGuide = view.findViewById<FloatingActionButton>(R.id.btn_add_guide)
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())

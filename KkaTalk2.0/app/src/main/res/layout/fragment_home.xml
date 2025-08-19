@@ -36,7 +36,7 @@
                 android:spinnerMode="dropdown"/>
 
             <Spinner
-                android:id="@+id/sortSpinner"
+                android:id="@+id/spinner_sort"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:entries="@array/sort_options"
