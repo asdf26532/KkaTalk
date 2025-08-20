@@ -2,6 +2,7 @@ package com.han.kkatalk2
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.DatePickerDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -29,7 +30,7 @@ import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.han.kkatalk2.databinding.ActivityChatBinding
-
+import java.util.Calendar
 
 
 class ChatActivity : AppCompatActivity() {
@@ -716,6 +717,46 @@ class ChatActivity : AppCompatActivity() {
         markMessagesAsRead(senderRoom, receiverRoom)
     }
 
+    // 예약하기(달력)
+    private fun showDatePicker() {
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+        val datePicker = DatePickerDialog(
+            this,
+            { _, selectedYear, selectedMonth, selectedDay ->
+                val selectedDate = "$selectedYear-${selectedMonth + 1}-$selectedDay"
+                handleBooking(selectedDate)
+            },
+            year, month, day
+        )
+        datePicker.show()
+    }
+
+    // 예약 처리
+    private fun handleBooking(selectedDate: String) {
+        Toast.makeText(this, "예약일: $selectedDate", Toast.LENGTH_SHORT).show()
+
+        val bookingId = FirebaseDatabase.getInstance().reference.push().key ?: return
+        val booking = mapOf(
+            "date" to selectedDate,
+            "userId" to userid, // 현재 유저 UID
+            "timestamp" to System.currentTimeMillis()
+        )
+
+        FirebaseDatabase.getInstance().getReference("bookings")
+            .child(bookingId)
+            .setValue(booking)
+            .addOnSuccessListener {
+                Toast.makeText(this, "예약 완료!", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "예약 실패", Toast.LENGTH_SHORT).show()
+            }
+    }
+
     // 메세지 검색 기능(하이라이트)
     private fun searchMessage(query: String) {
         Log.d("SearchDebug", "검색어 입력됨: $query")
@@ -792,6 +833,12 @@ class ChatActivity : AppCompatActivity() {
                 setResult(Activity.RESULT_OK, intent)
                 Log.d("ChatActivity", "setResult 호출됨") // 로그 추가
                 finish()
+                true
+            }
+
+            // 예약 버튼
+            R.id.menu_booking -> {
+                showDatePicker()
                 true
             }
 
