@@ -737,24 +737,47 @@ class ChatActivity : AppCompatActivity() {
 
     // 예약 처리
     private fun handleBooking(selectedDate: String) {
-        Toast.makeText(this, "예약일: $selectedDate", Toast.LENGTH_SHORT).show()
+        showCustomToast("예약일: $selectedDate")
 
         val bookingId = FirebaseDatabase.getInstance().reference.push().key ?: return
         val booking = mapOf(
             "date" to selectedDate,
-            "userId" to userid, // 현재 유저 UID
+            "userId" to senderUid, // 현재 유저 UID
             "timestamp" to System.currentTimeMillis()
         )
+        Log.d("BookingDebug", "예약 요청, date=$selectedDate, userId=$senderUid, timestamp=${System.currentTimeMillis()}")
 
         FirebaseDatabase.getInstance().getReference("bookings")
             .child(bookingId)
             .setValue(booking)
             .addOnSuccessListener {
-                Toast.makeText(this, "예약 완료!", Toast.LENGTH_SHORT).show()
+                showCustomToast("예약 완료!")
+
+                val bookingMessage = "📅 $selectedDate 예약 신청이 완료되었습니다."
+                sendMessage(bookingMessage, type = "booking")
             }
             .addOnFailureListener {
-                Toast.makeText(this, "예약 실패", Toast.LENGTH_SHORT).show()
+                showCustomToast("예약 실패")
             }
+    }
+
+    private fun sendMessage(message: String, type: String = "text") {
+        val chatId = senderUid // 현재 채팅방 ID
+        val messageId = FirebaseDatabase.getInstance().reference.push().key ?: return
+
+        val chatMessage = mapOf(
+            "id" to messageId,
+            "senderId" to senderUid,
+            "message" to message,
+            "type" to type,
+            "timestamp" to System.currentTimeMillis()
+        )
+
+        FirebaseDatabase.getInstance().getReference("chats")
+            .child(chatId)
+            .child("messages")
+            .child(messageId)
+            .setValue(chatMessage)
     }
 
     // 메세지 검색 기능(하이라이트)
