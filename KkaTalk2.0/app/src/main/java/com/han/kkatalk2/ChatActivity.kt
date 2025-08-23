@@ -14,6 +14,7 @@ import android.util.Log
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.CalendarView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -724,60 +725,40 @@ class ChatActivity : AppCompatActivity() {
         val month = calendar.get(Calendar.MONTH)
         val day = calendar.get(Calendar.DAY_OF_MONTH)
 
-        val datePicker = DatePickerDialog(
+        DatePickerDialog(
             this,
-            { _, selectedYear, selectedMonth, selectedDay ->
-                val selectedDate = "$selectedYear-${selectedMonth + 1}-$selectedDay"
-                handleBooking(selectedDate)
+            { _, y, m, d ->
+                val selectedDate = "$y-${m + 1}-$d"
+                val guideId = FirebaseAuth.getInstance().currentUser?.uid ?: return@DatePickerDialog
+
+                val ref = FirebaseDatabase.getInstance()
+                    .getReference("guides")
+                    .child(guideId)
+                    .child("availableDates")
+
+                ref.child(selectedDate).setValue(true)
             },
             year, month, day
-        )
-        datePicker.show()
+        ).show()
     }
 
-    // 예약 처리
-    private fun handleBooking(selectedDate: String) {
-        showCustomToast("예약일: $selectedDate")
+    private fun loadAvailableDates(guideId: String) {
+        val ref = FirebaseDatabase.getInstance().getReference("guides").child(guideId).child("availableDates")
 
-        val bookingId = FirebaseDatabase.getInstance().reference.push().key ?: return
-        val booking = mapOf(
-            "date" to selectedDate,
-            "userId" to senderUid, // 현재 유저 UID
-            "timestamp" to System.currentTimeMillis()
-        )
-        Log.d("BookingDebug", "예약 요청, date=$selectedDate, userId=$senderUid, timestamp=${System.currentTimeMillis()}")
+        ref.get().addOnSuccessListener { snapshot ->
+            val availableDates = snapshot.children.mapNotNull { it.key }
 
-        FirebaseDatabase.getInstance().getReference("bookings")
-            .child(bookingId)
-            .setValue(booking)
-            .addOnSuccessListener {
-                showCustomToast("예약 완료!")
+            val calendarView = findViewById<CalendarView>(R.id.calendarView)
 
-                val bookingMessage = "📅 $selectedDate 예약 신청이 완료되었습니다."
-                sendMessage(bookingMessage, type = "booking")
+            calendarView.setOnDateChangeListener { _, year, month, day ->
+                val selectedDate = "$year-${month + 1}-$day"
+                if (availableDates.contains(selectedDate)) {
+                    showCustomToast("예약 가능")
+                } else {
+                    showCustomToast("예약 불가능")
+                }
             }
-            .addOnFailureListener {
-                showCustomToast("예약 실패")
-            }
-    }
-
-    private fun sendMessage(message: String, type: String = "text") {
-        val chatId = senderUid // 현재 채팅방 ID
-        val messageId = FirebaseDatabase.getInstance().reference.push().key ?: return
-
-        val chatMessage = mapOf(
-            "id" to messageId,
-            "senderId" to senderUid,
-            "message" to message,
-            "type" to type,
-            "timestamp" to System.currentTimeMillis()
-        )
-
-        FirebaseDatabase.getInstance().getReference("chats")
-            .child(chatId)
-            .child("messages")
-            .child(messageId)
-            .setValue(chatMessage)
+        }
     }
 
     // 메세지 검색 기능(하이라이트)
