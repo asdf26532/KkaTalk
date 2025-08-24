@@ -728,7 +728,7 @@ class ChatActivity : AppCompatActivity() {
         DatePickerDialog(
             this,
             { _, y, m, d ->
-                val selectedDate = "$y-${m + 1}-$d"
+                val selectedDate = String.format("%04d-%02d-%02d", y, m + 1, d)
                 val guideId = FirebaseAuth.getInstance().currentUser?.uid ?: return@DatePickerDialog
 
                 val ref = FirebaseDatabase.getInstance()
@@ -736,29 +736,18 @@ class ChatActivity : AppCompatActivity() {
                     .child(guideId)
                     .child("availableDates")
 
-                ref.child(selectedDate).setValue(true)
+                // 중복 방지
+                ref.child(selectedDate).get().addOnSuccessListener { snapshot ->
+                    if (!snapshot.exists()) {
+                        ref.child(selectedDate).setValue(true)
+                        showCustomToast("예약 가능 날짜 추가됨: $selectedDate")
+                    } else {
+                        showCustomToast("이미 등록된 날짜입니다.")
+                    }
+                }
             },
             year, month, day
         ).show()
-    }
-
-    private fun loadAvailableDates(guideId: String) {
-        val ref = FirebaseDatabase.getInstance().getReference("guides").child(guideId).child("availableDates")
-
-        ref.get().addOnSuccessListener { snapshot ->
-            val availableDates = snapshot.children.mapNotNull { it.key }
-
-            val calendarView = findViewById<CalendarView>(R.id.calendarView)
-
-            calendarView.setOnDateChangeListener { _, year, month, day ->
-                val selectedDate = "$year-${month + 1}-$day"
-                if (availableDates.contains(selectedDate)) {
-                    showCustomToast("예약 가능")
-                } else {
-                    showCustomToast("예약 불가능")
-                }
-            }
-        }
     }
 
     // 메세지 검색 기능(하이라이트)
