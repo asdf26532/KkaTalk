@@ -71,9 +71,7 @@ class ChatActivity : AppCompatActivity() {
         profileImageUrl = intent.getStringExtra("profileImageUrl") ?: ""
 
         // 데이터가 제대로 넘어오는지 로그 확인
-        Log.d("ChatActivity", "Receiver Name: $receiverNick")
-        Log.d("ChatActivity", "Receiver UID: $receiverUid")
-        Log.d("ChatActivity", "Profile Image URL: $profileImageUrl")
+        Log.d("ChatActivity", "Receiver: $receiverNick ($receiverUid), Profile: $profileImageUrl")
 
         messageList = ArrayList()
         messageAdapter = MessageAdapter(this, messageList, profileImageUrl, receiverNick, receiverUid)
