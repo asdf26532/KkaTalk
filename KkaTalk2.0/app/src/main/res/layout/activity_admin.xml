@@ -34,13 +34,6 @@
             android:layout_marginBottom="20dp" />
 
         <Button
-            android:id="@+id/btnPostManagement"
-            android:text="게시글 관리"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp" />
-
-        <Button
             android:id="@+id/btnWriteNotice"
             android:text="공지사항 작성"
             android:layout_width="match_parent"

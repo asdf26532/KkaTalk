@@ -716,8 +716,30 @@ class ChatActivity : AppCompatActivity() {
         markMessagesAsRead(senderRoom, receiverRoom)
     }
 
+    private fun openReservation() {
+        val myUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val db = FirebaseDatabase.getInstance().reference
+
+        // 상대방(receiver)이 가이드인지 확인
+        db.child("guide").child(receiverUid).get().addOnSuccessListener { snap ->
+            val (guideId, isGuide) = if (snap.exists()) {
+                // 사용자(읽기 전용)
+                receiverUid to false
+            } else {
+                // 가이드
+                myUid to true
+            }
+
+            val intent = Intent(this, ReservationActivity::class.java).apply {
+                putExtra("guideId", guideId)
+                putExtra("isGuide", isGuide)
+            }
+            startActivity(intent)
+        }
+    }
+
     // 예약하기(달력)
-    private fun showDatePicker() {
+   /* private fun showDatePicker() {
         val calendar = Calendar.getInstance()
         val year = calendar.get(Calendar.YEAR)
         val month = calendar.get(Calendar.MONTH)
@@ -730,7 +752,7 @@ class ChatActivity : AppCompatActivity() {
                 val guideId = FirebaseAuth.getInstance().currentUser?.uid ?: return@DatePickerDialog
 
                 val ref = FirebaseDatabase.getInstance()
-                    .getReference("guides")
+                    .getReference("guide")
                     .child(guideId)
                     .child("availableDates")
 
@@ -746,7 +768,7 @@ class ChatActivity : AppCompatActivity() {
             },
             year, month, day
         ).show()
-    }
+    }*/
 
     // 메세지 검색 기능(하이라이트)
     private fun searchMessage(query: String) {
@@ -829,7 +851,7 @@ class ChatActivity : AppCompatActivity() {
 
             // 예약 버튼
             R.id.menu_booking -> {
-                showDatePicker()
+                openReservation()
                 true
             }
 
