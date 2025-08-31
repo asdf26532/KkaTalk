@@ -7,6 +7,14 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.han.kkatalk2.databinding.ActivityReservationBinding
+import com.kizitonwose.calendarview.model.CalendarDay
+import com.kizitonwose.calendarview.model.DayOwner
+import com.kizitonwose.calendarview.ui.DayBinder
+import com.kizitonwose.calendarview.ui.ViewContainer
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 class ReservationActivity : AppCompatActivity() {
 
@@ -17,16 +25,17 @@ class ReservationActivity : AppCompatActivity() {
     private lateinit var guideId: String
     private var isGuideMode: Boolean = false
 
-    private val available = HashSet<CalendarDay>()
-    private var decorator: AvailableDateDecorator? = null
+    // 가이드가 등록한 예약 가능 날짜
+    private val availableDates = mutableSetOf<LocalDate>()
     private var datesRef: DatabaseReference? = null
     private var valueListener: ValueEventListener? = null
+
+    private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.getDefault())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityReservationBinding.inflate(layoutInflater)
-        setContentView(R.layout.activity_reservation)
-
+        setContentView(binding.root)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "예약 가능 날짜"
@@ -34,12 +43,12 @@ class ReservationActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseDatabase.getInstance().reference
 
-        // ChatActivity에서 전달
+        // ChatActivity 에서 전달받음
         guideId = intent.getStringExtra("guideId") ?: ""
         isGuideMode = intent.getBooleanExtra("isGuide", false)
 
         if (guideId.isEmpty()) {
-            Toast.makeText(this, "가이드 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+            toast("가이드 정보가 없습니다.")
             finish()
             return
         }
@@ -47,23 +56,11 @@ class ReservationActivity : AppCompatActivity() {
         // DB 참조: /guide/{guideId}/availableDates
         datesRef = db.child("guide").child(guideId).child("availableDates")
 
-        // 현재 데이터 로드 & 실시간 반영
-        attachDatesListener()
+        // 캘린더 초기화
+        initCalendar()
 
-        // 탭/선택 동작
-        binding.calendarView.setOnDateChangedListener { _, date, _ ->
-            val dateStr = toDateString(date)
-            if (isGuideMode) {
-                toggleDate(date, dateStr) // 가이드: 추가/삭제
-            } else {
-                // 사용자: 읽기 전용
-                if (available.contains(date)) {
-                    toast("예약 가능: $dateStr")
-                } else {
-                    toast("예약 불가: $dateStr")
-                }
-            }
-        }
+        // Firebase에서 날짜 가져오기
+        attachDatesListener()
     }
 
     override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
@@ -77,22 +74,90 @@ class ReservationActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // 리스너 해제
         valueListener?.let { datesRef?.removeEventListener(it) }
     }
 
-    /** Firebase에서 availableDates를 읽어와 달력에 데코 적용 */
+    /** 캘린더 초기화 */
+    private fun initCalendar() {
+        val currentMonth = YearMonth.now()
+        val startMonth = currentMonth.minusMonths(12)
+        val endMonth = currentMonth.plusMonths(12)
+
+        binding.calendarView.setup(startMonth, endMonth, java.time.DayOfWeek.SUNDAY)
+        binding.calendarView.scrollToMonth(currentMonth)
+
+        binding.calendarView.dayBinder = object : DayBinder<DayViewContainer> {
+            override fun create(view: android.view.View) = DayViewContainer(view)
+            override fun bind(container: DayViewContainer, day: CalendarDay) {
+                container.bind(day)
+            }
+        }
+    }
+
+    /** 날짜를 누르면 동작 */
+    inner class DayViewContainer(view: android.view.View) :
+        ViewContainer(view) {
+        val textView = com.google.android.material.textview.MaterialTextView(view.context)
+
+        lateinit var day: CalendarDay
+
+        init {
+            (view as android.widget.FrameLayout).addView(textView)
+
+            textView.setOnClickListener {
+                if (day.owner == DayOwner.THIS_MONTH) {
+                    val date = day.date
+                    val dateStr = date.format(dateFormatter)
+
+                    if (isGuideMode) {
+                        toggleDate(date, dateStr)
+                    } else {
+                        if (availableDates.contains(date)) {
+                            toast("예약 가능: $dateStr")
+                        } else {
+                            toast("예약 불가: $dateStr")
+                        }
+                    }
+                }
+            }
+        }
+
+        fun bind(day: CalendarDay) {
+            this.day = day
+            textView.text = day.date.dayOfMonth.toString()
+
+            // 오늘 표시
+            if (day.date == LocalDate.now()) {
+                textView.setTextColor(android.graphics.Color.RED)
+            } else {
+                textView.setTextColor(android.graphics.Color.BLACK)
+            }
+
+            // 예약 가능 날짜 표시
+            if (availableDates.contains(day.date)) {
+                textView.setBackgroundColor(android.graphics.Color.parseColor("#90CAF9")) // 파란 배경
+            } else {
+                textView.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+            }
+        }
+    }
+
+    /** Firebase에서 예약 가능 날짜 가져오기 */
     private fun attachDatesListener() {
         valueListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                available.clear()
+                availableDates.clear()
                 for (child in snapshot.children) {
-                    val key = child.key ?: continue // yyyy-MM-dd
-                    parseDate(key)?.let { available.add(it) }
+                    val key = child.key ?: continue
+                    try {
+                        availableDates.add(LocalDate.parse(key, dateFormatter))
+                    } catch (_: Exception) {
+                    }
                 }
-                applyDecorator()
-                Log.d("Reservation", "Loaded dates: $available")
+                binding.calendarView.notifyCalendarChanged()
+                Log.d("Reservation", "Loaded dates: $availableDates")
             }
+
             override fun onCancelled(error: DatabaseError) {
                 Log.e("Reservation", "Load failed: ${error.message}")
             }
@@ -100,15 +165,8 @@ class ReservationActivity : AppCompatActivity() {
         datesRef?.addValueEventListener(valueListener as ValueEventListener)
     }
 
-    /** 데코레이터 갱신 */
-    private fun applyDecorator() {
-        decorator?.let { binding.calendarView.removeDecorator(it) }
-        decorator = AvailableDateDecorator(available.toSet())
-        binding.calendarView.addDecorator(decorator!!)
-    }
-
     /** 가이드: 날짜 토글 (추가/삭제) */
-    private fun toggleDate(date: CalendarDay, dateStr: String) {
+    private fun toggleDate(date: LocalDate, dateStr: String) {
         val ref = datesRef ?: return
         ref.child(dateStr).get().addOnSuccessListener { s ->
             if (s.exists()) {
@@ -123,22 +181,5 @@ class ReservationActivity : AppCompatActivity() {
         }
     }
 
-    /** yyyy-MM-dd 문자열로 */
-    private fun toDateString(day: CalendarDay): String =
-        String.format("%04d-%02d-%02d", day.year, day.month + 1, day.day) // month는 0-base
-
-    /** yyyy-MM-dd → CalendarDay (MaterialCalendarView는 month 0-base) */
-    private fun parseDate(s: String): CalendarDay? {
-        val p = s.split("-")
-        if (p.size != 3) return null
-        return try {
-            val y = p[0].toInt()
-            val m = p[1].toInt() - 1
-            val d = p[2].toInt()
-            CalendarDay.from(y, m, d)
-        } catch (_: Exception) { null }
-    }
-
     private fun toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-
 }
