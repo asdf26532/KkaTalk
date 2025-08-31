@@ -7,8 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.han.kkatalk2.databinding.ActivityReservationBinding
-import com.prolificinteractive.materialcalendarview.CalendarDay
-import java.util.Calendar
 
 class ReservationActivity : AppCompatActivity() {
 

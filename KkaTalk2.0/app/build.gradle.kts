@@ -75,7 +75,7 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation ("com.prolificinteractive:material-calendarview:1.4.3")
+    implementation ("com.kizitonwose.calendar:view:2.0.4")
 
     // 사진 관련
     implementation ("com.github.chrisbanes:PhotoView:2.3.0")
