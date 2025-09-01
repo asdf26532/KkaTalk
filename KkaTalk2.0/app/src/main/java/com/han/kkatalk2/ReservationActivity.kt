@@ -7,10 +7,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.han.kkatalk2.databinding.ActivityReservationBinding
-import com.kizitonwose.calendarview.model.CalendarDay
-import com.kizitonwose.calendarview.model.DayOwner
-import com.kizitonwose.calendarview.ui.DayBinder
-import com.kizitonwose.calendarview.ui.ViewContainer
+import com.kizitonwose.calendar.view.CalendarView
+import java.time.DayOfWeek
+
+
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -55,6 +55,14 @@ class ReservationActivity : AppCompatActivity() {
 
         // DB 참조: /guide/{guideId}/availableDates
         datesRef = db.child("guide").child(guideId).child("availableDates")
+
+        val calendarView = findViewById<CalendarView>(R.id.calendarView)
+        calendarView.setup(
+            YearMonth.now().minusMonths(12),
+            YearMonth.now().plusMonths(12),
+            DayOfWeek.SUNDAY
+        )
+        calendarView.scrollToMonth(YearMonth.now())
 
         // 캘린더 초기화
         initCalendar()
