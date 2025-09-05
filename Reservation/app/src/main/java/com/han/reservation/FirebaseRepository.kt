@@ -1,8 +1,5 @@
 package com.han.reservation
 
-import android.util.Log
-import com.han.reservation.model.Guide
-import com.han.reservation.model.Reservation
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
