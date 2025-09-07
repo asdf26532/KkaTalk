@@ -67,7 +67,7 @@
                         android:src="@drawable/ic_guide"
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:tint="@android:color/holo_blue_light"/>
+                        app:tint="@android:color/holo_blue_light" />
 
                     <TextView
                         android:layout_width="0dp"
@@ -104,7 +104,7 @@
                         android:src="@drawable/ic_calendar"
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:tint="@android:color/holo_orange_light"/>
+                        app:tint="@android:color/holo_orange_light" />
 
                     <TextView
                         android:layout_width="0dp"
@@ -140,7 +140,7 @@
                         android:src="@drawable/ic_cloud"
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:tint="@android:color/holo_green_light"/>
+                        app:tint="@android:color/holo_green_light" />
 
                     <TextView
                         android:layout_width="0dp"
