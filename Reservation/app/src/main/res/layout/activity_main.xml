@@ -7,9 +7,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/black"
     tools:context=".MainActivity">
 
-    <!-- simple custom top bar (no MaterialToolbar) -->
     <FrameLayout
         android:id="@+id/topAppBar"
         android:layout_width="match_parent"

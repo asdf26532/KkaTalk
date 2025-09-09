@@ -1,57 +1,41 @@
 package com.han.reservation
 
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
+import android.util.Log
+import com.google.firebase.database.FirebaseDatabase
+
 
 class FirebaseRepository {
-    private val db = Firebase.database.reference
-
-    // 가이드 목록 읽기
-    fun fetchGuides(onComplete: (List<Guide>) -> Unit, onError: (Exception) -> Unit) {
-        db.child("guides").addListenerForSingleValueEvent(object: ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val list = mutableListOf<Guide>()
-                snapshot.children.forEach {
-                    val g = it.getValue(Guide::class.java)
-                    g?.let { list.add(it) }
-                }
-                onComplete(list)
-            }
-            override fun onCancelled(error: DatabaseError) { onError(error.toException()) }
-        })
-    }
+    private val db = FirebaseDatabase.getInstance().reference
 
     // 예약 생성
-    fun createReservation(res: Reservation, callback: (Boolean, String?) -> Unit) {
-        val ref = db.child("reservations").push()
-        res.id = ref.key ?: ""
-        ref.setValue(res)
-            .addOnSuccessListener { callback(true, res.id) }
-            .addOnFailureListener { callback(false, it.message) }
+    fun createReservation(reservation: Reservation, onResult: (Boolean, String?) -> Unit) {
+        val id = db.child("reservations").push().key ?: return onResult(false, "key 생성 실패")
+        reservation.id = id
+        db.child("reservations").child(id).setValue(reservation)
+            .addOnSuccessListener {
+                Log.d("FirebaseRepo", "예약 생성 성공: $id")
+                onResult(true, id)
+            }
+            .addOnFailureListener { e ->
+                Log.e("FirebaseRepo", "예약 생성 실패", e)
+                onResult(false, e.message)
+            }
     }
 
-    // 사용자 예약 조회
-    fun fetchReservationsByUser(userId: String, onComplete: (List<Reservation>) -> Unit, onError: (Exception) -> Unit) {
-        db.child("reservations").orderByChild("userId").equalTo(userId)
-            .addListenerForSingleValueEvent(object: ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val list = mutableListOf<Reservation>()
-                    snapshot.children.forEach {
-                        val r = it.getValue(Reservation::class.java)
-                        r?.let { list.add(it) }
-                    }
-                    onComplete(list)
+    // 예약 목록 조회
+    fun fetchReservations(onResult: (List<Reservation>) -> Unit) {
+        db.child("reservations").get()
+            .addOnSuccessListener { snapshot ->
+                val list = mutableListOf<Reservation>()
+                for (child in snapshot.children) {
+                    val r = child.getValue(Reservation::class.java)
+                    if (r != null) list.add(r)
                 }
-                override fun onCancelled(error: DatabaseError) { onError(error.toException()) }
-            })
-    }
-
-    // 예약 상태 업데이트(취소 등)
-    fun updateReservationStatus(resId: String, newStatus: String, callback:(Boolean)->Unit) {
-        db.child("reservations").child(resId).child("status").setValue(newStatus)
-            .addOnSuccessListener { callback(true) }.addOnFailureListener { callback(false) }
+                onResult(list)
+            }
+            .addOnFailureListener {
+                Log.e("FirebaseRepo", "예약 조회 실패: ${it.message}")
+                onResult(emptyList())
+            }
     }
 }
