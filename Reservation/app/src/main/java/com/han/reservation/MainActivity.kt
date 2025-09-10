@@ -40,28 +40,58 @@ class MainActivity : AppCompatActivity() {
 
         // 가이드 보기 클릭
         cardGuide.setOnClickListener {
-            Toast.makeText(this, "가이드 보기 클릭됨!", Toast.LENGTH_SHORT).show()
-        }
-
-        // 예약 관리 클릭
-        cardBooking.setOnClickListener {
-            Toast.makeText(this, "예약 관리 클릭됨!", Toast.LENGTH_SHORT).show()
-        }
-
-        // Firebase Repository 테스트
-        cardFirebase.setOnClickListener {
-            repo.fetchGuides(
-                onComplete = { guides ->
-                    Toast.makeText(this, "가이드 ${guides.size}명 불러옴", Toast.LENGTH_SHORT).show()
-                    for (g in guides) {
-                        Log.d(TAG, "Guide: ${g.id}, ${g.name}, ${g.location}, ${g.price}")
-                    }
-                },
-                onError = { e ->
-                    Toast.makeText(this, "가이드 불러오기 실패: ${e.message}", Toast.LENGTH_SHORT).show()
-                    Log.e(TAG, "fetchGuides error: ${e.message}")
-                }
+            // 더미 가이드 하나 생성
+            val guide = Guide(
+                name = "김가이드",
+                location = "서울",
+                price = 50000
             )
+
+            repo.createGuide(guide) { success, id ->
+                if (success) {
+                    Toast.makeText(this, "가이드 생성 성공! ID=$id", Toast.LENGTH_SHORT).show()
+
+                    // 생성 후 전체 가이드 조회
+                    repo.fetchGuides { list ->
+                        Toast.makeText(this, "가이드 ${list.size}명 있음", Toast.LENGTH_SHORT).show()
+                        for (g in list) {
+                            Log.d(TAG, "가이드: ${g.id}, ${g.name}, ${g.location}, ${g.price}")
+                        }
+                    }
+
+                } else {
+                    Toast.makeText(this, "가이드 생성 실패: $id", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
+
+        // 예약 관리
+        cardBooking.setOnClickListener {
+            // 더미 예약 만들기
+            val reservation = Reservation(
+                guideId = "testGuide01",
+                date = "2025-09-10",
+                time = "14:00"
+            )
+
+            repo.createReservation(reservation) { success, id ->
+                if (success) {
+                    Toast.makeText(this, "예약 생성 성공! ID=$id", Toast.LENGTH_SHORT).show()
+
+                    // 생성 후 전체 예약 조회
+                    repo.fetchReservations { list ->
+                        Toast.makeText(this, "예약 ${list.size}건 있음", Toast.LENGTH_SHORT).show()
+                        for (r in list) {
+                            Log.d(TAG, "예약: ${r.id}, ${r.userName}, ${r.date} ${r.time}")
+                        }
+                    }
+
+                } else {
+                    Toast.makeText(this, "예약 생성 실패: $id", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+
     }
 }
