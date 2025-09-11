@@ -42,9 +42,11 @@ class MainActivity : AppCompatActivity() {
         cardGuide.setOnClickListener {
             // 더미 가이드 하나 생성
             val guide = Guide(
+                id = "g1",
                 name = "김가이드",
                 location = "서울",
-                price = 50000
+                price = 50000,
+                description = "일본 투어 전문 가이드"
             )
 
             repo.createGuide(guide) { success, id ->
