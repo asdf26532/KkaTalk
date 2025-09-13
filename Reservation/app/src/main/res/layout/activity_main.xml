@@ -96,6 +96,35 @@
 
             <!-- card-like item 2 -->
             <LinearLayout
+                android:id="@+id/cardReservation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="horizontal"
+                android:padding="20dp"
+                android:background="@drawable/card_bg"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_calendar"
+                    app:tint="@android:color/white" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="16dp"
+                    android:text="예약"
+                    android:textSize="18sp"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- card-like item 2 -->
+            <LinearLayout
                 android:id="@+id/cardBooking"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
