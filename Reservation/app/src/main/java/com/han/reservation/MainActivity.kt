@@ -8,7 +8,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.datepicker.MaterialDatePicker
 
 class MainActivity : AppCompatActivity() {
 
@@ -72,28 +71,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         // 예약
-        cardReservation.setOnClickListener {
-            val dateRangePicker =
-                MaterialDatePicker.Builder.dateRangePicker()
-                    .setTitleText("예약 날짜를 선택하세요")
-                    .build()
-
-            dateRangePicker.show(supportFragmentManager, "date_range_picker")
-
-            dateRangePicker.addOnPositiveButtonClickListener { selection ->
-                val startDate = selection.first   // 시작 날짜 (UTC millis)
-                val endDate = selection.second    // 끝 날짜 (UTC millis)
-
-                Toast.makeText(this, "선택: $startDate ~ $endDate", Toast.LENGTH_SHORT).show()
-                // 여기서 millis → yyyy-MM-dd 변환해서 DB에 저장하면 됨
-            }
-        }
-
-        // 예약
-        /*cardReservation.setOnClickListener{
+        cardReservation.setOnClickListener{
             val intent = Intent(this, BookingActivity::class.java)
             startActivity(intent)
-        }*/
+        }
 
         // 예약 관리
         cardBooking.setOnClickListener {

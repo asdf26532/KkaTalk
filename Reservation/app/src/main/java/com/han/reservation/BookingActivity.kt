@@ -29,46 +29,9 @@ class BookingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_booking)
 
-        /*calendarView = findViewById(R.id.calendarView)
         btnConfirm = findViewById(R.id.btnConfirmReservation)
 
-        // 날짜 선택 이벤트
-        calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            val cal = Calendar.getInstance()
-            cal.set(year, month, dayOfMonth)
-            val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            selectedDate = format.format(cal.time)
-            Toast.makeText(this, "선택한 날짜: $selectedDate", Toast.LENGTH_SHORT).show()
-        }
-
-        // 예약 버튼 클릭
-        btnConfirm.setOnClickListener {
-            if (selectedDate.isEmpty()) {
-                Toast.makeText(this, "날짜를 먼저 선택하세요!", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val reservation = Reservation(
-                id = UUID.randomUUID().toString(),
-                userId = currentUserId,
-                guideId = guideId,
-                date = selectedDate,
-                status = "pending"
-            )
-
-            repo.createReservation(reservation) { success, idOrError ->
-                if (success) {
-                    Toast.makeText(this, "예약 완료!", Toast.LENGTH_SHORT).show()
-                    finish()
-                } else {
-                    Toast.makeText(this, "예약 실패: $idOrError", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }*/
-        btnConfirm = findViewById(R.id.btnConfirmReservation)
-
-        // 예약 버튼 → 날짜 범위 선택 다이얼로그 띄우기
+        // 예약 버튼
         btnConfirm.setOnClickListener {
             val dateRangePicker =
                 MaterialDatePicker.Builder.dateRangePicker()
