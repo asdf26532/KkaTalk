@@ -78,29 +78,9 @@ class MainActivity : AppCompatActivity() {
 
         // 예약 관리
         cardBooking.setOnClickListener {
-            // 더미 예약 만들기
-            val reservation = Reservation(
-                guideId = "testGuide01",
-                date = "2025-09-10",
-                time = "14:00"
-            )
 
-            repo.createReservation(reservation) { success, id ->
-                if (success) {
-                    Toast.makeText(this, "예약 생성 성공! ID=$id", Toast.LENGTH_SHORT).show()
-
-                    // 생성 후 전체 예약 조회
-                    repo.fetchReservations { list ->
-                        Toast.makeText(this, "예약 ${list.size}건 있음", Toast.LENGTH_SHORT).show()
-                        for (r in list) {
-                            Log.d(TAG, "예약: ${r.id}, ${r.userName}, ${r.date} ${r.time}")
-                        }
-                    }
-
-                } else {
-                    Toast.makeText(this, "예약 생성 실패: $id", Toast.LENGTH_SHORT).show()
-                }
-            }
+            val intent = Intent(this, ListActivity::class.java)
+            startActivity(intent)
         }
 
 
