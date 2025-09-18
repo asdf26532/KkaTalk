@@ -6,8 +6,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class ReservationAdapter(private var reservations: List<Reservation>) :
-    RecyclerView.Adapter<ReservationAdapter.ReservationViewHolder>()  {
+class ReservationAdapter(
+    private var reservations: List<Reservation>,
+    private val onItemClick: (Reservation) -> Unit
+) : RecyclerView.Adapter<ReservationAdapter.ReservationViewHolder>() {
 
         class ReservationViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             val tvDate: TextView = itemView.findViewById(R.id.tvDate)

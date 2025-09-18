@@ -1,42 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical">
+
+<androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/recyclerViewReservations"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    android:padding="12dp"
-    android:foreground="?android:attr/selectableItemBackground"
-    android:clickable="true"
-    android:focusable="true"
-    android:elevation="4dp">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/tvDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="2025-09-12 14:00"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvGuide"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="가이드: 김가이드"
-            android:textSize="14sp"
-            android:paddingTop="4dp" />
-
-        <TextView
-            android:id="@+id/tvStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="상태: 예약중"
-            android:textSize="14sp"
-            android:textColor="@android:color/holo_blue_dark"
-            android:paddingTop="4dp" />
-    </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+    android:layout_height="match_parent"/>
+</LinearLayout>

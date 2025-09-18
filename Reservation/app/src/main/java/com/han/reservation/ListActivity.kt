@@ -1,5 +1,6 @@
 package com.han.reservation
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -23,22 +24,39 @@ class ListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list)
 
-        recyclerView = findViewById(R.id.recyclerViewReservations)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-
-        adapter = ReservationAdapter(emptyList())
-        recyclerView.adapter = adapter
-
-        // 내 예약 목록 가져오기
-        repo.fetchReservations { list ->
-            val myList = list.filter { it.userId == currentUserId }
-            if (myList.isEmpty()) {
-                Toast.makeText(this, "예약이 없습니다.", Toast.LENGTH_SHORT).show()
-            } else {
-                adapter.updateData(myList)
-                Log.d("ReservationList", "내 예약 ${myList.size}건 불러옴")
-            }
+        adapter = ReservationAdapter { reservationId ->
+            val intent = Intent(this, DetailActivity::class.java)
+            intent.putExtra("reservationId", reservationId)
+            startActivity(intent)
         }
+        binding.recyclerView.adapter = adapter
+        binding.recyclerView.layoutManager = LinearLayoutManager(this)
 
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            userId = currentUser.uid
+            loadReservations()
+        }
+    }
+
+    private fun loadReservations() {
+        database.child("reservations")
+            .orderByChild("userId")
+            .equalTo(userId)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val reservations = mutableListOf<Reservation>()
+                    for (child in snapshot.children) {
+                        val reservation = child.getValue(Reservation::class.java)
+                        reservation?.let {
+                            it.reservationId = child.key ?: ""
+                            reservations.add(it)
+                        }
+                    }
+                    adapter.submitList(reservations)
+                }
+
+                override fun onCancelled(error: DatabaseError) {}
+            })
     }
 }
