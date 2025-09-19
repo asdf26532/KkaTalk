@@ -27,10 +27,8 @@ class DetailActivity : AppCompatActivity() {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val reservation = snapshot.getValue(Reservation::class.java)
                     if (reservation != null) {
-                        binding.tvGuideName.text = reservation.guideName
+                        binding.tvGuideName.text = reservation.guideId
                         binding.tvDate.text = reservation.date
-                        binding.tvPeople.text = "${reservation.peopleCount}명"
-                        binding.tvPrice.text = "${reservation.price}원"
                         binding.tvStatus.text = reservation.status
                     }
                 }

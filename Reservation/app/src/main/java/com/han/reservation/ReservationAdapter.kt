@@ -4,36 +4,43 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 
-class ReservationAdapter(
-    private var reservations: List<Reservation>,
-    private val onItemClick: (Reservation) -> Unit
-) : RecyclerView.Adapter<ReservationAdapter.ReservationViewHolder>() {
+class ReservationAdapter(private val onItemClick: (String) -> Unit
+) : ListAdapter<Reservation, ReservationAdapter.ReservationViewHolder>(DiffCallback()) {
 
-        class ReservationViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            val tvDate: TextView = itemView.findViewById(R.id.tvDate)
-            val tvGuide: TextView = itemView.findViewById(R.id.tvGuide)
-            val tvStatus: TextView = itemView.findViewById(R.id.tvStatus)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReservationViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_list, parent, false)
+        return ReservationViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: ReservationViewHolder, position: Int) {
+        holder.bind(getItem(position))
+    }
+
+    inner class ReservationViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val tvGuideName: TextView = itemView.findViewById(R.id.tvGuideName)
+        private val tvDate: TextView = itemView.findViewById(R.id.tvDate)
+        private val tvStatus: TextView = itemView.findViewById(R.id.tvStatus)
+
+        fun bind(reservation: Reservation) {
+            tvGuideName.text = reservation.guideId
+            tvDate.text = reservation.date
+            tvStatus.text = reservation.status
+
+            itemView.setOnClickListener {
+                onItemClick(reservation.id)
+            }
         }
+    }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReservationViewHolder {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_list, parent, false)
-            return ReservationViewHolder(view)
-        }
+    class DiffCallback : DiffUtil.ItemCallback<Reservation>() {
+        override fun areItemsTheSame(oldItem: Reservation, newItem: Reservation) =
+            oldItem.id == newItem.id
 
-        override fun onBindViewHolder(holder: ReservationViewHolder, position: Int) {
-            val reservation = reservations[position]
-            holder.tvDate.text = "${reservation.date} ${reservation.time}"
-            holder.tvGuide.text = "가이드 ID: ${reservation.guideId}"
-            holder.tvStatus.text = "상태: ${reservation.status}"
-        }
-
-        override fun getItemCount(): Int = reservations.size
-
-        fun updateData(newList: List<Reservation>) {
-            reservations = newList
-            notifyDataSetChanged()
-        }
+        override fun areContentsTheSame(oldItem: Reservation, newItem: Reservation) =
+            oldItem == newItem
+    }
 }
