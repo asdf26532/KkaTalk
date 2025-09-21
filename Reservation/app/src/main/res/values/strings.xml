@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Reservation</string>
+    <string-array name="reservation_filter_options">
+        <item>전체</item>
+        <item>예약 요청중</item>
+        <item>예약 확정</item>
+        <item>예약 완료</item>
+        <item>취소됨</item>
+    </string-array>
+
 </resources>

@@ -88,7 +88,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="16dp"
-                    android:text="가이드 보기"
+                    android:text="유저 생성"
                     android:textSize="18sp"
                     android:textColor="@android:color/white"
                     android:textStyle="bold" />

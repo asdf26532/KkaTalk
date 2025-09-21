@@ -18,10 +18,11 @@ class ListActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ReservationAdapter
-    private val repo = FirebaseRepository()
 
     private val database = FirebaseDatabase.getInstance().reference
-    private var userId: String = ""
+
+    // 테스트용 유저
+    private val userId: String = "USER_001"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,13 +37,15 @@ class ListActivity : AppCompatActivity() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        val currentUser = FirebaseAuth.getInstance().currentUser
+        /*val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null) {
             userId = currentUser.uid
             loadReservations()
         } else {
             Toast.makeText(this, "로그인이 필요합니다", Toast.LENGTH_SHORT).show()
-        }
+        }*/
+
+        loadReservations()
     }
 
     private fun loadReservations() {
@@ -55,7 +58,7 @@ class ListActivity : AppCompatActivity() {
                     for (child in snapshot.children) {
                         val reservation = child.getValue(Reservation::class.java)
                         reservation?.let {
-                            it.id = child.key ?: ""   // Reservation 클래스에 id 필드 있어야 함
+                            it.id = child.key ?: ""
                             reservations.add(it)
                         }
                     }
