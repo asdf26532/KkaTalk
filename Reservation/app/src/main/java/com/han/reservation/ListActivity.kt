@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -18,6 +19,7 @@ class ListActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ReservationAdapter
+    private val allReservations = mutableListOf<Reservation>()
 
     private val database = FirebaseDatabase.getInstance().reference
 
@@ -27,6 +29,8 @@ class ListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list)
+
+        val tabLayout = findViewById<TabLayout>(R.id.tabLayoutReservations)
 
         recyclerView = findViewById(R.id.recyclerViewReservations)
         adapter = ReservationAdapter { reservationId ->
@@ -44,6 +48,21 @@ class ListActivity : AppCompatActivity() {
         } else {
             Toast.makeText(this, "로그인이 필요합니다", Toast.LENGTH_SHORT).show()
         }*/
+
+
+        // 탭 추가
+        val tabs = listOf("전체", "예약 요청중", "예약 확정", "예약 완료", "취소됨")
+        tabs.forEach { tabLayout.addTab(tabLayout.newTab().setText(it)) }
+
+        // 탭 선택 시 필터링
+        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab) {
+                val filter = tab.text.toString()
+                filterReservations(filter)
+            }
+            override fun onTabUnselected(tab: TabLayout.Tab) {}
+            override fun onTabReselected(tab: TabLayout.Tab) {}
+        })
 
         loadReservations()
     }
@@ -69,5 +88,14 @@ class ListActivity : AppCompatActivity() {
                     Log.e("ListActivity", "예약 불러오기 실패: ${error.message}")
                 }
             })
+    }
+
+    private fun filterReservations(filter: String) {
+        if (filter == "전체") {
+            adapter.submitList(allReservations.toList())
+        } else {
+            val filtered = allReservations.filter { it.status == filter }
+            adapter.submitList(filtered)
+        }
     }
 }
