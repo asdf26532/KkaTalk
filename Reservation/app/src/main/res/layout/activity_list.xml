@@ -10,8 +10,8 @@
         android:id="@+id/tabLayoutReservations"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:tabIndicatorColor="@color/purple_500"
-        app:tabSelectedTextColor="@color/purple_500"
+        app:tabIndicatorColor="@color/black"
+        app:tabSelectedTextColor="@color/black"
         app:tabTextColor="@android:color/darker_gray"/>
 
     <!-- 예약 리스트 -->
