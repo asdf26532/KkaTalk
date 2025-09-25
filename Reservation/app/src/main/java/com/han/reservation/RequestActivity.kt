@@ -24,8 +24,8 @@ class RequestActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_request)
 
-        recyclerView = findViewById(R.id.recyclerViewGuideRequests)
-        adapter = GuideRequestAdapter(
+        recyclerView = findViewById(R.id.recyclerViewRequests)
+        adapter = RequestAdapter(
             onAccept = { reservationId -> updateReservationStatus(reservationId, "예약 확정") },
             onReject = { reservationId -> updateReservationStatus(reservationId, "예약 거절") }
         )

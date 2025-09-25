@@ -54,17 +54,6 @@
             android:layout_height="wrap_content"
             android:gravity="center_horizontal">
 
-            <!-- welcome -->
-            <TextView
-                android:id="@+id/tvWelcome"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="환영합니다 👋"
-                android:textSize="24sp"
-                android:textColor="@android:color/white"
-                android:textStyle="bold"
-                android:layout_marginBottom="24dp" />
-
             <!-- card-like item 1 -->
             <LinearLayout
                 android:id="@+id/cardGuide"
@@ -117,13 +106,13 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="16dp"
-                    android:text="예약"
+                    android:text="예약 하기"
                     android:textSize="18sp"
                     android:textColor="@android:color/white"
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <!-- card-like item 2 -->
+            <!-- card-like item 3 -->
             <LinearLayout
                 android:id="@+id/cardBooking"
                 android:layout_width="match_parent"
@@ -146,13 +135,42 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="16dp"
-                    android:text="예약 관리"
+                    android:text="예약 관리(유저용)"
                     android:textSize="18sp"
                     android:textColor="@android:color/white"
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <!-- card-like item 3 -->
+            <!-- card-like item 4 -->
+            <LinearLayout
+                android:id="@+id/cardRequest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="horizontal"
+                android:padding="20dp"
+                android:background="@drawable/card_bg"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_calendar"
+                    app:tint="@android:color/white" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="16dp"
+                    android:text="예약 관리(가이드용)"
+                    android:textSize="18sp"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- card-like item 5 -->
             <LinearLayout
                 android:id="@+id/cardFirebase"
                 android:layout_width="match_parent"

@@ -20,10 +20,10 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var btnMenu: ImageButton
     private lateinit var tvTitle: TextView
-    private lateinit var tvWelcome: TextView
     private lateinit var cardGuide: LinearLayout
     private lateinit var cardReservation: LinearLayout
     private lateinit var cardBooking: LinearLayout
+    private lateinit var cardRequest: LinearLayout
     private lateinit var cardFirebase: LinearLayout
 
     private val repo = FirebaseRepository()
@@ -38,11 +38,11 @@ class MainActivity : AppCompatActivity() {
         // 뷰 초기화
         btnMenu = findViewById(R.id.btnMenu)
         tvTitle = findViewById(R.id.tvTitle)
-        tvWelcome = findViewById(R.id.tvWelcome)
         cardGuide = findViewById(R.id.cardGuide)
         cardReservation = findViewById(R.id.cardReservation)
         cardBooking = findViewById(R.id.cardBooking)
         cardFirebase = findViewById(R.id.cardFirebase)
+        cardRequest = findViewById(R.id.cardRequest)
 
         // 메뉴 버튼 (예: 토스트만 출력)
         btnMenu.setOnClickListener {
@@ -120,13 +120,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // 예약 관리
+        // 예약 관리(유저용)
         cardBooking.setOnClickListener {
-
             val intent = Intent(this, ListActivity::class.java)
             startActivity(intent)
         }
 
+        // 예약관리(가이드용)
+        cardRequest.setOnClickListener {
+            val intent = Intent(this, RequestActivity::class.java)
+            startActivity(intent)
+        }
 
     }
 }
