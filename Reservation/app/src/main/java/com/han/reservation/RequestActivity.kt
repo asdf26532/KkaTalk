@@ -47,7 +47,7 @@ class RequestActivity : AppCompatActivity() {
                         val reservation = child.getValue(Reservation::class.java)
                         reservation?.let {
                             it.id = child.key ?: ""
-                            if (it.status == "요청중") requests.add(it)
+                            if (it.status == "예약 요청중") requests.add(it)
                         }
                     }
                     adapter.submitList(requests)

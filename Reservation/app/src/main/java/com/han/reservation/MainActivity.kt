@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
     private val repo = FirebaseRepository()
 
     private val currentUserId = "USER_001" // 로그인한 유저 ID
-    private val guideId = "GUIDE_001" // 더미 가이드 ID
+    private val guideId = "GUIDE_001" // 가이드 ID
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,7 +104,7 @@ class MainActivity : AppCompatActivity() {
                         userId = currentUserId,
                         guideId = guideId,
                         date = "$startDate ~ $endDate",
-                        status = "pending"
+                        status = "예약 요청중"
                     )
 
                     // DB 저장

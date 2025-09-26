@@ -25,13 +25,13 @@ class RequestAdapter(
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val tvUserName: TextView = itemView.findViewById(R.id.tvGuideName)
-        private val tvDate: TextView = itemView.findViewById(R.id.tvDate)
+        private val tvRequesterName: TextView = itemView.findViewById(R.id.tvRequesterName)
+        private val tvDate: TextView = itemView.findViewById(R.id.tvRequestDate)
         private val btnAccept: Button = itemView.findViewById(R.id.btnAccept)
         private val btnReject: Button = itemView.findViewById(R.id.btnReject)
 
         fun bind(reservation: Reservation) {
-            tvUserName.text = reservation.userName
+            tvRequesterName.text = reservation.userId
             tvDate.text = "${reservation.date}"
 
             btnAccept.setOnClickListener { onAccept(reservation.id) }
