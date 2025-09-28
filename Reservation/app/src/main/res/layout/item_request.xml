@@ -41,12 +41,14 @@
 
         <!-- 버튼 영역 -->
         <LinearLayout
+            android:id="@+id/buttonContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="end"
             android:layout_marginTop="8dp">
 
+            <!-- 예약 요청중 -->
             <Button
                 android:id="@+id/btnAccept"
                 android:layout_width="wrap_content"
@@ -63,6 +65,22 @@
                 android:layout_marginStart="8dp"
                 android:backgroundTint="@android:color/holo_red_dark"
                 android:textColor="@android:color/white"/>
+
+            <!-- 예약 확정 -->
+            <Button
+                android:id="@+id/btnDetail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="상세보기"
+                android:visibility="gone"/>
+
+            <!-- 완료된 예약 -->
+            <Button
+                android:id="@+id/btnReview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="후기 남기기"
+                android:visibility="gone"/>
         </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

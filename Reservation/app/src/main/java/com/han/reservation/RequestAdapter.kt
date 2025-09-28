@@ -27,15 +27,46 @@ class RequestAdapter(
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvRequesterName: TextView = itemView.findViewById(R.id.tvRequesterName)
         private val tvDate: TextView = itemView.findViewById(R.id.tvRequestDate)
+
         private val btnAccept: Button = itemView.findViewById(R.id.btnAccept)
         private val btnReject: Button = itemView.findViewById(R.id.btnReject)
+        private val btnDetail: Button = itemView.findViewById(R.id.btnDetail)
+        private val btnReview: Button = itemView.findViewById(R.id.btnReview)
+
 
         fun bind(reservation: Reservation) {
             tvRequesterName.text = reservation.userId
             tvDate.text = "${reservation.date}"
 
-            btnAccept.setOnClickListener { onAccept(reservation.id) }
-            btnReject.setOnClickListener { onReject(reservation.id) }
+            // 초기화
+            btnAccept.visibility = View.GONE
+            btnReject.visibility = View.GONE
+            btnDetail.visibility = View.GONE
+            btnReview.visibility = View.GONE
+
+            when (reservation.status) {
+                RequestActivity.STATUS_PENDING -> {
+                    btnAccept.visibility = View.VISIBLE
+                    btnReject.visibility = View.VISIBLE
+
+                    btnAccept.setOnClickListener { onAccept(reservation.id) }
+                    btnReject.setOnClickListener { onReject(reservation.id) }
+                }
+                RequestActivity.STATUS_CONFIRMED -> {
+                    btnDetail.visibility = View.VISIBLE
+
+                    btnDetail.setOnClickListener {
+                        // 상세보기 이동 처리
+                    }
+                }
+                RequestActivity.STATUS_COMPLETED -> {
+                    btnReview.visibility = View.VISIBLE
+
+                    btnReview.setOnClickListener {
+                        // 후기 남기기 다이얼로그나 화면 연결
+                    }
+                }
+            }
         }
     }
 
