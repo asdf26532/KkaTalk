@@ -75,11 +75,21 @@
                 android:visibility="gone"/>
 
             <!-- 완료된 예약 -->
+
+            <!-- 유저 전용: 후기 작성 -->
             <Button
                 android:id="@+id/btnReview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="후기 남기기"
+                android:visibility="gone"/>
+
+            <!-- 가이드 전용: 후기 보기 -->
+            <Button
+                android:id="@+id/btnViewReviews"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="후기 보기"
                 android:visibility="gone"/>
         </LinearLayout>
     </LinearLayout>
