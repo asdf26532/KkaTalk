@@ -111,7 +111,7 @@ class MainActivity : AppCompatActivity() {
                     repo.createReservation(reservation) { success, idOrError ->
                         if (success) {
                             Toast.makeText(this, "예약 완료!", Toast.LENGTH_SHORT).show()
-                            finish()
+
                         } else {
                             Toast.makeText(this, "예약 실패: $idOrError", Toast.LENGTH_SHORT).show()
                         }

@@ -1,8 +1,10 @@
 package com.han.reservation
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.DiffUtil
@@ -24,15 +26,26 @@ class ReservationAdapter(private val onItemClick: (String) -> Unit
         private val tvGuideName: TextView = itemView.findViewById(R.id.tvGuideName)
         private val tvDate: TextView = itemView.findViewById(R.id.tvDate)
         private val tvStatus: TextView = itemView.findViewById(R.id.tvStatus)
+        private val btnViewReview: Button = itemView.findViewById(R.id.btnViewReview)
 
         fun bind(reservation: Reservation) {
             tvGuideName.text = reservation.guideId
             tvDate.text = reservation.date
             tvStatus.text = reservation.status
 
+            if (reservation.status == "예약 완료") {
+                btnViewReview.visibility = View.VISIBLE
+                btnViewReview.setOnClickListener {
+                    val intent = Intent(itemView.context, ReviewActivity::class.java)
+                    intent.putExtra("reservationId", reservation.id)
+                    itemView.context.startActivity(intent)
+                }
+            }
+
             itemView.setOnClickListener {
                 onItemClick(reservation.id)
             }
+
         }
     }
 

@@ -38,5 +38,12 @@
             android:textSize="14sp"
             android:textColor="@android:color/holo_blue_dark"
             android:paddingTop="4dp" />
+
+        <Button
+            android:id="@+id/btnViewReview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="후기 남기기"
+            android:visibility="gone"/>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

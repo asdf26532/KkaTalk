@@ -51,7 +51,7 @@ class ListActivity : AppCompatActivity() {
 
 
         // 탭 추가
-        val tabs = listOf("전체", "예약 요청중", "예약 확정", "예약 완료", "취소됨")
+        val tabs = listOf("예약 요청중", "예약 확정", "예약 완료")
         tabs.forEach { tabLayout.addTab(tabLayout.newTab().setText(it)) }
 
         // 탭 선택 시 필터링
@@ -81,6 +81,10 @@ class ListActivity : AppCompatActivity() {
                             reservations.add(it)
                         }
                     }
+                    // allReservations 업데이트
+                    allReservations.clear()
+                    allReservations.addAll(reservations)
+
                     adapter.submitList(reservations)
                 }
 

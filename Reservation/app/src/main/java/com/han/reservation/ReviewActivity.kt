@@ -48,7 +48,7 @@ class ReviewActivity : AppCompatActivity() {
                     ratingBar.rating = it.rating.toFloat()
                     tvReviewText.text = it.text
                 } ?: run {
-                    Toast.makeText(this@ReviewViewActivity, "후기 불러오기 실패", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ReviewActivity, "후기 불러오기 실패", Toast.LENGTH_SHORT).show()
                 }
             }
 
