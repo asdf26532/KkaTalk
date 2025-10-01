@@ -30,7 +30,7 @@ class RequestActivity : AppCompatActivity() {
     companion object {
         const val STATUS_PENDING = "예약 요청중"
         const val STATUS_CONFIRMED = "예약 확정"
-        const val STATUS_COMPLETED = "완료된 예약" // DB에 맞춰 사용
+        const val STATUS_COMPLETED = "완료된 예약"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,12 +62,10 @@ class RequestActivity : AppCompatActivity() {
 
         listenRequestsRealtime()
 
-        //loadRequests()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        // 리스너 detach
         dbListener?.let {
             database.child("reservations").removeEventListener(it)
         }

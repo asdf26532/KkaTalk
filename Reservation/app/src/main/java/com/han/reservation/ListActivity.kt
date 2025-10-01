@@ -13,6 +13,8 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class ListActivity : AppCompatActivity() {
 
@@ -25,6 +27,12 @@ class ListActivity : AppCompatActivity() {
 
     // 테스트용 유저
     private val userId: String = "USER_001"
+
+    object ReservationStatus {
+        const val PENDING = "pending"      // 예약 요청중
+        const val CONFIRMED = "confirmed"  // 예약 확정
+        const val COMPLETED = "completed"  // 예약 완료
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,6 +75,23 @@ class ListActivity : AppCompatActivity() {
         loadReservations()
     }
 
+    private fun filterReservations(filter: String) {
+        val targetStatus = when (filter) {
+            "예약 요청중" -> ReservationStatus.PENDING
+            "예약 확정" -> ReservationStatus.CONFIRMED
+            "예약 완료" -> ReservationStatus.COMPLETED
+            else -> null
+        }
+
+        val filtered = if (targetStatus == null) {
+            allReservations.toList()
+        } else {
+            allReservations.filter { it.status == targetStatus }
+        }
+
+        adapter.submitList(filtered)
+    }
+
     private fun loadReservations() {
         database.child("reservations")
             .orderByChild("userId")
@@ -74,32 +99,48 @@ class ListActivity : AppCompatActivity() {
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val reservations = mutableListOf<Reservation>()
+                    val today = System.currentTimeMillis()
+                    val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
                     for (child in snapshot.children) {
                         val reservation = child.getValue(Reservation::class.java)
                         reservation?.let {
                             it.id = child.key ?: ""
+
+                            // 문자열 date → Long 변환
+                            try {
+                                val dateStr = it.date
+                                val endDateStr = if (dateStr.contains("~")) {
+                                    dateStr.split("~")[1].trim() // 끝 날짜
+                                } else {
+                                    dateStr.trim()
+                                }
+
+                                val endDateMillis = format.parse(endDateStr)?.time ?: 0L
+
+                                // 예약완료 처리: 확정 + 날짜 지난 경우
+                                if (it.status == ReservationStatus.CONFIRMED && endDateMillis < today) {
+                                    it.status = ReservationStatus.COMPLETED
+                                    database.child("reservations").child(it.id).child("status")
+                                        .setValue(ReservationStatus.COMPLETED)
+                                }
+                            } catch (e: Exception) {
+                                Log.e("ListActivity", "날짜 파싱 실패: ${e.message}")
+                            }
+
                             reservations.add(it)
                         }
                     }
-                    // allReservations 업데이트
+
                     allReservations.clear()
                     allReservations.addAll(reservations)
 
-                    adapter.submitList(reservations)
+                    adapter.submitList(allReservations.toList())
                 }
 
                 override fun onCancelled(error: DatabaseError) {
                     Log.e("ListActivity", "예약 불러오기 실패: ${error.message}")
                 }
             })
-    }
-
-    private fun filterReservations(filter: String) {
-        if (filter == "전체") {
-            adapter.submitList(allReservations.toList())
-        } else {
-            val filtered = allReservations.filter { it.status == filter }
-            adapter.submitList(filtered)
-        }
     }
 }
