@@ -3,6 +3,7 @@ package com.han.reservation
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -72,6 +73,8 @@ class ListActivity : AppCompatActivity() {
             override fun onTabReselected(tab: TabLayout.Tab) {}
         })
 
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
         loadReservations()
     }
 
@@ -135,7 +138,17 @@ class ListActivity : AppCompatActivity() {
                     allReservations.clear()
                     allReservations.addAll(reservations)
 
-                    adapter.submitList(allReservations.toList())
+                    // 현재 선택된 탭 확인
+                    val tabLayout = findViewById<TabLayout>(R.id.tabLayoutReservations)
+                    val selected = tabLayout.selectedTabPosition
+
+                    if (selected < 0) {
+                        // 앱 첫 진입 시 → 예약 요청중만 보여주기
+                        filterReservations("예약 요청중")
+                    } else {
+                        // 그 외엔 현재 탭 기준으로 필터링
+                        filterReservations(tabLayout.getTabAt(selected)?.text.toString())
+                    }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -143,4 +156,16 @@ class ListActivity : AppCompatActivity() {
                 }
             })
     }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressedDispatcher.onBackPressed()
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
 }

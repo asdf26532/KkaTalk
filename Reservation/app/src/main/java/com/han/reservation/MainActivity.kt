@@ -104,7 +104,7 @@ class MainActivity : AppCompatActivity() {
                         userId = currentUserId,
                         guideId = guideId,
                         date = "$startDate ~ $endDate",
-                        status = "예약 요청중"
+                        status = "pending"
                     )
 
                     // DB 저장

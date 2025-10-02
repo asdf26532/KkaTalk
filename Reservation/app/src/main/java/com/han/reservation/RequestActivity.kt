@@ -2,6 +2,7 @@ package com.han.reservation
 
 import android.os.Bundle
 import android.util.Log
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -28,9 +29,10 @@ class RequestActivity : AppCompatActivity() {
     private var dbListener: ValueEventListener? = null
 
     companion object {
-        const val STATUS_PENDING = "예약 요청중"
-        const val STATUS_CONFIRMED = "예약 확정"
-        const val STATUS_COMPLETED = "완료된 예약"
+        const val STATUS_PENDING = "pending"
+        const val STATUS_CONFIRMED = "confirmed"
+        const val STATUS_COMPLETED = "completed"
+        const val STATUS_REJECTED = "rejected"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,8 +41,8 @@ class RequestActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.recyclerView)
         adapter = RequestAdapter(
-            onAccept = { reservationId -> updateReservationStatus(reservationId, "예약 확정") },
-            onReject = { reservationId -> updateReservationStatus(reservationId, "예약 거절") }
+            onAccept = { reservationId -> updateReservationStatus(reservationId, STATUS_CONFIRMED) },
+            onReject = { reservationId -> updateReservationStatus(reservationId, STATUS_REJECTED) }
         )
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -59,6 +61,8 @@ class RequestActivity : AppCompatActivity() {
             override fun onTabUnselected(tab: TabLayout.Tab) {}
             override fun onTabReselected(tab: TabLayout.Tab) {}
         })
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         listenRequestsRealtime()
 
@@ -86,9 +90,14 @@ class RequestActivity : AppCompatActivity() {
                         }
                     }
                 }
-                // 현재 선택된 탭 기준으로 화면에 보일 목록 갱신
-                val selected = tabLayout.selectedTabPosition.takeIf { it >= 0 } ?: 0
-                applyFilterForTab(selected)
+                val selected = tabLayout.selectedTabPosition
+                if (selected < 0) {
+                    // 앱 첫 진입 시 -> "예약 요청중"만 보여줌
+                    applyFilterForTab(0)
+                } else {
+                    // 그 외엔 현재 탭 기준
+                    applyFilterForTab(selected)
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -151,4 +160,14 @@ class RequestActivity : AppCompatActivity() {
             }
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressedDispatcher.onBackPressed()
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
 }
