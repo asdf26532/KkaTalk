@@ -56,15 +56,23 @@ class RequestAdapter(
                 RequestActivity.STATUS_CONFIRMED -> {
                     btnDetail.visibility = View.VISIBLE
 
+                    // 상세보기
                     btnDetail.setOnClickListener {
-                        // 상세보기 이동 처리
+                        val context = it.context
+                        val intent = Intent(context, DetailActivity::class.java)
+                        intent.putExtra("reservationId", reservation.id)
+                        context.startActivity(intent)
                     }
                 }
                 RequestActivity.STATUS_COMPLETED -> {
                     btnReview.visibility = View.VISIBLE
 
+                    // 후기 
                     btnReview.setOnClickListener {
-                        // 후기 남기기 다이얼로그나 화면 연결
+                        val context = it.context
+                        val intent = Intent(context, ReviewActivity::class.java)
+                        intent.putExtra("reservationId", reservation.id) // 예약 ID 전달
+                        context.startActivity(intent)
                     }
                 }
             }
