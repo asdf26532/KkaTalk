@@ -1,31 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
+    android:padding="16dp"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
+    <!-- 후기 없음 안내 (조회 전용) -->
     <TextView
         android:id="@+id/tvNoReview"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="후기 없음"
+        android:text="아직 후기가 없습니다."
+        android:visibility="gone"
         android:textSize="16sp"
-        android:visibility="gone"/>
+        android:textColor="@android:color/darker_gray"/>
 
+    <!-- 별점 -->
     <RatingBar
         android:id="@+id/ratingBar"
+        style="?android:attr/ratingBarStyleIndicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:numStars="5"
-        android:stepSize="1"
-        android:visibility="gone"/>
+        android:stepSize="1.0"
+        android:visibility="gone" />
 
+    <!-- 후기 텍스트 (조회 전용) -->
     <TextView
         android:id="@+id/tvReviewText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text=""
-        android:layout_marginTop="12dp"
+        android:visibility="gone"
+        android:paddingTop="8dp"
+        android:textSize="16sp" />
+
+    <!-- 작성용 UI -->
+    <RatingBar
+        android:id="@+id/ratingBarInput"
+        style="?android:attr/ratingBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:numStars="5"
+        android:stepSize="1.0"
+        android:visibility="gone"/>
+
+    <EditText
+        android:id="@+id/etReviewInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="후기를 입력하세요"
+        android:visibility="gone"/>
+
+    <Button
+        android:id="@+id/btnSubmitReview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="등록"
         android:visibility="gone"/>
 </LinearLayout>

@@ -39,8 +39,18 @@
             android:textColor="@android:color/holo_blue_dark"
             android:paddingTop="4dp" />
 
+        <!-- 예약 확정 -->
         <Button
-            android:id="@+id/btnViewReview"
+            android:id="@+id/btnDetail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="상세보기"
+            android:visibility="gone"/>
+
+        <!-- 완료된 예약 -->
+        <!-- 유저 전용: 후기 작성 -->
+        <Button
+            android:id="@+id/btnReview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="후기 남기기"

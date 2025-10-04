@@ -1,6 +1,7 @@
 package com.han.reservation
 
 import android.os.Bundle
+import android.view.MenuItem
 import android.widget.RatingBar
 import android.widget.TextView
 import android.widget.Toast
@@ -24,6 +25,8 @@ class ReviewActivity : AppCompatActivity() {
         tvReviewText = findViewById(R.id.tvReviewText)
 
         requestId = intent.getStringExtra("requestId") ?: return
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         loadReview()
     }
@@ -55,4 +58,16 @@ class ReviewActivity : AppCompatActivity() {
             override fun onCancelled(error: DatabaseError) {}
         })
     }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressedDispatcher.onBackPressed()
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
 }

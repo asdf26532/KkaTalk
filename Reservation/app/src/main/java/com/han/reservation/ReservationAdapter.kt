@@ -26,26 +26,44 @@ class ReservationAdapter(private val onItemClick: (String) -> Unit
         private val tvGuideName: TextView = itemView.findViewById(R.id.tvGuideName)
         private val tvDate: TextView = itemView.findViewById(R.id.tvDate)
         private val tvStatus: TextView = itemView.findViewById(R.id.tvStatus)
-        private val btnViewReview: Button = itemView.findViewById(R.id.btnViewReview)
+
+        private val btnDetail: Button = itemView.findViewById(R.id.btnDetail)
+        private val btnReview: Button = itemView.findViewById(R.id.btnReview)
 
         fun bind(reservation: Reservation) {
             tvGuideName.text = reservation.guideId
             tvDate.text = reservation.date
             tvStatus.text = reservation.status
 
-            if (reservation.status == "예약 완료") {
-                btnViewReview.visibility = View.VISIBLE
-                btnViewReview.setOnClickListener {
-                    val intent = Intent(itemView.context, ReviewActivity::class.java)
-                    intent.putExtra("reservationId", reservation.id)
-                    itemView.context.startActivity(intent)
+            // 기본적으로 버튼 숨김
+            btnDetail.visibility = View.GONE
+            btnReview.visibility = View.GONE
+
+            when (reservation.status) {
+                RequestActivity.STATUS_CONFIRMED -> {
+                    btnDetail.visibility = View.VISIBLE
+                    btnDetail.setOnClickListener {
+                        val context = it.context
+                        val intent = Intent(context, DetailActivity::class.java)
+                        intent.putExtra("reservationId", reservation.id)
+                        context.startActivity(intent)
+                    }
+                }
+                RequestActivity.STATUS_COMPLETED -> {
+                    btnReview.visibility = View.VISIBLE
+                    btnReview.setOnClickListener {
+                        val context = it.context
+                        val intent = Intent(context, ReviewActivity::class.java)
+                        intent.putExtra("reservationId", reservation.id)
+                        context.startActivity(intent)
+                    }
                 }
             }
 
+            // 리스트 아이템 전체 클릭 → 기본 상세보기 진입
             itemView.setOnClickListener {
                 onItemClick(reservation.id)
             }
-
         }
     }
 
