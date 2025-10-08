@@ -93,20 +93,32 @@ class ReviewActivity : AppCompatActivity() {
     }
 
     private fun loadReview(canWrite: Boolean) {
+        Log.d("ReviewActivity", "loadReview called, canWrite=$canWrite")
+
         reviewRef.child(reservationId)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
+                    Log.d("ReviewActivity", "review snapshot.exists()=${snapshot.exists()}")
+
                     if (!snapshot.exists()) {
-                        if (canWrite) showWriteReviewUI()
-                        else showEmptyReadonlyUI()
+                        if (canWrite) {
+                            Log.d("ReviewActivity", "No review, user CAN write")
+                            showWriteReviewUI()
+                        } else {
+                            Log.d("ReviewActivity", "No review, read-only mode")
+                            showEmptyReadonlyUI()
+                        }
                         return
                     }
 
                     val review = snapshot.getValue(Review::class.java)
+                    Log.d("ReviewActivity", "Loaded review=$review")
                     review?.let { showReadReviewUI(it, canWrite) }
                 }
 
-                override fun onCancelled(error: DatabaseError) {}
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("ReviewActivity", "loadReview cancelled: ${error.message}")
+                }
             })
     }
 
@@ -121,10 +133,43 @@ class ReviewActivity : AppCompatActivity() {
         btnSubmitReview.visibility = View.GONE
     }
 
-    private fun showWriteReviewUI() {
+    /*private fun showWriteReviewUI() {
         tvNoReview.visibility = View.GONE
         ratingBar.visibility = View.GONE
         tvReviewText.visibility = View.GONE
+
+        ratingBarInput.visibility = View.VISIBLE
+        etReviewInput.visibility = View.VISIBLE
+        btnSubmitReview.visibility = View.VISIBLE
+
+        btnSubmitReview.setOnClickListener {
+            val rating = ratingBarInput.rating.toInt()
+            val text = etReviewInput.text.toString()
+
+            if (rating == 0 || text.isBlank()) {
+                Toast.makeText(this, "별점과 후기를 입력해주세요.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val review = Review(rating, text, currentUserId, System.currentTimeMillis())
+            reviewRef.child(reservationId).setValue(review)
+                .addOnSuccessListener {
+                    Toast.makeText(this, "후기가 등록되었습니다.", Toast.LENGTH_SHORT).show()
+                    showReadReviewUI(review, canWrite = false)
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "등록 실패: ${it.message}", Toast.LENGTH_SHORT).show()
+                }
+        }
+    }*/
+
+    private fun showWriteReviewUI() {
+        Log.d("ReviewActivity", "showWriteReviewUI() called")
+
+        // "후기 작성" 레이아웃만 보여주기
+        findViewById<View>(R.id.layoutWriteReview).visibility = View.VISIBLE
+        findViewById<View>(R.id.layoutReadOnlyReview).visibility = View.GONE
+        tvNoReview.visibility = View.GONE
 
         ratingBarInput.visibility = View.VISIBLE
         etReviewInput.visibility = View.VISIBLE
