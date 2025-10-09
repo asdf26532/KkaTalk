@@ -20,6 +20,8 @@ class ReviewActivity : AppCompatActivity() {
     private lateinit var ratingBarInput: RatingBar
     private lateinit var etReviewInput: EditText
     private lateinit var btnSubmitReview: Button
+    private lateinit var layoutWriteReview: LinearLayout
+    private lateinit var layoutReadOnlyReview: LinearLayout
 
     private var reservationId: String = ""
     private var currentUserId: String = ""
@@ -37,6 +39,8 @@ class ReviewActivity : AppCompatActivity() {
         ratingBarInput = findViewById(R.id.ratingBarInput)
         etReviewInput = findViewById(R.id.etReviewInput)
         btnSubmitReview = findViewById(R.id.btnSubmitReview)
+        layoutWriteReview = findViewById(R.id.layoutWriteReview)
+        layoutReadOnlyReview = findViewById(R.id.layoutReadOnlyReview)
 
        // reservationId = intent.getStringExtra("reservationId") ?: return
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -47,31 +51,10 @@ class ReviewActivity : AppCompatActivity() {
 
         reservationId = intent.getStringExtra("reservationId") ?: "TEST_RESERVATION"
 
-
-        // 테스트용 데이터 삽입
-        insertTestDataIfNeeded()
-
         // 예약 상태 확인
         checkReservationStatus()
     }
 
-    private fun insertTestDataIfNeeded() {
-        reservationRef.child("TEST_RESERVATION")
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if (!snapshot.exists()) {
-                        val testReservation = mapOf(
-                            "userId" to "USER_001",
-                            "guideId" to "GUIDE_001",
-                            "status" to "completed", // 후기 작성 가능 상태
-                            "title" to "테스트 예약"
-                        )
-                        reservationRef.child("TEST_RESERVATION").setValue(testReservation)
-                    }
-                }
-                override fun onCancelled(error: DatabaseError) {}
-            })
-    }
 
     private fun checkReservationStatus() {
         Log.d("ReviewActivity", "checkReservationStatus called, reservationId=$reservationId")
@@ -123,57 +106,33 @@ class ReviewActivity : AppCompatActivity() {
     }
 
     private fun showEmptyReadonlyUI() {
+        Log.d("ReviewActivity", "showEmptyReadonlyUI()")
+
         tvNoReview.visibility = View.VISIBLE
         tvNoReview.text = "아직 후기가 없습니다."
 
-        ratingBar.visibility = View.GONE
-        tvReviewText.visibility = View.GONE
-        ratingBarInput.visibility = View.GONE
-        etReviewInput.visibility = View.GONE
-        btnSubmitReview.visibility = View.GONE
+        layoutReadOnlyReview.visibility = View.GONE
+        layoutWriteReview.visibility = View.GONE
     }
 
-    /*private fun showWriteReviewUI() {
-        tvNoReview.visibility = View.GONE
-        ratingBar.visibility = View.GONE
-        tvReviewText.visibility = View.GONE
 
-        ratingBarInput.visibility = View.VISIBLE
-        etReviewInput.visibility = View.VISIBLE
-        btnSubmitReview.visibility = View.VISIBLE
-
-        btnSubmitReview.setOnClickListener {
-            val rating = ratingBarInput.rating.toInt()
-            val text = etReviewInput.text.toString()
-
-            if (rating == 0 || text.isBlank()) {
-                Toast.makeText(this, "별점과 후기를 입력해주세요.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val review = Review(rating, text, currentUserId, System.currentTimeMillis())
-            reviewRef.child(reservationId).setValue(review)
-                .addOnSuccessListener {
-                    Toast.makeText(this, "후기가 등록되었습니다.", Toast.LENGTH_SHORT).show()
-                    showReadReviewUI(review, canWrite = false)
-                }
-                .addOnFailureListener {
-                    Toast.makeText(this, "등록 실패: ${it.message}", Toast.LENGTH_SHORT).show()
-                }
-        }
-    }*/
-
-    private fun showWriteReviewUI() {
+    private fun showWriteReviewUI(existingReview: Review? = null) {
         Log.d("ReviewActivity", "showWriteReviewUI() called")
 
-        // "후기 작성" 레이아웃만 보여주기
-        findViewById<View>(R.id.layoutWriteReview).visibility = View.VISIBLE
-        findViewById<View>(R.id.layoutReadOnlyReview).visibility = View.GONE
         tvNoReview.visibility = View.GONE
+        layoutReadOnlyReview.visibility = View.GONE
+        layoutWriteReview.visibility = View.VISIBLE
 
-        ratingBarInput.visibility = View.VISIBLE
-        etReviewInput.visibility = View.VISIBLE
-        btnSubmitReview.visibility = View.VISIBLE
+        // 기존 리뷰 수정일 경우
+        if (existingReview != null) {
+            ratingBarInput.rating = existingReview.rating.toFloat()
+            etReviewInput.setText(existingReview.text)
+            btnSubmitReview.text = "후기 수정"
+        } else {
+            ratingBarInput.rating = 0f
+            etReviewInput.text.clear()
+            btnSubmitReview.text = "후기 등록"
+        }
 
         btnSubmitReview.setOnClickListener {
             val rating = ratingBarInput.rating.toInt()
@@ -184,11 +143,11 @@ class ReviewActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val review = Review(rating, text, currentUserId, System.currentTimeMillis())
-            reviewRef.child(reservationId).setValue(review)
+            val newReview = Review(rating, text, currentUserId, System.currentTimeMillis())
+            reviewRef.child(reservationId).setValue(newReview)
                 .addOnSuccessListener {
                     Toast.makeText(this, "후기가 등록되었습니다.", Toast.LENGTH_SHORT).show()
-                    showReadReviewUI(review, canWrite = false)
+                    showReadReviewUI(newReview, canWrite = false) //  읽기 모드 전환
                 }
                 .addOnFailureListener {
                     Toast.makeText(this, "등록 실패: ${it.message}", Toast.LENGTH_SHORT).show()
@@ -197,29 +156,23 @@ class ReviewActivity : AppCompatActivity() {
     }
 
     private fun showReadReviewUI(review: Review, canWrite: Boolean) {
+        Log.d("ReviewActivity", "showReadReviewUI() called")
+
         tvNoReview.visibility = View.GONE
-
-        ratingBar.visibility = View.VISIBLE
-        tvReviewText.visibility = View.VISIBLE
-
-        ratingBarInput.visibility = View.GONE
-        etReviewInput.visibility = View.GONE
-        btnSubmitReview.visibility = View.GONE
+        layoutReadOnlyReview.visibility = View.VISIBLE
+        layoutWriteReview.visibility = View.GONE
 
         ratingBar.rating = review.rating.toFloat()
         tvReviewText.text = review.text
 
-        // 만약 후기를 수정 가능하게 할 경우 (본인 후기)
+
+        // 수정 (작성자만)
         if (canWrite && review.userId == currentUserId) {
+            // 본인 후기일 경우 수정 가능
             btnSubmitReview.visibility = View.VISIBLE
-            btnSubmitReview.text = "수정하기"
+            btnSubmitReview.text = "후기 수정"
             btnSubmitReview.setOnClickListener {
-                ratingBarInput.visibility = View.VISIBLE
-                etReviewInput.visibility = View.VISIBLE
-                ratingBarInput.rating = review.rating.toFloat()
-                etReviewInput.setText(review.text)
-                btnSubmitReview.text = "등록"
-                showWriteReviewUI()
+                showWriteReviewUI(review) // 수정 모드로 전환
             }
         }
     }
