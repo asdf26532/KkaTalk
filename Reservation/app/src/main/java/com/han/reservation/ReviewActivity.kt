@@ -121,7 +121,24 @@ class ReviewActivity : AppCompatActivity() {
 
         tvNoReview.visibility = View.GONE
         layoutReadOnlyReview.visibility = View.GONE
+
         layoutWriteReview.visibility = View.VISIBLE
+        btnSubmitReview.visibility = View.VISIBLE
+        ratingBarInput.visibility = View.VISIBLE
+        etReviewInput.visibility = View.VISIBLE
+
+        try {
+            ratingBarInput.setIsIndicator(false) // ← 안전한 호출
+        } catch (e: Throwable) {
+            ratingBarInput.isClickable = true
+            ratingBarInput.isFocusable = true
+        }
+
+        ratingBarInput.onRatingBarChangeListener = RatingBar.OnRatingBarChangeListener { _, rating, fromUser ->
+            if (fromUser) {
+                Log.d("ReviewActivity", "rating changed by user: $rating")
+            }
+        }
 
         // 기존 리뷰 수정일 경우
         if (existingReview != null) {

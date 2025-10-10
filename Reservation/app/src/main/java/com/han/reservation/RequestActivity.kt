@@ -116,13 +116,7 @@ class RequestActivity : AppCompatActivity() {
             2 -> displayRequests.addAll(allRequests.filter { it.status == STATUS_COMPLETED })
             else -> displayRequests.addAll(allRequests)
         }
-
-        // 어댑터에 리스트 넘김 (ListAdapter면 submitList 사용)
-        // RequestAdapter가 ListAdapter라면 아래처럼 submitList 권장:
         adapter.submitList(displayRequests.toList())
-
-        // 만약 커스텀 update 함수 사용 시:
-        // adapter.updateData(displayRequests)
     }
 
     /*private fun loadRequests() {
