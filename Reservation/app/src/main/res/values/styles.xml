@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="CustomRatingBarTheme" parent="@android:style/Widget.Material.RatingBar.Small">
+        <item name="android:progressDrawable">@drawable/custom_ratingbar</item>
+    </style>
+</resources>
