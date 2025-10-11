@@ -164,7 +164,7 @@ class ReviewActivity : AppCompatActivity() {
             reviewRef.child(reservationId).setValue(newReview)
                 .addOnSuccessListener {
                     Toast.makeText(this, "후기가 등록되었습니다.", Toast.LENGTH_SHORT).show()
-                    showReadReviewUI(newReview, canWrite = false) //  읽기 모드 전환
+                    showReadReviewUI(newReview, canWrite = true) //  읽기 모드 전환
                 }
                 .addOnFailureListener {
                     Toast.makeText(this, "등록 실패: ${it.message}", Toast.LENGTH_SHORT).show()
@@ -185,12 +185,14 @@ class ReviewActivity : AppCompatActivity() {
 
         // 수정 (작성자만)
         if (canWrite && review.userId == currentUserId) {
-            // 본인 후기일 경우 수정 가능
-            btnSubmitReview.visibility = View.VISIBLE
-            btnSubmitReview.text = "후기 수정"
-            btnSubmitReview.setOnClickListener {
+            tvReviewText.setOnClickListener {
+                Toast.makeText(this, "수정 모드로 전환합니다.", Toast.LENGTH_SHORT).show()
                 showWriteReviewUI(review) // 수정 모드로 전환
             }
+            tvReviewText.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_edit, 0)
+            tvReviewText.compoundDrawablePadding = 8
+        } else {
+            tvReviewText.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
         }
     }
 
