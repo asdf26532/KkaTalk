@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -20,6 +21,8 @@ class ReviewActivity : AppCompatActivity() {
     private lateinit var ratingBarInput: RatingBar
     private lateinit var etReviewInput: EditText
     private lateinit var btnSubmitReview: Button
+    private lateinit var btnDeleteReview: Button
+
     private lateinit var layoutWriteReview: LinearLayout
     private lateinit var layoutReadOnlyReview: LinearLayout
 
@@ -41,6 +44,7 @@ class ReviewActivity : AppCompatActivity() {
         btnSubmitReview = findViewById(R.id.btnSubmitReview)
         layoutWriteReview = findViewById(R.id.layoutWriteReview)
         layoutReadOnlyReview = findViewById(R.id.layoutReadOnlyReview)
+        btnDeleteReview = findViewById(R.id.btnDeleteReview)
 
        // reservationId = intent.getStringExtra("reservationId") ?: return
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -183,17 +187,43 @@ class ReviewActivity : AppCompatActivity() {
         tvReviewText.text = review.text
 
 
-        // 수정 (작성자만)
+        // 수정 가능 여부
         if (canWrite && review.userId == currentUserId) {
+            // 수정
             tvReviewText.setOnClickListener {
                 Toast.makeText(this, "수정 모드로 전환합니다.", Toast.LENGTH_SHORT).show()
-                showWriteReviewUI(review) // 수정 모드로 전환
+                showWriteReviewUI(review)
             }
             tvReviewText.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_edit, 0)
             tvReviewText.compoundDrawablePadding = 8
+
+            // 삭제
+            btnDeleteReview.visibility = View.VISIBLE
+            btnDeleteReview.setOnClickListener {
+                AlertDialog.Builder(this)
+                    .setTitle("후기 삭제")
+                    .setMessage("정말로 이 후기를 삭제하시겠습니까?")
+                    .setPositiveButton("삭제") { _, _ ->
+                        deleteReview()
+                    }
+                    .setNegativeButton("취소", null)
+                    .show()
+            }
         } else {
             tvReviewText.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
+            btnDeleteReview.visibility = View.GONE
         }
+    }
+
+    private fun deleteReview() {
+        reviewRef.child(reservationId).removeValue()
+            .addOnSuccessListener {
+                Toast.makeText(this, "후기가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                loadReview(false)
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "삭제 실패: ${it.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
