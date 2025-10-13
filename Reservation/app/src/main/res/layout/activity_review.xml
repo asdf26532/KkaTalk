@@ -1,149 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/reviewScroll"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
     android:background="#FAFAFA"
+    android:padding="16dp"
     tools:context=".ReviewActivity">
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:padding="24dp"
+    <!-- 후기 없음 안내 -->
+    <TextView
+        android:id="@+id/tvNoReview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal">
+        android:text="아직 후기가 없습니다."
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:paddingVertical="20dp"
+        android:visibility="gone" />
 
-        <!-- 후기 없음 안내문 -->
+    <!-- 후기 목록 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerReviews"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="8dp" />
+
+    <!-- 후기 작성 -->
+    <LinearLayout
+        android:id="@+id/layoutWriteReview"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_review_card"
+        android:padding="20dp"
+        android:elevation="6dp"
+        android:layout_marginTop="8dp">
+
         <TextView
-            android:id="@+id/tvNoReview"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="아직 후기가 없습니다."
-            android:textAlignment="center"
+            android:text="별점 주기"
+            android:textStyle="bold"
             android:textColor="@color/black"
             android:textSize="16sp"
-            android:paddingVertical="20dp"
-            android:visibility="gone" />
+            android:layout_marginBottom="6dp" />
 
-        <!-- 이미 등록된 후기 보기 (읽기 모드) -->
-        <LinearLayout
-            android:id="@+id/layoutReadOnlyReview"
-            android:orientation="vertical"
+        <RatingBar
+            android:id="@+id/ratingBarInput"
+            style="?android:attr/ratingBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numStars="5"
+            android:stepSize="1"
+            android:isIndicator="false"
+            android:progressTint="@color/teal_700"
+            android:layout_marginBottom="12dp" />
+
+        <EditText
+            android:id="@+id/etReviewInput"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:hint="후기를 작성해주세요."
+            android:background="@drawable/bg_edittext"
+            android:gravity="top|start"
+            android:padding="14dp"
+            android:textSize="15sp"
+            android:textColor="@color/black"
+            android:inputType="textMultiLine"
+            android:maxLines="5"
+            android:layout_marginBottom="16dp" />
+
+        <Button
+            android:id="@+id/btnSubmitReview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:background="@drawable/bg_review_card"
-            android:padding="20dp"
-            android:layout_margin="16dp"
-            android:elevation="6dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="평점"
-                android:textStyle="bold"
-                android:textColor="@color/black"
-                android:textSize="17sp"
-                android:drawableStart="@drawable/ic_star_filled"
-                android:drawablePadding="6dp" />
-
-            <RatingBar
-                android:id="@+id/ratingBar"
-                style="?android:attr/ratingBarStyleSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:isIndicator="true"
-                android:numStars="5"
-                android:stepSize="1"
-                android:progressTint="@color/teal_700"
-                android:layout_marginTop="6dp"
-                android:layout_marginBottom="12dp" />
-
-            <ImageView
-                android:id="@+id/btnDeleteReview"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_delete"
-                android:contentDescription="후기 삭제"
-                android:visibility="gone"
-                app:tint="@color/red" />
-
-            <TextView
-                android:id="@+id/tvReviewText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="후기 내용"
-                android:textColor="@color/black"
-                android:textSize="15sp"
-                android:lineSpacingExtra="6dp"
-                android:background="@drawable/bg_review_text"
-                android:padding="12dp"
-                android:layout_marginTop="4dp" />
-        </LinearLayout>
-
-        <!-- 후기 작성 -->
-        <LinearLayout
-            android:id="@+id/layoutWriteReview"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:background="@drawable/bg_review_card"
-            android:padding="20dp"
-            android:layout_marginTop="12dp"
-            android:elevation="5dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="별점 주기"
-                android:textStyle="bold"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                android:layout_marginBottom="6dp" />
-
-            <RatingBar
-                android:id="@+id/ratingBarInput"
-                style="?android:attr/ratingBarStyleIndicator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:numStars="5"
-                android:stepSize="1"
-                android:rating="0"
-                android:layout_marginBottom="12dp"
-                android:isIndicator="false"
-                android:progressTint="@color/teal_700"
-                android:theme="@style/CustomRatingBarTheme" />
-
-            <EditText
-                android:id="@+id/etReviewInput"
-                android:layout_width="match_parent"
-                android:layout_height="140dp"
-                android:hint="후기를 작성해주세요."
-                android:background="@drawable/bg_edittext"
-                android:gravity="top|start"
-                android:padding="14dp"
-                android:textSize="15sp"
-                android:textColor="@color/black"
-                android:inputType="textMultiLine"
-                android:maxLines="5"
-                android:layout_marginBottom="16dp" />
-
-            <Button
-                android:id="@+id/btnSubmitReview"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="후기 등록"
-                android:textAllCaps="false"
-                android:textColor="@android:color/white"
-                android:textSize="16sp"
-                android:padding="12dp"
-                android:background="@drawable/bg_submit_button"
-                android:visibility="gone" />
-        </LinearLayout>
-
+            android:text="후기 등록"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:padding="12dp"
+            android:background="@drawable/bg_submit_button" />
     </LinearLayout>
-</ScrollView>
+</LinearLayout>

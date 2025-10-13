@@ -1,38 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_review_card"
+    android:orientation="vertical"
     android:padding="16dp"
-    android:layout_marginBottom="12dp"
-    android:elevation="3dp">
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/bg_review_card"
+    android:elevation="4dp">
 
     <TextView
-        android:id="@+id/tvUser"
+        android:id="@+id/tvReviewerName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="사용자"
+        android:text="작성자"
         android:textStyle="bold"
         android:textColor="@color/black"
         android:textSize="15sp" />
 
     <RatingBar
-        android:id="@+id/ratingBar"
+        android:id="@+id/ratingBarItem"
         style="?android:attr/ratingBarStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:isIndicator="true"
         android:numStars="5"
         android:stepSize="1"
-        android:isIndicator="true"
-        android:layout_marginTop="6dp"
-        android:layout_marginBottom="8dp"/>
+        android:progressTint="@color/teal_700"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="8dp" />
 
     <TextView
-        android:id="@+id/tvReviewText"
+        android:id="@+id/tvReviewTextItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:text="후기 내용"
         android:textColor="@color/black"
-        android:textSize="14sp"
-        android:lineSpacingExtra="4dp"/>
+        android:textSize="15sp"
+        android:lineSpacingExtra="6dp"
+        android:background="@drawable/bg_review_text"
+        android:padding="12dp" />
+
+    <LinearLayout
+        android:id="@+id/layoutReviewActions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:visibility="gone"
+        android:layout_marginTop="8dp">
+
+        <ImageView
+            android:id="@+id/btnEditReview"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_edit"
+            android:contentDescription="후기 수정"
+            app:tint="@color/black"
+            android:layout_marginEnd="8dp" />
+
+        <ImageView
+            android:id="@+id/btnDeleteReview"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_delete"
+            android:contentDescription="후기 삭제"
+            app:tint="@color/red" />
+    </LinearLayout>
 </LinearLayout>
