@@ -3,6 +3,7 @@ package com.han.reservation
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -16,8 +17,6 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.han.reservation.databinding.ActivityLoginBinding
-import com.kakao.sdk.auth.model.OAuthToken
-import com.kakao.sdk.user.UserApiClient
 
 class LoginActivity : AppCompatActivity() {
 
@@ -53,7 +52,7 @@ class LoginActivity : AppCompatActivity() {
             val password = binding.edtPassword.text.toString()
 
             if (email.isEmpty() || password.isEmpty()) {
-                showCustomToast("이메일과 비밀번호를 입력하세요.")
+                Toast.makeText(this, "이메일과 비밀번호를 입력하세요.", Toast.LENGTH_SHORT).show()
             } else {
                 login(email, password)
             }
@@ -87,7 +86,7 @@ class LoginActivity : AppCompatActivity() {
                     checkBanAndProceed(uid) {
                         val intent = Intent(this@LoginActivity, MainActivity::class.java)
                         startActivity(intent)
-                        showCustomToast("로그인 성공")
+                        Toast.makeText("")
                         finish()
                     }
                 } else {
