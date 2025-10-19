@@ -66,6 +66,10 @@ dependencies {
     implementation ("com.kakao.sdk:v2-user:2.20.3")
     implementation ("com.kakao.sdk:v2-all:2.20.3") // 전체 모듈 설치, 2.11.0 버전부터 지원
 
+    // glide
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+
     implementation ("androidx.recyclerview:recyclerview:1.3.0")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
