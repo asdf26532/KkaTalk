@@ -17,9 +17,6 @@ class SignUpActivity : AppCompatActivity() {
     lateinit var mAuth: FirebaseAuth
     private lateinit var mDbRef: DatabaseReference
 
-    // 기본 프로필 이미지 URL
-    private val defaultProfileImageUrl = ""
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySignUpBinding.inflate(layoutInflater)
@@ -48,10 +45,11 @@ class SignUpActivity : AppCompatActivity() {
         mAuth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
+                    val uid = mAuth.currentUser?.uid ?: return@addOnCompleteListener
+                    addUserToDatabase(name, email, uid, nick)
                     Toast.makeText(this, "회원가입 성공", Toast.LENGTH_LONG).show()
-                    val intent: Intent = Intent(this@SignUpActivity, MainActivity::class.java)
-                    startActivity(intent)
-                    addUserToDatabase(name, email, mAuth.currentUser?.uid!!, nick)
+                    startActivity(Intent(this, MainActivity::class.java))
+                    finish()
                 } else {
                     Toast.makeText(this, "회원가입 실패: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }
@@ -60,6 +58,10 @@ class SignUpActivity : AppCompatActivity() {
     }
 
     private fun addUserToDatabase(name:String, email:String, uId: String, nick: String) {
-        mDbRef.child("user").child(uId).setValue(User(name, email, uId, nick, defaultProfileImageUrl,null,"user"))
+        val role = "user"
+        val user = User(name, email, uId, nick, role)
+
+        mDbRef.child("users").child(uId).setValue(user)
+        PrefHelper.saveUserInfo(this, uId, email, name, nick, role)
     }
 }
