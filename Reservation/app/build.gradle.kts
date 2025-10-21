@@ -62,10 +62,6 @@ dependencies {
     implementation ("com.firebaseui:firebase-ui-auth:8.0.0")
     implementation("com.google.firebase:firebase-storage")
 
-    // 카카오 로그인
-    implementation ("com.kakao.sdk:v2-user:2.20.3")
-    implementation ("com.kakao.sdk:v2-all:2.20.3") // 전체 모듈 설치, 2.11.0 버전부터 지원
-
     // glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
