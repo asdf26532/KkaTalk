@@ -9,14 +9,16 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.firebase.auth.FirebaseAuth
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
 
     private val TAG = "MainActivity"
+    private lateinit var auth: FirebaseAuth
+    private lateinit var repo: FirebaseRepository
 
     private lateinit var btnMenu: ImageButton
     private lateinit var tvTitle: TextView
@@ -24,16 +26,27 @@ class MainActivity : AppCompatActivity() {
     private lateinit var cardReservation: LinearLayout
     private lateinit var cardBooking: LinearLayout
     private lateinit var cardRequest: LinearLayout
-    private lateinit var cardFirebase: LinearLayout
 
-    private val repo = FirebaseRepository()
-
-    private val currentUserId = "USER_001" // 로그인한 유저 ID
-    private val guideId = "GUIDE_001" // 가이드 ID
+    private var userId: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        auth = FirebaseAuth.getInstance()
+        repo = FirebaseRepository()
+
+        // 로그인된 사용자 확인
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            userId = currentUser.uid
+            Log.d(TAG, "현재 로그인 유저: $userId")
+        } else {
+            Toast.makeText(this, "로그인 정보가 없습니다. 로그인 화면으로 이동합니다.", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return
+        }
 
         // 뷰 초기화
         btnMenu = findViewById(R.id.btnMenu)
@@ -41,41 +54,17 @@ class MainActivity : AppCompatActivity() {
         cardGuide = findViewById(R.id.cardGuide)
         cardReservation = findViewById(R.id.cardReservation)
         cardBooking = findViewById(R.id.cardBooking)
-        cardFirebase = findViewById(R.id.cardFirebase)
         cardRequest = findViewById(R.id.cardRequest)
 
-        // 메뉴 버튼 (예: 토스트만 출력)
+        // 메뉴 버튼
         btnMenu.setOnClickListener {
             Toast.makeText(this, "메뉴 클릭됨!", Toast.LENGTH_SHORT).show()
         }
 
-        // 가이드 보기 클릭
+        // 가이드 목록 보기
         cardGuide.setOnClickListener {
-            // 더미 가이드 하나 생성
-            val guide = Guide(
-                id = "g1",
-                name = "김가이드",
-                location = "서울",
-                price = 50000,
-                description = "일본 투어 전문 가이드"
-            )
-
-            repo.createGuide(guide) { success, id ->
-                if (success) {
-                    Toast.makeText(this, "가이드 생성 성공! ID=$id", Toast.LENGTH_SHORT).show()
-
-                    // 생성 후 전체 가이드 조회
-                    repo.fetchGuides { list ->
-                        Toast.makeText(this, "가이드 ${list.size}명 있음", Toast.LENGTH_SHORT).show()
-                        for (g in list) {
-                            Log.d(TAG, "가이드: ${g.id}, ${g.name}, ${g.location}, ${g.price}")
-                        }
-                    }
-
-                } else {
-                    Toast.makeText(this, "가이드 생성 실패: $id", Toast.LENGTH_SHORT).show()
-                }
-            }
+            val intent = Intent(this, ListActivity::class.java)
+            startActivity(intent)
         }
 
         // 예약 버튼
@@ -98,39 +87,28 @@ class MainActivity : AppCompatActivity() {
 
                     Toast.makeText(this, "선택: $startDate ~ $endDate", Toast.LENGTH_SHORT).show()
 
-                    // 예약 객체 생성
-                    val reservation = Reservation(
-                        id = UUID.randomUUID().toString(),
-                        userId = currentUserId,
-                        guideId = guideId,
-                        date = "$startDate ~ $endDate",
-                        status = "pending"
-                    )
-
-                    // DB 저장
-                    repo.createReservation(reservation) { success, idOrError ->
-                        if (success) {
-                            Toast.makeText(this, "예약 완료!", Toast.LENGTH_SHORT).show()
-
-                        } else {
-                            Toast.makeText(this, "예약 실패: $idOrError", Toast.LENGTH_SHORT).show()
-                        }
-                    }
+                    // 실제 예약 로직
+                    val intent = Intent(this, DetailActivity::class.java)
+                    intent.putExtra("userId", userId)
+                    intent.putExtra("startDate", startDate)
+                    intent.putExtra("endDate", endDate)
+                    startActivity(intent)
                 }
             }
         }
 
-        // 예약 관리(유저용)
+        // 예약 관리 (유저)
         cardBooking.setOnClickListener {
             val intent = Intent(this, ListActivity::class.java)
+            intent.putExtra("userId", userId)
             startActivity(intent)
         }
 
-        // 예약관리(가이드용)
+        // 예약 요청 관리 (가이드)
         cardRequest.setOnClickListener {
             val intent = Intent(this, RequestActivity::class.java)
+            intent.putExtra("guideId", userId)
             startActivity(intent)
         }
-
     }
 }
