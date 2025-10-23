@@ -25,9 +25,8 @@ class ListActivity : AppCompatActivity() {
     private val allReservations = mutableListOf<Reservation>()
 
     private val database = FirebaseDatabase.getInstance().reference
-
-    // 테스트용 유저
-    private val userId: String = "USER_001"
+    private lateinit var auth: FirebaseAuth
+    private var userId: String = ""
 
     object ReservationStatus {
         const val PENDING = "pending"      // 예약 요청중
@@ -38,6 +37,8 @@ class ListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list)
+
+        auth = FirebaseAuth.getInstance()
 
         val tabLayout = findViewById<TabLayout>(R.id.tabLayoutReservations)
 
@@ -50,13 +51,17 @@ class ListActivity : AppCompatActivity() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        /*val currentUser = FirebaseAuth.getInstance().currentUser
+        // 로그인 확인
+        val currentUser = auth.currentUser
         if (currentUser != null) {
             userId = currentUser.uid
+            Log.d("ListActivity", "현재 로그인된 유저 ID: $userId")
             loadReservations()
         } else {
-            Toast.makeText(this, "로그인이 필요합니다", Toast.LENGTH_SHORT).show()
-        }*/
+            Toast.makeText(this, "로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
 
 
         // 탭 추가

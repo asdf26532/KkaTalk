@@ -58,10 +58,9 @@ class SignUpActivity : AppCompatActivity() {
     }
 
     private fun addUserToDatabase(name:String, email:String, uId: String, nick: String) {
-        val role = "user"
-        val user = User(name, email, uId, nick, role)
+        val user = User(name, email, uId, nick)
 
         mDbRef.child("users").child(uId).setValue(user)
-        PrefHelper.saveUserInfo(this, uId, email, name, nick, role)
+        PrefHelper.saveUserInfo(this, uId, email, name, nick)
     }
 }

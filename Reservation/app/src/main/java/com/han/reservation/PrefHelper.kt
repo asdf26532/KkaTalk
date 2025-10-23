@@ -10,19 +10,17 @@ object PrefHelper {
     private const val KEY_EMAIL = "email"
     private const val KEY_NAME = "name"
     private const val KEY_NICK = "nick"
-    private const val KEY_ROLE = "role"
 
     private fun getPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
     }
 
-    fun saveUserInfo(context: Context, uid: String, email: String, name: String, nick: String, role: String) {
+    fun saveUserInfo(context: Context, uid: String, email: String, name: String, nick: String) {
         val editor = getPrefs(context).edit()
         editor.putString(KEY_UID, uid)
         editor.putString(KEY_EMAIL, email)
         editor.putString(KEY_NAME, name)
         editor.putString(KEY_NICK, nick)
-        editor.putString(KEY_ROLE, role)
         editor.apply()
     }
 
@@ -30,7 +28,6 @@ object PrefHelper {
     fun getEmail(context: Context): String? = getPrefs(context).getString(KEY_EMAIL, null)
     fun getName(context: Context): String? = getPrefs(context).getString(KEY_NAME, null)
     fun getNick(context: Context): String? = getPrefs(context).getString(KEY_NICK, null)
-    fun getRole(context: Context): String? = getPrefs(context).getString(KEY_ROLE, null)
 
     fun clear(context: Context) {
         getPrefs(context).edit().clear().apply()

@@ -10,6 +10,11 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -18,11 +23,11 @@ class MainActivity : AppCompatActivity() {
 
     private val TAG = "MainActivity"
     private lateinit var auth: FirebaseAuth
+    private lateinit var database: DatabaseReference
     private lateinit var repo: FirebaseRepository
 
     private lateinit var btnMenu: ImageButton
     private lateinit var tvTitle: TextView
-    private lateinit var cardGuide: LinearLayout
     private lateinit var cardReservation: LinearLayout
     private lateinit var cardBooking: LinearLayout
     private lateinit var cardRequest: LinearLayout
@@ -34,6 +39,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         auth = FirebaseAuth.getInstance()
+        database = FirebaseDatabase.getInstance().reference
         repo = FirebaseRepository()
 
         // 로그인된 사용자 확인
@@ -51,7 +57,6 @@ class MainActivity : AppCompatActivity() {
         // 뷰 초기화
         btnMenu = findViewById(R.id.btnMenu)
         tvTitle = findViewById(R.id.tvTitle)
-        cardGuide = findViewById(R.id.cardGuide)
         cardReservation = findViewById(R.id.cardReservation)
         cardBooking = findViewById(R.id.cardBooking)
         cardRequest = findViewById(R.id.cardRequest)
@@ -59,12 +64,6 @@ class MainActivity : AppCompatActivity() {
         // 메뉴 버튼
         btnMenu.setOnClickListener {
             Toast.makeText(this, "메뉴 클릭됨!", Toast.LENGTH_SHORT).show()
-        }
-
-        // 가이드 목록 보기
-        cardGuide.setOnClickListener {
-            val intent = Intent(this, ListActivity::class.java)
-            startActivity(intent)
         }
 
         // 예약 버튼
@@ -106,9 +105,32 @@ class MainActivity : AppCompatActivity() {
 
         // 예약 요청 관리 (가이드)
         cardRequest.setOnClickListener {
-            val intent = Intent(this, RequestActivity::class.java)
-            intent.putExtra("guideId", userId)
-            startActivity(intent)
+            val guideRef = database.child("guides").child(userId)
+            guideRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        // 이미 가이드 등록됨 → 가이드 예약 관리
+                        val intent = Intent(this@MainActivity, RequestActivity::class.java)
+                        startActivity(intent)
+                    } else {
+                        // 가이드 등록 안됨 → 등록 화면
+                        val intent = Intent(this@MainActivity, GuideRegisterActivity::class.java)
+                        startActivity(intent)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(this@MainActivity, "오류: ${error.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
         }
+
+        /*buttonLogout.setOnClickListener {
+            auth.signOut()
+            Toast.makeText(this, "로그아웃되었습니다", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+        }*/
+
     }
 }
