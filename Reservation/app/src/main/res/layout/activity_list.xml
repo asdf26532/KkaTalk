@@ -1,23 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:background="@color/white"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    tools:context=".TourListActivity">
 
-    <!-- 상단 탭 -->
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayoutReservations"
+    <!-- 상단 타이틀바 -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/tourListToolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:tabIndicatorColor="@color/black"
-        app:tabSelectedTextColor="@color/black"
-        app:tabTextColor="@android:color/darker_gray"/>
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/teal_700"
+        android:title="전체 투어 목록"
+        android:titleTextColor="@android:color/white" />
 
-    <!-- 예약 리스트 -->
+    <!-- 로딩 중일 때 ProgressBar -->
+    <ProgressBar
+        android:id="@+id/progressBarTours"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:visibility="gone" />
+
+    <!-- 투어 리스트 -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewReservations"
+        android:id="@+id/recyclerTourList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="8dp"/>
+        android:padding="8dp"
+        android:clipToPadding="false" />
+
 </LinearLayout>

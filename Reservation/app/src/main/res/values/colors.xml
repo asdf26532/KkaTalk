@@ -6,4 +6,5 @@
     <color name="red">#FF0000</color>
 
     <color name="teal_700">#00796B</color>
+    <color name="darker_gray">#555555</color>
 </resources>
