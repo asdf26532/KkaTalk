@@ -3,43 +3,48 @@
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="6dp"
+    android:layout_margin="8dp"
     card_view:cardCornerRadius="12dp"
     card_view:cardElevation="3dp">
 
     <LinearLayout
-        android:padding="12dp"
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:orientation="vertical">
 
         <TextView
-            android:id="@+id/textTitle"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/black"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:id="@+id/textDesc"
-            android:textSize="14sp"
-            android:textColor="@color/darker_gray"
-            android:layout_marginTop="4dp"
+            android:id="@+id/textTourTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxLines="2"
-            android:ellipsize="end" />
+            android:text="투어 제목"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/black" />
 
         <TextView
-            android:id="@+id/textPrice"
-            android:text="0원"
-            android:textSize="15sp"
-            android:textColor="@color/teal_700"
-            android:textStyle="bold"
-            android:layout_marginTop="6dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+            android:id="@+id/textTourLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="장소"
+            android:textColor="@color/darker_gray"
+            android:layout_marginTop="4dp" />
 
+        <TextView
+            android:id="@+id/textTourDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="기간"
+            android:textColor="@color/darker_gray"
+            android:layout_marginTop="2dp" />
+
+        <TextView
+            android:id="@+id/textTourPrice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="가격"
+            android:textStyle="bold"
+            android:textColor="@color/teal_700"
+            android:layout_marginTop="6dp" />
+    </LinearLayout>
 </androidx.cardview.widget.CardView>
