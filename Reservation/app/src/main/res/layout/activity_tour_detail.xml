@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="#FAFAFA">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <!-- 제목 -->
+        <TextView
+            android:id="@+id/textTourTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="투어 제목"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
+
+        <!-- 위치 -->
+        <TextView
+            android:id="@+id/textTourLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="위치"
+            android:textSize="18sp"
+            android:paddingBottom="4dp" />
+
+        <!-- 날짜 -->
+        <TextView
+            android:id="@+id/textTourDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="기간"
+            android:textSize="16sp"
+            android:paddingBottom="4dp" />
+
+        <!-- 가격 -->
+        <TextView
+            android:id="@+id/textTourPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="50,000원"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/holo_blue_dark"
+            android:paddingBottom="8dp" />
+
+        <!-- 설명 -->
+        <TextView
+            android:id="@+id/textTourDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="투어 설명 내용 표시."
+            android:textSize="16sp"
+            android:paddingBottom="24dp" />
+
+        <!-- 예약 버튼 -->
+        <Button
+            android:id="@+id/btnReserveTour"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="예약하기"
+            android:backgroundTint="@android:color/holo_blue_light"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:padding="12dp" />
+
+    </LinearLayout>
+</ScrollView>
