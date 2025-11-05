@@ -57,7 +57,59 @@ class TourDetailActivity : AppCompatActivity() {
         }
     }
 
+    private fun loadTourDetail(id: String) {
+        database.child("tours").child(id)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val tour = snapshot.getValue(Tour::class.java)
+                    if (tour != null) {
+                        selectedTour = tour
+                        titleView.text = tour.title
+                        locationView.text = tour.location
+                        dateView.text = tour.date
+                        priceView.text = "${tour.price}원"
+                        descView.text = tour.description
+                    } else {
+                        Toast.makeText(this@TourDetailActivity, "투어 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                }
 
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(this@TourDetailActivity, "불러오기 실패: ${error.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
+    }
+
+    private fun reserveTour() {
+        val currentUser = auth.currentUser
+        val tour = selectedTour
+
+        if (currentUser == null || tour == null) {
+            Toast.makeText(this, "로그인이 필요하거나 투어 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val reservationId = database.child("reservations").push().key ?: return
+
+        val reservation = Reservation(
+            id = reservationId,
+            userId = currentUser.uid,
+            guideId = tour.guideId,
+            date = tour.date,
+            status = "pending",
+            createdAt = System.currentTimeMillis()
+        )
+
+        database.child("reservations").child(reservationId).setValue(reservation)
+            .addOnSuccessListener {
+                Toast.makeText(this, "예약 요청이 완료되었습니다!", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "예약 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
 
 
 }
