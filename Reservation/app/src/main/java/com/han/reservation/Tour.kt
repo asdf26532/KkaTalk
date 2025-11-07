@@ -7,8 +7,7 @@ data class Tour(
     var description: String,
     var price: Int,
     var location: String,
-    var date: String,
-    var imageUrl: String
+    var date: String
 ) {
-    constructor() : this("", "", "", "", 0, "", "", "")
+    constructor() : this("", "", "", "", 0, "", "")
 }
