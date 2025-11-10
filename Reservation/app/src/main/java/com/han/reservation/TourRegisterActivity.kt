@@ -20,6 +20,10 @@ class TourRegisterActivity : AppCompatActivity() {
     private lateinit var etDescription: EditText
     private lateinit var btnRegister: Button
 
+    private var isEditMode = false
+    private var tourId: String? = null
+    private var originalTour: Tour? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tour_register)
@@ -33,9 +37,37 @@ class TourRegisterActivity : AppCompatActivity() {
         etDescription = findViewById(R.id.etDescription)
         btnRegister = findViewById(R.id.btnRegister)
 
-        btnRegister.setOnClickListener {
-            saveTourToFirebase()
+        // 인텐트로 수정모드 여부 확인
+        isEditMode = intent.getBooleanExtra("editMode", false)
+        tourId = intent.getStringExtra("tourId")
+
+        if (isEditMode && tourId != null) {
+            loadTourData(tourId!!)
         }
+
+        btnRegister.setOnClickListener {
+            if (isEditMode) updateTour() else saveTourToFirebase()
+        }
+    }
+
+    private fun loadTourData(tourId: String) {
+        database.child("tours").child(tourId).get()
+            .addOnSuccessListener { snapshot ->
+                val tour = snapshot.getValue(Tour::class.java)
+                if (tour != null) {
+                    originalTour = tour
+                    etTitle.setText(tour.title)
+                    etLocation.setText(tour.location)
+                    etPrice.setText(tour.price.toString())
+                    etDate.setText(tour.date)
+                    etDescription.setText(tour.description)
+                    btnRegister.text = "수정 완료"
+                }
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "투어 정보를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
+                finish()
+            }
     }
 
     private fun saveTourToFirebase() {
@@ -74,6 +106,39 @@ class TourRegisterActivity : AppCompatActivity() {
             }
             .addOnFailureListener { e ->
                 Toast.makeText(this, "등록 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun updateTour() {
+        val currentUser = auth.currentUser
+        val tour = originalTour ?: return
+
+        val updatedTitle = etTitle.text.toString().trim()
+        val updatedLocation = etLocation.text.toString().trim()
+        val updatedPrice = etPrice.text.toString().trim().toIntOrNull() ?: 0
+        val updatedDate = etDate.text.toString().trim()
+        val updatedDescription = etDescription.text.toString().trim()
+
+        if (updatedTitle.isEmpty() || updatedLocation.isEmpty() || updatedDate.isEmpty()) {
+            Toast.makeText(this, "필수 항목을 입력해주세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val updatedTour = tour.copy(
+            title = updatedTitle,
+            location = updatedLocation,
+            price = updatedPrice,
+            date = updatedDate,
+            description = updatedDescription
+        )
+
+        database.child("tours").child(tour.id).setValue(updatedTour)
+            .addOnSuccessListener {
+                Toast.makeText(this, "투어 수정이 완료되었습니다!", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "수정 실패: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 }
