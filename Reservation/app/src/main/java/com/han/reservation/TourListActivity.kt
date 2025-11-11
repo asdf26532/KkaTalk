@@ -28,11 +28,25 @@ class TourListActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerTourList)
         progressBar = findViewById(R.id.progressBarTourList)
 
-        adapter = TourAdapter(emptyList()) { tour ->
-            val intent = Intent(this, TourDetailActivity::class.java)
-            intent.putExtra("tourId", tour.id)
-            startActivity(intent)
-        }
+        adapter = TourAdapter(
+            emptyList(),
+            onItemClick = { tour ->
+                // 상세보기로 이동
+                val intent = Intent(this, TourDetailActivity::class.java)
+                intent.putExtra("tourId", tour.id)
+                startActivity(intent)
+            },
+            onEditClick = { tour ->
+                // ✳ 수정 모드로 이동 ✳
+                val intent = Intent(this, TourRegisterActivity::class.java)
+                intent.putExtra("editMode", true)
+                intent.putExtra("tourId", tour.id)
+                startActivity(intent)
+            },
+            onDeleteClick = { tour ->
+                deleteTour(tour)
+            }
+        )
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
@@ -66,4 +80,16 @@ class TourListActivity : AppCompatActivity() {
                 }
             })
     }
+
+    private fun deleteTour(tour: Tour) {
+        database.child("tours").child(tour.id).removeValue()
+            .addOnSuccessListener {
+                Toast.makeText(this, "투어가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                loadTours() // 새로고침
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "삭제 실패: ${it.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
 }
