@@ -26,20 +26,21 @@ class RequestAdapter(
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val tvRequesterName: TextView = itemView.findViewById(R.id.tvRequesterName)
-        private val tvDate: TextView = itemView.findViewById(R.id.tvRequestDate)
-
+        private val tvTourTitle: TextView = itemView.findViewById(R.id.tvTourTitle)
+        private val tvRequester: TextView = itemView.findViewById(R.id.tvRequester)
+        private val tvDate: TextView = itemView.findViewById(R.id.tvDate)
+        private val tvStatus: TextView = itemView.findViewById(R.id.tvStatus)
         private val btnAccept: Button = itemView.findViewById(R.id.btnAccept)
         private val btnReject: Button = itemView.findViewById(R.id.btnReject)
         private val btnDetail: Button = itemView.findViewById(R.id.btnDetail)
         private val btnReview: Button = itemView.findViewById(R.id.btnReview)
 
-
         fun bind(reservation: Reservation) {
-            tvRequesterName.text = reservation.userId
-            tvDate.text = "${reservation.date}"
+            tvTourTitle.text = reservation.tourTitle ?: "제목 없음"
+            tvRequester.text = "신청자: ${reservation.userName ?: "알 수 없음"}"
+            tvDate.text = "예약일: ${reservation.date ?: "-"}"
+            tvStatus.text = "상태: ${reservation.status}"
 
-            // 초기화
             btnAccept.visibility = View.GONE
             btnReject.visibility = View.GONE
             btnDetail.visibility = View.GONE
@@ -49,14 +50,12 @@ class RequestAdapter(
                 RequestActivity.STATUS_PENDING -> {
                     btnAccept.visibility = View.VISIBLE
                     btnReject.visibility = View.VISIBLE
-
                     btnAccept.setOnClickListener { onAccept(reservation.id) }
                     btnReject.setOnClickListener { onReject(reservation.id) }
                 }
+
                 RequestActivity.STATUS_CONFIRMED -> {
                     btnDetail.visibility = View.VISIBLE
-
-                    // 상세보기
                     btnDetail.setOnClickListener {
                         val context = it.context
                         val intent = Intent(context, DetailActivity::class.java)
@@ -64,26 +63,26 @@ class RequestAdapter(
                         context.startActivity(intent)
                     }
                 }
+
                 RequestActivity.STATUS_COMPLETED -> {
                     btnReview.visibility = View.VISIBLE
-
-                    // 후기 
                     btnReview.setOnClickListener {
                         val context = it.context
                         val intent = Intent(context, ReviewActivity::class.java)
-                        intent.putExtra("reservationId", reservation.id) // 예약 ID 전달
+                        intent.putExtra("reservationId", reservation.id)
                         context.startActivity(intent)
                     }
+                }
+
+                RequestActivity.STATUS_REJECTED -> {
+                    tvStatus.text = "상태: 거절됨"
                 }
             }
         }
     }
 
     class DiffCallback : DiffUtil.ItemCallback<Reservation>() {
-        override fun areItemsTheSame(oldItem: Reservation, newItem: Reservation) =
-            oldItem.id == newItem.id
-
-        override fun areContentsTheSame(oldItem: Reservation, newItem: Reservation) =
-            oldItem == newItem
+        override fun areItemsTheSame(oldItem: Reservation, newItem: Reservation) = oldItem.id == newItem.id
+        override fun areContentsTheSame(oldItem: Reservation, newItem: Reservation) = oldItem == newItem
     }
 }

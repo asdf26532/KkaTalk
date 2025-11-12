@@ -119,28 +119,6 @@ class RequestActivity : AppCompatActivity() {
         adapter.submitList(displayRequests.toList())
     }
 
-    /*private fun loadRequests() {
-        database.child("reservations")
-            .orderByChild("guideId")
-            .equalTo(guideId)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val requests = mutableListOf<Reservation>()
-                    for (child in snapshot.children) {
-                        val reservation = child.getValue(Reservation::class.java)
-                        reservation?.let {
-                            it.id = child.key ?: ""
-                            if (it.status == "예약 요청중") requests.add(it)
-                        }
-                    }
-                    adapter.submitList(requests)
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Log.e("GuideRequestsActivity", "가이드 예약 요청 불러오기 실패: ${error.message}")
-                }
-            })
-    }*/
 
     private fun updateReservationStatus(reservationId: String, status: String) {
         database.child("reservations").child(reservationId).child("status")
