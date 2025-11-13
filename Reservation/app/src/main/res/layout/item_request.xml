@@ -1,87 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    android:padding="12dp"
-    android:elevation="4dp"
-    android:foreground="?attr/selectableItemBackground">
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <!-- 예약자 이름 -->
+        <!-- 투어 제목 -->
         <TextView
-            android:id="@+id/tvRequesterName"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvTourTitle"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="홍길동"
+            android:text="투어 제목"
+            android:textColor="#222222"
+            android:textSize="16sp"
             android:textStyle="bold"
-            android:textSize="16sp"/>
+            android:ellipsize="end"
+            android:maxLines="1" />
 
-        <!-- 예약 날짜 -->
+        <!-- 신청자명 -->
         <TextView
-            android:id="@+id/tvRequestDate"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvRequester"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="2025-09-12"
+            android:text="신청자: 이름"
+            android:textColor="#555555"
             android:textSize="14sp"
-            android:layout_marginTop="4dp"/>
+            android:layout_marginTop="4dp" />
 
-        <!-- 요청 메시지 -->
+        <!-- 예약일 -->
         <TextView
-            android:id="@+id/tvRequestMessage"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvDate"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="가이드를 신청합니다."
+            android:text="예약일: 날짜"
+            android:textColor="#555555"
             android:textSize="14sp"
-            android:layout_marginTop="4dp"/>
+            android:layout_marginTop="2dp" />
+
+        <!-- 상태 -->
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="상태: 예약 요청중"
+            android:textColor="#00796B"
+            android:textSize="14sp"
+            android:layout_marginTop="2dp"
+            android:textStyle="bold" />
 
         <!-- 버튼 영역 -->
         <LinearLayout
-            android:id="@+id/buttonContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="end"
             android:layout_marginTop="8dp">
 
-            <!-- 예약 요청중 -->
             <Button
                 android:id="@+id/btnAccept"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="수락"
-                android:backgroundTint="@android:color/holo_green_dark"
-                android:textColor="@android:color/white"/>
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="#4CAF50"
+                android:textColor="@android:color/white" />
 
             <Button
                 android:id="@+id/btnReject"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="거절"
-                android:layout_marginStart="8dp"
-                android:backgroundTint="@android:color/holo_red_dark"
-                android:textColor="@android:color/white"/>
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="#F44336"
+                android:textColor="@android:color/white" />
 
-            <!-- 예약 확정 -->
             <Button
                 android:id="@+id/btnDetail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="상세보기"
-                android:visibility="gone"/>
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="#2196F3"
+                android:textColor="@android:color/white"
+                android:visibility="gone" />
 
-            <!-- 완료된 예약 -->
-            <!-- 가이드 전용: 후기 보기 -->
             <Button
                 android:id="@+id/btnReview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="후기 보기"
-                android:visibility="gone"/>
+                android:text="후기보기"
+                android:backgroundTint="#9C27B0"
+                android:textColor="@android:color/white"
+                android:visibility="gone" />
         </LinearLayout>
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>
