@@ -29,7 +29,7 @@ class HomeFragment : Fragment() {
 
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var database: DatabaseReference
-    private lateinit var guideAdapter: GuideTourAdapter
+    private lateinit var guideAdapter: GuideAdapter
     private var guideList = mutableListOf<Guide>()
     private var filteredList = mutableListOf<Guide>()
 
