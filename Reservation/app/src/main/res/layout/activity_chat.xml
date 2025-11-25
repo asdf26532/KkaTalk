@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
@@ -7,4 +8,74 @@
     android:layout_height="match_parent"
     tools:context=".ChatActivity">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_chat"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/input_layout"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="5dp">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+
+    <LinearLayout
+        android:id="@+id/input_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:layout_marginBottom="20dp"
+        android:weightSum="100">
+
+        <ImageButton
+            android:id="@+id/btn_attach"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginEnd="3dp"
+            android:padding="6dp"
+            android:src="@drawable/ic_plus"
+            android:scaleType="fitXY"
+            android:background="@drawable/edit_background"/>
+
+        <EditText
+            android:id="@+id/edt_message"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_weight="85"
+            android:background="@drawable/edit_background"
+            android:hint="내용을 입력하세요"
+            android:paddingStart="10dp" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_send"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_weight="15"
+            android:background="@drawable/btn_background"
+            android:text="전송"
+            android:textSize="17sp"
+            android:textColor="@color/white" />
+
+    </LinearLayout>
+
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btn_scroll_to_bottom"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_above="@+id/input_layout"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="16dp"
+        android:layout_marginBottom="16dp"
+        app:maxImageSize="42dp"
+        android:visibility="gone"
+        android:contentDescription="Scroll to bottom"
+        android:src="@drawable/ic_arrow_down"
+        app:tint="#FFFFFF"
+        android:backgroundTint="@color/skyblue"/>
+
+</RelativeLayout>
