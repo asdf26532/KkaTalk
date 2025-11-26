@@ -1,14 +1,19 @@
 package com.han.reservation
 
 import android.app.Activity
+import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
@@ -237,6 +242,45 @@ class ChatActivity : AppCompatActivity() {
                 }
             })
 
+        // FloatingActionButton 바인딩
+        binding.btnScrollToBottom.setOnClickListener {
+            if (messageList.isNotEmpty()) {
+                binding.rvChat.scrollToPosition(messageList.size - 1) // 가장 마지막 메시지로 스크롤
+            }
+        }
+
+        // RecyclerView 스크롤 리스너 추가
+        binding.rvChat.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                // 대화가 없으면 버튼 숨김
+                if (messageList.isEmpty()) {
+                    binding.btnScrollToBottom.hide()
+                    return // 추가 작업 없이 종료
+                }
+
+                // 스크롤 상태에 따라 버튼 표시/숨김
+                val layoutManager = binding.rvChat.layoutManager as LinearLayoutManager
+                val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+
+                if (lastVisibleItemPosition < messageList.size - 1) {
+                    // 마지막 메시지가 화면에 보이지 않으면 버튼 표시
+                    binding.btnScrollToBottom.show()
+                } else {
+                    // 마지막 메시지가 화면에 보이면 버튼 숨김
+                    binding.btnScrollToBottom.hide()
+                }
+            }
+        })
+
+        binding.btnAttach.setOnClickListener {
+            // Intent를 사용해 파일 선택
+            val intent = Intent(Intent.ACTION_GET_CONTENT)
+            intent.type = "*/*" // 모든 파일 타입을 허용
+            startActivityForResult(intent, REQUEST_CODE_SELECT_FILE)
+        }
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -295,39 +339,81 @@ class ChatActivity : AppCompatActivity() {
         const val REQUEST_CODE_SELECT_FILE = 401 // 파일 선택 요청 코드
     }
 
-    private fun setupRecyclerView() {
-        messageAdapter = MessageAdapter(messageList)
-        binding.recyclerViewChat.apply {
-            layoutManager = LinearLayoutManager(this@ChatActivity)
-            adapter = messageAdapter
+    // 메세지 전달 기능
+    private fun shareMessage(message: Message) {
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain" // 텍스트 데이터 유형
+            putExtra(Intent.EXTRA_TEXT, message.message) // Message 객체에서 메시지 내용만 추출
+        }
+        // 공유 가능한 앱 목록 보여주기
+        val chooser = Intent.createChooser(intent, "메시지 전달")
+        startActivity(chooser)
+    }
+
+    private fun updateReactions(messagesRef: DatabaseReference, message: Message, userId: String, reaction: String) {
+        message.timestamp?.toDouble()?.let { timestamp ->
+            messagesRef.orderByChild("timestamp")
+                .equalTo(timestamp)
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        for (messageSnapshot in snapshot.children) {
+                            val currentReactions = (messageSnapshot.child("reactions").value as? HashMap<String, String>)
+                                ?: hashMapOf()
+
+                            // 리액션 추가
+                            currentReactions[userId] = reaction
+
+                            // 업데이트된 리액션을 Firebase에 저장
+                            messageSnapshot.ref.child("reactions").setValue(currentReactions)
+                                .addOnSuccessListener {
+                                    Log.d("updateReactions", "리액션이 성공적으로 추가되었습니다.")
+                                }
+                                .addOnFailureListener { error ->
+                                    Log.e("updateReactions", "리액션 추가 실패: ${error.message}")
+                                }
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        Log.e("updateReactions", "데이터베이스 오류: ${error.message}")
+                    }
+                })
         }
     }
 
-    private fun setupSendButton() {
-        binding.btnSend.setOnClickListener {
-            val msg = binding.editMessage.text.toString().trim()
+    // 보낸 메세지 팝업 옵션
+    fun showOptionsPopup(message: Message) {
+        val dialogView = layoutInflater.inflate(R.layout.message_options, null)
 
-            if (msg.isEmpty()) return@setOnClickListener
+        val btnCopy = dialogView.findViewById<TextView>(R.id.btn_copy)
+        val btnDelete = dialogView.findViewById<TextView>(R.id.btn_delete)
+        val btnCancel = dialogView.findViewById<TextView>(R.id.btn_cancel)
 
-            // 메시지 객체 생성
-            val newMessage = Message(
-                messageId = System.currentTimeMillis().toString(), // 임시 ID
-                senderId = "local_user", // Firebase는 3일차에 붙임
-                content = msg,
-                timestamp = System.currentTimeMillis()
-            )
+        // AlertDialog 생성
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
 
-            // 리스트에 추가
-            messageList.add(newMessage)
+        dialog.show()
 
-            // 화면 갱신
-            messageAdapter.notifyItemInserted(messageList.size - 1)
+        // 복사 버튼 클릭
+        btnCopy.setOnClickListener {
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("Copied Message", message.message)
+            clipboard.setPrimaryClip(clip)
+            showCustomToast("메시지가 복사되었습니다.")
+            dialog.dismiss()
+        }
 
-            // 스크롤 맨 아래로 이동
-            binding.recyclerViewChat.scrollToPosition(messageList.size - 1)
+        // 삭제 버튼 클릭
+        btnDelete.setOnClickListener {
+            showDeletePopup(message) // 기존 삭제 다이얼로그 호출
+            dialog.dismiss()
+        }
 
-            // 입력창 초기화
-            binding.editMessage.setText("")
+        // 취소 버튼 클릭
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
         }
     }
 }
