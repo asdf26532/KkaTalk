@@ -416,4 +416,79 @@ class ChatActivity : AppCompatActivity() {
             dialog.dismiss()
         }
     }
+
+    // 메세지 삭제 팝업
+    private fun showDeletePopup(message: Message) {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("메시지 삭제")
+        builder.setMessage("이 메시지를 삭제하시겠습니까?")
+        builder.setPositiveButton("삭제") { dialog, _ ->
+
+            // 현재 사용자가 메시지를 보낸 사람인지 확인
+            if (message.sendId == FirebaseAuth.getInstance().currentUser?.uid) {
+                deleteMessage(senderRoom, receiverRoom, message)
+            } else {
+                showCustomToast("자신이 보낸 메시지만 삭제할 수 있습니다.")
+            }
+            dialog.dismiss()
+        }
+        builder.setNegativeButton("취소") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        val alertDialog = builder.create()
+        alertDialog.show()
+    }
+
+    // 보낸 메세지 삭제 기능
+    private fun deleteMessage(senderRoom: String, receiverRoom: String, message: Message) {
+        val senderMessagesRef = mDbRef.child("chats").child(senderRoom).child("message")
+        val receiverMessagesRef = mDbRef.child("chats").child(receiverRoom).child("message")
+
+        // Sender Room에서 메시지 삭제
+        message.timestamp?.toDouble()?.let {
+            senderMessagesRef.orderByChild("timestamp")
+                .equalTo(it)
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        for (messageSnapshot in snapshot.children) {
+                            messageSnapshot.ref.child("deleted").setValue(true)
+                                .addOnSuccessListener {
+                                    Log.d("deleteMessageInRooms", "SenderRoom: 메시지가 성공적으로 삭제되었습니다.")
+                                }
+                                .addOnFailureListener { error ->
+                                    Log.e("deleteMessageInRooms", "SenderRoom: 메시지 삭제 실패 - ${error.message}")
+                                }
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        Log.e("deleteMessageInRooms", "SenderRoom: 데이터베이스 오류 - ${error.message}")
+                    }
+                })
+        }
+
+        // Receiver Room에서 메시지 삭제
+        message.timestamp?.toDouble()?.let {
+            receiverMessagesRef.orderByChild("timestamp")
+                .equalTo(it)
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        for (messageSnapshot in snapshot.children) {
+                            messageSnapshot.ref.child("deleted").setValue(true)
+                                .addOnSuccessListener {
+                                    Log.d("deleteMessageInRooms", "ReceiverRoom: 메시지가 성공적으로 삭제되었습니다.")
+                                }
+                                .addOnFailureListener { error ->
+                                    Log.e("deleteMessageInRooms", "ReceiverRoom: 메시지 삭제 실패 - ${error.message}")
+                                }
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        Log.e("deleteMessageInRooms", "ReceiverRoom: 데이터베이스 오류 - ${error.message}")
+                    }
+                })
+        }
+    }
 }
