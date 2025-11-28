@@ -10,6 +10,8 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -339,6 +341,72 @@ class ChatActivity : AppCompatActivity() {
         const val REQUEST_CODE_SELECT_FILE = 401 // 파일 선택 요청 코드
     }
 
+    // 리액션 표시 (받은 메세지만 적용)
+    fun showReactionPopup(message: Message) {
+
+        val reactions = listOf("❤️", "👍", "👎", "😂", "😮", "😢", "✅") // 리액션 목록
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId == null) {
+            showCustomToast("로그인 정보가 없습니다.")
+            return
+        }
+
+        val senderMessagesRef = mDbRef.child("chats").child(senderRoom).child("message")
+        val receiverMessagesRef = mDbRef.child("chats").child(receiverRoom).child("message")
+
+
+        // 팝업을 위한 커스텀 레이아웃 초기화
+        val popupView = layoutInflater.inflate(R.layout.popup_reaction, null)
+        val reactionContainer = popupView.findViewById<LinearLayout>(R.id.reaction_container)
+        val btnCopy = popupView.findViewById<TextView>(R.id.btn_copy) // 복사 버튼
+        val btnForward = popupView.findViewById<TextView>(R.id.btn_forward) // 전달 버튼
+        val btnCancel = popupView.findViewById<TextView>(R.id.btn_cancel) // 취소 버튼
+
+        // AlertDialog로 팝업 표시
+        val dialog = AlertDialog.Builder(this)
+            .setView(popupView)
+            .create()
+        dialog.show()
+
+        // 리액션 이모티콘 동적 추가
+        for (reaction in reactions) {
+            val textView = TextView(this).apply {
+                text = reaction
+                textSize = 24f
+                gravity = Gravity.CENTER
+                setPadding(22, 8, 22, 8)
+                setOnClickListener {
+                    updateReactions(senderMessagesRef, message, userId, reaction)
+                    updateReactions(receiverMessagesRef, message, userId, reaction)
+                    showCustomToast("$reaction 리액션이 추가되었습니다.")
+                    dialog.dismiss()
+                }
+            }
+            reactionContainer.addView(textView)
+        }
+
+        // 복사 버튼 클릭 이벤트
+        btnCopy.setOnClickListener {
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("Copied Message", message.message)
+            clipboard.setPrimaryClip(clip)
+            showCustomToast("메시지가 복사되었습니다.")
+            dialog.dismiss()
+        }
+
+        // 전달 버튼 클릭 이벤트
+        btnForward.setOnClickListener{
+            shareMessage(message)
+            dialog.dismiss()
+        }
+
+        // 취소 버튼 클릭 이벤트
+        btnCancel.setOnClickListener {
+            dialog.dismiss() // 팝업 닫기
+        }
+
+    }
+
     // 메세지 전달 기능
     private fun shareMessage(message: Message) {
         val intent = Intent(Intent.ACTION_SEND).apply {
@@ -491,4 +559,54 @@ class ChatActivity : AppCompatActivity() {
                 })
         }
     }
+
+    // 메세지 읽음 표시
+    private fun markMessagesAsRead(senderRoom: String, receiverRoom: String) {
+        val senderMessagesRef = mDbRef.child("chats").child(senderRoom).child("message")
+        val receiverMessagesRef = mDbRef.child("chats").child(receiverRoom).child("message")
+
+        // Sender Room 업데이트
+        senderMessagesRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (messageSnapshot in snapshot.children) {
+                    val message = messageSnapshot.getValue(Message::class.java)
+                    if (message != null && (message.mread == false) && message.sendId != FirebaseAuth.getInstance().currentUser?.uid) {
+                        // Sender Room 업데이트
+                        if (blockedUserIds.contains(message.sendId)) {
+                            Log.d("markMessagesAsRead", "차단된 사용자의 메시지 읽음 처리 제외: ${message.sendId}")
+                            continue // 차단된 사용자의 메시지는 읽음 처리하지 않음
+                        }
+
+                        // 읽음 처리
+                        if (message.sendId != FirebaseAuth.getInstance().currentUser?.uid) {
+                            messageSnapshot.ref.child("mread").setValue(true)
+                        }
+
+                        // Receiver Room 업데이트
+                        message.timestamp?.let { timestamp ->  // timestamp가 null이 아닌 경우만 실행
+                            receiverMessagesRef.orderByChild("timestamp")
+                                .equalTo(timestamp.toDouble())
+                                .addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(receiverSnapshot: DataSnapshot) {
+                                        for (receiverMessageSnapshot in receiverSnapshot.children) {
+                                            receiverMessageSnapshot.ref.child("mread")
+                                                .setValue(true)
+                                        }
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {
+                                        Log.e("markMessagesAsRead", "Database error: $error")
+                                    }
+                                })
+                        }
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("markMessagesAsRead", "Database error: $error")
+            }
+        })
+    }
+
 }
