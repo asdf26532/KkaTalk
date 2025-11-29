@@ -609,4 +609,97 @@ class ChatActivity : AppCompatActivity() {
         })
     }
 
+    // 차단 기능
+    fun blockUser(blockedUserId: String) {
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+        val blockTime = System.currentTimeMillis()
+
+        if (currentUserId != null) {
+            val userRef = FirebaseDatabase.getInstance().reference
+                .child("user").child(currentUserId).child("blockedUsers").child(blockedUserId)
+
+            val blockData = mapOf("timestamp" to blockTime)
+
+            userRef.setValue(blockData).addOnSuccessListener {
+                showCustomToast("사용자를 차단했습니다.")
+
+                // 차단 성공 시 결과 전달
+                val intent = Intent()
+                intent.putExtra("refreshRequired", true) // 새로고침 필요 플래그
+                setResult(Activity.RESULT_OK, intent)
+
+            }.addOnFailureListener {
+                showCustomToast("차단에 실패했습니다. 다시 시도해주세요.")
+            }
+        } else {
+            showCustomToast("로그인 상태를 확인하세요.")
+        }
+    }
+
+    // 차단 유저 확인
+    private fun checkIfBlocked(blockedUserId: String, callback: (Boolean) -> Unit) {
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        val userRef = FirebaseDatabase.getInstance().reference
+            .child("user").child(currentUserId).child("blockedUsers").child(blockedUserId)
+
+        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val isBlocked = snapshot.exists()  // 데이터가 있으면 차단된 상태
+                callback(isBlocked)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("ChatActivity", "Failed to check block status: ${error.message}")
+                callback(false)
+            }
+        })
+    }
+
+    // 차단 해제 기능
+    private fun unblockUser(blockedUserId: String) {
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        FirebaseDatabase.getInstance().reference
+            .child("user").child(currentUserId).child("blockedUsers").child(blockedUserId)
+            .removeValue()
+            .addOnSuccessListener {
+                showCustomToast("차단을 해제했습니다.")
+                invalidateOptionsMenu() // 메뉴 다시 로드해서 "차단"으로 변경
+            }
+            .addOnFailureListener {
+                showCustomToast("차단 해제 실패")
+            }
+    }
+
+    // 차단된 사용자 목록 가져오기
+    private fun fetchBlockedUsers() {
+        if (senderUid.isNotEmpty()) {
+            val userRef = FirebaseDatabase.getInstance().reference.child("user").child(senderUid)
+                .child("blockedUsers")
+
+            userRef.addValueEventListener(object : ValueEventListener { //
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    blockedUserIds.clear()
+                    blockTimeStamp = Long.MAX_VALUE
+
+                    for (child in snapshot.children) {
+                        val blockedUserId = child.key
+                        val blockTime = child.child("timestamp").getValue(Long::class.java) ?: System.currentTimeMillis()
+
+                        blockedUserId?.let {
+                            blockedUserIds.add(blockedUserId)
+                            blockTimeStamp = minOf(blockTimeStamp, blockTime)
+                        }
+                    }
+                    Log.d("ChatActivity", "Blocked Users: $blockedUserIds")
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("DatabaseError", "Failed to fetch blocked users: $error")
+                }
+            })
+        }
+    }
+
 }
