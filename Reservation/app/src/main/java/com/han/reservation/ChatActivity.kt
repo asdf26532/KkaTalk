@@ -702,4 +702,87 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // 메시지 읽음 상태 업데이트
+        markMessagesAsRead(senderRoom, receiverRoom)
+    }
+
+    private fun openReservation() {
+        val myUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val db = FirebaseDatabase.getInstance().reference
+
+        // 상대방(receiver)이 가이드인지 확인
+        db.child("guide").child(receiverUid).get().addOnSuccessListener { snap ->
+            val (guideId, isGuide) = if (snap.exists()) {
+                // 사용자(읽기 전용)
+                receiverUid to false
+            } else {
+                // 가이드
+                myUid to true
+            }
+
+            val intent = Intent(this, ReservationActivity::class.java).apply {
+                putExtra("guideId", guideId)
+                putExtra("isGuide", isGuide)
+            }
+            startActivity(intent)
+        }
+    }
+
+    // 예약하기(달력)
+    /* private fun showDatePicker() {
+         val calendar = Calendar.getInstance()
+         val year = calendar.get(Calendar.YEAR)
+         val month = calendar.get(Calendar.MONTH)
+         val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+         DatePickerDialog(
+             this,
+             { _, y, m, d ->
+                 val selectedDate = String.format("%04d-%02d-%02d", y, m + 1, d)
+                 val guideId = FirebaseAuth.getInstance().currentUser?.uid ?: return@DatePickerDialog
+
+                 val ref = FirebaseDatabase.getInstance()
+                     .getReference("guide")
+                     .child(guideId)
+                     .child("availableDates")
+
+                 // 중복 방지
+                 ref.child(selectedDate).get().addOnSuccessListener { snapshot ->
+                     if (!snapshot.exists()) {
+                         ref.child(selectedDate).setValue(true)
+                         showCustomToast("예약 가능 날짜 추가됨: $selectedDate")
+                     } else {
+                         showCustomToast("이미 등록된 날짜입니다.")
+                     }
+                 }
+             },
+             year, month, day
+         ).show()
+     }*/
+
+    // 메세지 검색 기능(하이라이트)
+    private fun searchMessage(query: String) {
+        Log.d("SearchDebug", "검색어 입력됨: $query")
+
+        if (query.isBlank()){
+            Log.d("SearchDebug", "검색어가 비어있음 -> 원래 리스트로 복원")
+            restoreOriginalList()
+            return // 검색어가 비어 있으면 리턴
+        }
+
+        messageAdapter.highlightMessages(query)
+
+    }
+
+    // 검색 후 원본 대화 복구
+    private fun restoreOriginalList() {
+        originalList?.let {
+            messageAdapter.updateList(it)
+            originalList = null
+        }
+    }
+
+
 }
