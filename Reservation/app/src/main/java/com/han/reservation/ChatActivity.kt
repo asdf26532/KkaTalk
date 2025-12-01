@@ -11,9 +11,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
@@ -784,5 +787,101 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    // 액션바 버튼 기능 구현
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.chat_menu, menu)
 
+        // 검색 버튼 설정
+        val searchItem = menu?.findItem(R.id.menu_search)
+        val searchView = searchItem?.actionView as? SearchView
+
+        if (searchView != null) {
+            Log.d("SearchDebug", "SearchView 액세스")
+            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    Log.d("SearchDebug", "onQueryTextSubmit 호출 검색어: $query")
+                    query?.let { searchMessage(it) } // 검색 실행
+                    return true
+                }
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    Log.d("SearchDebug", "onQueryTextChange 호출. 현재 입력값: $newText")
+                    newText?.let { searchMessage(it) } // 실시간 검색 실행
+                    return true
+                }
+            })
+
+        } else {
+            Log.d("SearchDebug", "SearchView null")
+        }
+
+        //  검색 닫을 때 원래 리스트 복원
+        searchView?.setOnCloseListener {
+            restoreOriginalList()
+            false
+        }
+
+        // 차단 버튼 관련 처리
+        val blockMenuItem = menu?.findItem(R.id.menu_block_user)
+        if (blockMenuItem != null) {
+            checkIfBlocked(receiverUid) { isBlocked ->
+                blockMenuItem.title = if (isBlocked) "차단 해제" else "차단"
+            }
+        }
+
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    // 버튼(옵션) 선택
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                val intent = Intent()
+                intent.putExtra("chatUpdated", true) // 결과 값으로 '갱신 필요' 플래그 전달
+                setResult(Activity.RESULT_OK, intent)
+                Log.d("ChatActivity", "setResult 호출됨") // 로그 추가
+                finish()
+                true
+            }
+
+            // 예약 버튼
+            R.id.menu_booking -> {
+                openReservation()
+                true
+            }
+
+            // 차단하기/해제 버튼
+            R.id.menu_block_user -> {
+                checkIfBlocked(receiverUid) { isBlocked ->
+                    if (isBlocked) {
+                        // 차단 해제 로직
+                        AlertDialog.Builder(this)
+                            .setTitle("차단 해제")
+                            .setMessage("대화 상대의 차단을 해제하시겠습니까?")
+                            .setPositiveButton("해제") { dialog, _ ->
+                                unblockUser(receiverUid) // 차단 해제 실행
+                                dialog.dismiss()
+                            }
+                            .setNegativeButton("취소") { dialog, _ -> dialog.dismiss() }
+                            .show()
+                    } else {
+                        // 차단 실행
+                        AlertDialog.Builder(this)
+                            .setTitle("사용자 차단")
+                            .setMessage("대화 상대를 차단하시겠습니까?")
+                            .setPositiveButton("차단하기") { dialog, _ ->
+                                blockUser(receiverUid) // 차단 실행
+                                dialog.dismiss()
+                            }
+                            .setNegativeButton("취소") { dialog, _ -> dialog.dismiss() }
+                            .show()
+                    }
+                }
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
+
+    }
 }
