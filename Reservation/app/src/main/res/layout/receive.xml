@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="18dp">
+
+    <!-- 프로필 이미지 -->
+    <ImageView
+        android:id="@+id/iv_profile"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="8dp" />
+
+    <!-- 닉네임 -->
+    <TextView
+        android:id="@+id/tv_nick"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/iv_profile"
+        android:layout_marginStart="8dp"
+        android:text="닉네임 표시" />
+
+    <!-- 메시지 영역: 이미지와 텍스트를 같은 위치에 배치 -->
+    <FrameLayout
+        android:id="@+id/message_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_nick"
+        android:layout_toEndOf="@id/iv_profile"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp">
+
+        <!-- 받은 이미지 -->
+        <ImageView
+            android:id="@+id/iv_receive_image"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:visibility="gone"
+            android:background="@drawable/edit_background"
+            android:padding="10dp"
+            android:scaleType="centerCrop" />
+
+        <!-- 받은 텍스트 -->
+        <TextView
+            android:id="@+id/tv_receive_msg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/edit_background"
+            android:padding="10dp"
+            android:text="받은 메시지"
+            android:textSize="18sp"
+            android:visibility="gone"/>
+    </FrameLayout>
+
+    <!-- 시간 표시 -->
+    <TextView
+        android:id="@+id/tv_receive_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="시간 표시"
+        android:textSize="12sp"
+        android:layout_toEndOf="@id/message_container"
+        android:layout_alignBottom="@id/message_container"
+        android:layout_marginTop="4dp"
+        android:layout_marginLeft="5dp"
+        android:textColor="#888888" />
+
+    <!-- 리액션 -->
+    <TextView
+        android:id="@+id/tv_reactions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/message_container"
+        android:layout_toEndOf="@id/iv_profile"
+        android:layout_marginStart="12dp"
+        android:paddingTop="4dp"
+        android:textColor="#FF5733"
+        android:textSize="14sp" />
+
+
+</RelativeLayout>
