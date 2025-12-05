@@ -63,6 +63,11 @@ dependencies {
     implementation ("com.firebaseui:firebase-ui-auth:8.0.0")
     implementation("com.google.firebase:firebase-storage")
 
+    // 사진 관련
+    implementation ("com.github.chrisbanes:PhotoView:2.3.0")
+    implementation ("com.github.Dhaval2404:ImagePicker:2.1")
+    implementation ("com.tbuonomo:dotsindicator:4.3")
+
     // glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
