@@ -11,11 +11,15 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.BuildConfig
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.R
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.han.reservation.databinding.FragmentSettingBinding
 
@@ -111,5 +115,79 @@ class SettingFragment : Fragment() {
             showDeleteAccountDialog()
         }
 
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    // 현재 사용자 정보 불러오기
+    private fun loadUserData() {
+        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (!isAdded || _binding == null) {
+                    Log.e(TAG, "loadUserData() 호출 시 fragment가 detach 상태이거나 binding이 null입니다.")
+                    return
+                }
+
+                val nick = snapshot.child("nick").getValue(String::class.java) ?: "닉네임 없음"
+                val status = snapshot.child("statusMessage").getValue(String::class.java) ?: "상태메시지 없음"
+                val profileImageUrl = snapshot.child("profileImageUrl").getValue(String::class.java)
+
+                binding.tvCurrentNick.text = "현재 닉네임: $nick"
+                binding.tvCurrentStatus.text = "현재 상태 메시지: $status"
+                binding.progressBar.visibility = View.VISIBLE
+
+                if (!profileImageUrl.isNullOrEmpty()) {
+                    val storageRef = storage.getReferenceFromUrl(profileImageUrl)
+
+                    storageRef.downloadUrl.addOnSuccessListener { uri ->
+                        if (!isAdded || _binding == null) return@addOnSuccessListener
+
+                        Glide.with(this@SettingFragment)
+                            .load(uri)
+                            .placeholder(R.drawable.profile_default)
+                            .into(binding.ivProfile)
+
+                    }.addOnFailureListener {
+                        if (!isAdded || _binding == null) return@addOnFailureListener
+
+                        binding.ivProfile.setImageResource(R.drawable.profile_default)
+                    }.addOnCompleteListener {
+                        if (!isAdded || _binding == null) return@addOnCompleteListener
+
+                        binding.progressBar.visibility = View.GONE
+                    }
+                } else {
+                    binding.ivProfile.setImageResource(R.drawable.profile_default)
+                    binding.progressBar.visibility = View.GONE
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                if (!isAdded || _binding == null) return
+                requireContext().showCustomToast("사용자를 찾을 수 없습니다")
+            }
+        })
+    }
+
+    // 닉네임 변경
+    private fun updateNickname(newNick: String) {
+        if (userId.isNotEmpty()) {
+            userRef.child("nick").setValue(newNick)
+                .addOnSuccessListener {
+                    binding.tvCurrentNick.text = "현재 닉네임: $newNick"
+                    binding.edtNewNick.text.clear()
+                    binding.edtNewNick.visibility = View.GONE
+                    binding.btnSaveNewNick.visibility = View.GONE
+                    requireContext().showCustomToast("닉네임이 변경되었습니다")
+                }
+                .addOnFailureListener {
+                    requireContext().showCustomToast("닉네임 변경에 실패했습니다.")
+                }
         }
     }
+
+
+}
