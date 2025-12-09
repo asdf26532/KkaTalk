@@ -1,5 +1,6 @@
 package com.han.reservation
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -9,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
@@ -78,7 +80,6 @@ class SettingFragment : Fragment() {
         if (userId.isNotEmpty()) {
             loadUserData()
         } else {
-            requireContext().showCustomToast("사용자 정보를 불러올 수 없습니다")
             // 로그인 화면으로 이동
             val intent = Intent(requireContext(), LoginActivity::class.java)
             startActivity(intent)
@@ -136,7 +137,6 @@ class SettingFragment : Fragment() {
                 val profileImageUrl = snapshot.child("profileImageUrl").getValue(String::class.java)
 
                 binding.tvCurrentNick.text = "현재 닉네임: $nick"
-                binding.tvCurrentStatus.text = "현재 상태 메시지: $status"
                 binding.progressBar.visibility = View.VISIBLE
 
                 if (!profileImageUrl.isNullOrEmpty()) {
@@ -186,6 +186,77 @@ class SettingFragment : Fragment() {
                 .addOnFailureListener {
                     requireContext().showCustomToast("닉네임 변경에 실패했습니다.")
                 }
+        }
+    }
+
+    // 통합 로그아웃 처리
+    private fun handleLogout() {
+        // FirebaseAuth 로그아웃
+        auth.signOut()
+
+        // 카카오 로그아웃 시도 (카카오 로그아웃 실패해도 무시)
+        UserApiClient.instance.logout { error ->
+            if (error != null) {
+                Log.w("TestFragment", "카카오 로그아웃 실패: ${error.message}")
+            }
+            // SharedPreferences 초기화 및 로그인 화면 이동
+            prefs.edit().clear().apply()
+            redirectToLogin()
+        }
+    }
+
+    // 로그아웃 후처리
+    private fun redirectToLogin() {
+        val intent = Intent(requireActivity(), LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        activity?.finish()
+    }
+
+    // 탈퇴 확인
+    private fun showDeleteAccountDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("회원 탈퇴")
+            .setMessage("정말 탈퇴하시겠습니까? 모든 정보가 삭제됩니다.")
+            .setPositiveButton("탈퇴") { _, _ ->
+                deleteAccount()
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
+
+    // 계정 삭제
+    private fun deleteAccount() {
+        if (userId.isNotEmpty()) {
+
+            // 1. DB에서 유저 데이터 삭제
+            userRef.removeValue()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        // 2. auth계정 삭제 (자체 회원가입 유저인 경우만)
+                        val currentUser = FirebaseAuth.getInstance().currentUser
+                        if (currentUser != null) {
+                            currentUser.delete()
+                                .addOnCompleteListener { authTask ->
+                                    if (authTask.isSuccessful) {
+                                        Toast.makeText(requireContext(), "회원 탈퇴가 완료되었습니다.", Toast.LENGTH_SHORT).show()
+                                        FirebaseAuth.getInstance().signOut()
+                                        redirectToLogin()
+                                    } else {
+                                        Toast.makeText(requireContext(), "계정 삭제 실패: ${authTask.exception?.message}.", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                        } else {
+                            // SNS 로그인 사용자: DB만 삭제됨
+                            Toast.makeText(requireContext(), "회원 데이터 삭제 완료되었습니다. (SNS 로그인 계정)", Toast.LENGTH_SHORT).show()
+                            redirectToLogin()
+                        }
+                    } else {
+                        Toast.makeText(requireContext(), "데이터베이스 삭제 실패", Toast.LENGTH_SHORT).show()
+                    }
+                }
+        } else {
+            Toast.makeText(requireContext(), "로그인된 사용자 정보가 없습니다.", Toast.LENGTH_SHORT).show()
         }
     }
 
