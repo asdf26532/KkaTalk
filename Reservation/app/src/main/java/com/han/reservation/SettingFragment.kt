@@ -105,6 +105,20 @@ class SettingFragment : Fragment() {
             }
         }
 
+        // 상태 메시지 변경
+        binding.btnChangeStatus.setOnClickListener {
+            binding.edtNewStatus.visibility = View.VISIBLE
+            binding.btnSaveNewStatus.visibility = View.VISIBLE
+        }
+
+        // 상태 메시지 저장
+        binding.btnSaveNewStatus.setOnClickListener {
+            val newStatus = binding.edtNewStatus.text.toString().trim()
+            if (newStatus.isNotEmpty()) {
+                updateStatusMessage(newStatus)
+            }
+        }
+
         // 다크모드
         switchDarkMode = view.findViewById(R.id.switch_dark_mode)
 
@@ -175,7 +189,7 @@ class SettingFragment : Fragment() {
 
             override fun onCancelled(error: DatabaseError) {
                 if (!isAdded || _binding == null) return
-                requireContext().showCustomToast("사용자를 찾을 수 없습니다")
+                Toast.makeText(requireContext(), "사용자를 찾을 수 없습니다", Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -189,12 +203,25 @@ class SettingFragment : Fragment() {
                     binding.edtNewNick.text.clear()
                     binding.edtNewNick.visibility = View.GONE
                     binding.btnSaveNewNick.visibility = View.GONE
-                    requireContext().showCustomToast("닉네임이 변경되었습니다")
+                    Toast.makeText(requireContext(), "닉네임이 변경되었습니다", Toast.LENGTH_SHORT).show()
                 }
                 .addOnFailureListener {
-                    requireContext().showCustomToast("닉네임 변경에 실패했습니다.")
+                    Toast.makeText(requireContext(), "닉네임 변경에 실패했습니다.", Toast.LENGTH_SHORT).show()
                 }
         }
+    }
+
+    // 상태 메시지 업데이트
+    private fun updateStatusMessage(newStatus: String) {
+        if (userId.isNotEmpty()) {
+            userRef.child("statusMessage").setValue(newStatus)
+                .addOnSuccessListener {
+                    binding.tvCurrentStatus.text = "현재 상태 메시지: $newStatus"
+                    binding.edtNewStatus.visibility = View.GONE
+                    binding.btnSaveNewStatus.visibility = View.GONE
+                }
+        }
+        Toast.makeText(requireContext(), "상태 메시지가 변경되었습니다.", Toast.LENGTH_SHORT).show()
     }
 
     // 통합 로그아웃 처리
