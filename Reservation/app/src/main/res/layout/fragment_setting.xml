@@ -106,6 +106,22 @@
             android:layout_gravity="center"/>
 
         <Button
+            android:id="@+id/btn_notice_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="공지사항"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="center" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_dark_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="다크 모드"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"/>
+
+        <Button
             android:id="@+id/btnManageBlockedUsers"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -129,6 +145,14 @@
             android:layout_gravity="center"
             android:layout_marginTop="16dp" />
 
+        <Button
+            android:id="@+id/btn_admin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="관리자 페이지"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"/>
 
     </LinearLayout>
 
