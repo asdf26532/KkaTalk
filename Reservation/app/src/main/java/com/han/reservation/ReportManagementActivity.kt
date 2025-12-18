@@ -1,11 +1,7 @@
 package com.han.reservation
 
-import android.app.Activity
-import android.app.AlertDialog
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -53,7 +49,7 @@ class ReportManagementActivity : AppCompatActivity() {
             }
             adapter.notifyDataSetChanged()
         }.addOnFailureListener {
-            showCustomToast("신고 불러오기 실패: ${it.message}")
+            Toast.makeText(this, "신고 불러오기 실패", Toast.LENGTH_SHORT).show()
         }
     }
 
