@@ -133,6 +133,11 @@ class SettingFragment : Fragment() {
             startActivity(intent)
         }
 
+        binding.btnLab.setOnClickListener {
+            val intent = Intent(requireContext(), LabActivity::class.java)
+            startActivity(intent)
+        }
+
         // 로그아웃
         binding.btnLogout.setOnClickListener {
             handleLogout()
