@@ -18,7 +18,9 @@ class LabActivity : AppCompatActivity() {
 
         prefs = getSharedPreferences("lab_prefs", MODE_PRIVATE)
 
-        applyQuickReserveExperiment()
+       // applyQuickReserveExperiment()
+
+        setupRecyclerView()
     }
 
     /*private fun initQuickReserveExperiment() {
@@ -61,6 +63,14 @@ class LabActivity : AppCompatActivity() {
         prefs.edit()
             .putBoolean("lab_quick_reserve_used", true)
             .apply()
+    }
+
+    private fun setupRecyclerView() {
+        adapter = LabAdapter(
+            experiments = LabExperiments.experiments,
+            prefs = prefs
+        )
+        binding.recyclerLab.adapter = adapter
     }
 
 
