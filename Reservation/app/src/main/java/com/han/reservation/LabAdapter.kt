@@ -1,5 +1,6 @@
 package com.han.reservation
 
+import android.content.Intent
 import android.content.SharedPreferences
 import android.view.LayoutInflater
 import android.view.View
@@ -58,7 +59,17 @@ class LabAdapter(
                 .putBoolean("${experiment.key}_used", false)
                 .apply()
         }
+
+        holder.binding.root.setOnClickListener {
+            val context = holder.itemView.context
+            val intent = Intent(context, LabDetailActivity::class.java)
+            intent.putExtra("experiment_key", experiment.key)
+            context.startActivity(intent)
+        }
+
     }
 
     override fun getItemCount() = experiments.size
+
+
 }
