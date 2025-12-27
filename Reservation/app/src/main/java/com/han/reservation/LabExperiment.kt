@@ -1,10 +1,11 @@
 package com.han.reservation
 
 data class LabExperiment(
-    val key: String,
-    val title: String,
-    val description: String,
-    val badge: ExperimentBadge = ExperimentBadge.NONE
+    var key: String = "",
+    var title: String = "",
+    var description: String = "",
+    var badge: ExperimentBadge = ExperimentBadge.NONE,
+    var phase: ExperimentPhase = ExperimentPhase.EXPERIMENT
 )
 
 enum class ExperimentBadge {

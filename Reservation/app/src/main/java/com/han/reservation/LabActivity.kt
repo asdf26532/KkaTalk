@@ -2,6 +2,7 @@ package com.han.reservation
 
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.han.reservation.databinding.ActivityLabBinding
 
@@ -21,6 +22,14 @@ class LabActivity : AppCompatActivity() {
        // applyQuickReserveExperiment()
 
         setupRecyclerView()
+
+        LabExperimentRunner.runIfEnabled(
+            context = this,
+            experimentKey = LabKeys.QUICK_RESERVE
+        ) {
+            initQuickReserveExperiment()
+        }
+
     }
 
     /*private fun initQuickReserveExperiment() {
@@ -73,5 +82,8 @@ class LabActivity : AppCompatActivity() {
         binding.recyclerLab.adapter = adapter
     }
 
+    private fun initQuickReserveExperiment() {
+        Toast.makeText(this, "⚡ 빠른 예약 실험 실행됨", Toast.LENGTH_SHORT).show()
+    }
 
 }
