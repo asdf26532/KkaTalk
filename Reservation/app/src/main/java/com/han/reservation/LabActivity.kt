@@ -23,55 +23,15 @@ class LabActivity : AppCompatActivity() {
 
         setupRecyclerView()
 
-        LabExperimentRunner.runIfEnabled(
-            context = this,
-            experimentKey = LabKeys.QUICK_RESERVE
-        ) {
+        val experiment = LabExperiments.find(LabKeys.QUICK_RESERVE)
+
+        LabExperimentRunner.runSafely(this, experiment) {
             initQuickReserveExperiment()
         }
-
     }
 
-    /*private fun initQuickReserveExperiment() {
-        // 저장된 실험 플래그 불러오기
-        val isEnabled = prefs.getBoolean("lab_quick_reserve", false)
-
-        binding.switchQuickReserve.isChecked = isEnabled
-
-        binding.switchQuickReserve.setOnCheckedChangeListener { _, checked ->
-            prefs.edit()
-                .putBoolean("lab_quick_reserve", checked)
-                .apply()
-        }
-    }*/
-
-    private fun applyQuickReserveExperiment() {
-        val isEnabled = prefs.getBoolean("lab_quick_reserve", false)
-        val isUsed = prefs.getBoolean("lab_quick_reserve_used", false)
-
-        // 실험 OFF → 아무 영향 없음
-        if (!isEnabled) return
-
-        // 이미 한 번 적용됨
-        if (isUsed) return
-
-        // 사용자가 이미 입력한 경우
-        if (binding.etMessage.text.isNotEmpty()) {
-            markExperimentUsed()
-            return
-        }
-
-        // 실험 효과 적용
-        binding.etMessage.setText("안녕하세요! 예약 문의드립니다 🙂")
-        binding.tvLabHint.visibility = View.VISIBLE
-
-        markExperimentUsed()
-    }
-
-    private fun markExperimentUsed() {
-        prefs.edit()
-            .putBoolean("lab_quick_reserve_used", true)
-            .apply()
+    private fun initQuickReserveExperiment() {
+        throw IllegalStateException("실험 실패 시뮬레이션")
     }
 
     private fun setupRecyclerView() {
@@ -80,10 +40,6 @@ class LabActivity : AppCompatActivity() {
             prefs = prefs
         )
         binding.recyclerLab.adapter = adapter
-    }
-
-    private fun initQuickReserveExperiment() {
-        Toast.makeText(this, "⚡ 빠른 예약 실험 실행됨", Toast.LENGTH_SHORT).show()
     }
 
 }
