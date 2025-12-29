@@ -22,6 +22,9 @@ class LabDetailActivity : AppCompatActivity() {
         val key = intent.getStringExtra("experiment_key") ?: return
         experiment = LabExperiments.experiments.first { it.key == key }
 
+        val count = LabExperimentHistory.getCount(this, experiment.key)
+        binding.tvMeta.text = "실행 횟수: ${count}회"
+
         bindExperiment()
         initSwitch()
     }

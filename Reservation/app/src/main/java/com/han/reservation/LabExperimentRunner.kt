@@ -19,6 +19,9 @@ object LabExperimentRunner {
         try {
             action.invoke()
 
+            // 실행 기록
+            LabExperimentHistory.record(context, experiment.key)
+
             // 정상 실행 → 사용 처리
             markUsed(context, experiment)
 
