@@ -9,6 +9,29 @@ object LabExperimentRunner {
 
     private const val PREFS_NAME = "lab_prefs"
 
+    fun runAB(
+        context: Context,
+        experiment: LabExperiment,
+        onA: () -> Unit,
+        onB: () -> Unit
+    ) {
+        if (!shouldRun(context, experiment)) return
+
+        try {
+            when (ExperimentGroupManager.getGroup(context, experiment.key)) {
+                ExperimentGroup.A -> onA()
+                ExperimentGroup.B -> onB()
+            }
+
+            LabExperimentHistory.record(context, experiment.key)
+            markUsed(context, experiment)
+
+        } catch (e: Exception) {
+            disableExperiment(context, experiment)
+            showFailToast(context)
+        }
+    }
+
     fun runSafely(
         context: Context,
         experiment: LabExperiment,

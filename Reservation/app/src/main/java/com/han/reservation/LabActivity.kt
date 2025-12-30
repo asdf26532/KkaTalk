@@ -51,6 +51,19 @@ class LabActivity : AppCompatActivity() {
         LabExperimentRunner.runSafely(this, experiment) {
             initQuickReserveExperiment()
         }
+
+        LabExperimentRunner.runAB(
+            context = this,
+            experiment = experiment,
+            onA = {
+                // 기존 방식
+                initNormalReserve()
+            },
+            onB = {
+                // 새로운 실험 방식
+                initQuickReserveExperiment()
+            }
+        )
     }
 
     private fun initQuickReserveExperiment() {

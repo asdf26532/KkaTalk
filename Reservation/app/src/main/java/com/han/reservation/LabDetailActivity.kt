@@ -25,6 +25,9 @@ class LabDetailActivity : AppCompatActivity() {
         val count = LabExperimentHistory.getCount(this, experiment.key)
         binding.tvMeta.text = "실행 횟수: ${count}회"
 
+        val group = ExperimentGroupManager.getGroup(this, experiment.key)
+        binding.tvMeta2.text = "실험 그룹: ${group.name}"
+
         bindExperiment()
         initSwitch()
     }
