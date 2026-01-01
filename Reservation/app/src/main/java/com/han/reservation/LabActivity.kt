@@ -1,5 +1,6 @@
 package com.han.reservation
 
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.Toast
@@ -64,6 +65,13 @@ class LabActivity : AppCompatActivity() {
                 initQuickReserveExperiment()
             }
         )
+
+        binding.btnDashboard.setOnClickListener {
+            startActivity(
+                Intent(this, LabDashboardActivity::class.java)
+            )
+        }
+
     }
 
     private fun initQuickReserveExperiment() {

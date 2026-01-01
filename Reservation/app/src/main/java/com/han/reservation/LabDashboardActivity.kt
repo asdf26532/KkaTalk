@@ -2,6 +2,7 @@ package com.han.reservation
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.han.reservation.databinding.ActivityLabDashboardBinding
 
 class LabDashboardActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLabDashboardBinding

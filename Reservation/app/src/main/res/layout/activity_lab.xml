@@ -72,6 +72,21 @@
             android:textColor="#888888"
             android:visibility="gone" />
 
+        <!-- 관리자 전용 버튼 -->
+        <Button
+            android:id="@+id/btnDashboard"
+            android:text="📊 실험 결과 대시보드"
+            android:layout_margin="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- 실험 리스트 -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
     </LinearLayout>
 
 
