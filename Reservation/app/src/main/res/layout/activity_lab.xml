@@ -87,7 +87,20 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
+        <Button
+            android:id="@+id/btnLabCelebrate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🧪 예약 완료 축하 효과 체험" />
+
+        <Button
+            android:id="@+id/btnLabCancelTone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🧪 취소 말투 다이얼로그 체험" />
+
     </LinearLayout>
+
 
 
 </ScrollView>
