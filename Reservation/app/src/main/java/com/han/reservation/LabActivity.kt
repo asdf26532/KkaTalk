@@ -1,7 +1,12 @@
 package com.han.reservation
 
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -9,12 +14,17 @@ import com.google.firebase.auth.FirebaseAuth
 import com.han.reservation.databinding.ActivityLabBinding
 
 
-class LabActivity : AppCompatActivity() {
+class LabActivity : AppCompatActivity(), SensorEventListener {
 
     private lateinit var binding: ActivityLabBinding
     private lateinit var prefs: SharedPreferences
     private lateinit var auth: FirebaseAuth
     private lateinit var userId: String
+
+    private lateinit var sensorManager: SensorManager
+    private var accelerometer: Sensor? = null
+    private var lastShakeTime = 0L
+    private val SHAKE_THRESHOLD = 12f
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,6 +33,17 @@ class LabActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         prefs = getSharedPreferences("lab_prefs", MODE_PRIVATE)
+
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+
+        binding.btnLabCelebrate.setOnClickListener {
+            runReserveCelebration()
+        }
+
+        binding.btnLabCancelTone.setOnClickListener {
+            runCancelToneDialog()
+        }
 
         setupLabButtons()
 
@@ -124,7 +145,48 @@ class LabActivity : AppCompatActivity() {
             }
             .setNegativeButton("다시 생각할래요", null)
             .show()
+        }
+
+    override fun onResume() {
+        super.onResume()
+        accelerometer?.let {
+            sensorManager.registerListener(
+                this,
+                it,
+                SensorManager.SENSOR_DELAY_UI
+            )
+        }
     }
-}
+
+    override fun onPause() {
+        super.onPause()
+        sensorManager.unregisterListener(this)
+    }
+
+    override fun onSensorChanged(event: SensorEvent) {
+        if (!prefs.getBoolean(LAB_SHAKE_TOAST, false)) return
+
+        val x = event.values[0]
+        val y = event.values[1]
+        val z = event.values[2]
+
+        val acceleration = kotlin.math.sqrt(x * x + y * y + z * z)
+        val currentTime = System.currentTimeMillis()
+
+        if (acceleration > SHAKE_THRESHOLD &&
+            currentTime - lastShakeTime > 1000
+        ) {
+            lastShakeTime = currentTime
+            Toast.makeText(
+                this,
+                "📳 흔들림 감지! (Lab 이스터에그)",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+    }
 
 }
+
