@@ -99,6 +99,21 @@
             android:layout_height="wrap_content"
             android:text="🧪 취소 말투 다이얼로그 체험" />
 
+        <Switch
+            android:id="@+id/switchDoubleTapToast"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="더블 탭 토스트 (LAB)"
+            android:layout_marginTop="16dp"/>
+
+        <Switch
+            android:id="@+id/switchLongPressHint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="롱프레스 힌트 (LAB)"
+            android:layout_marginTop="12dp"/>
+
+
     </LinearLayout>
 
 

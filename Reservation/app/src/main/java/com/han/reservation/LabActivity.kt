@@ -1,5 +1,6 @@
 package com.han.reservation
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -8,6 +9,9 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.view.MotionEvent
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
@@ -26,6 +30,16 @@ class LabActivity : AppCompatActivity(), SensorEventListener {
     private var lastShakeTime = 0L
     private val SHAKE_THRESHOLD = 12f
 
+    private var lastTapTime = 0L
+    private val handler = Handler(Looper.getMainLooper())
+    private var longPressRunnable: Runnable? = null
+
+    companion object {
+        private const val LAB_DOUBLE_TAP_TOAST = "lab_double_tap_toast"
+        private const val LAB_LONG_PRESS_HINT = "lab_long_press_hint"
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -76,6 +90,49 @@ class LabActivity : AppCompatActivity(), SensorEventListener {
                 Intent(this, LabDashboardActivity::class.java)
             )
         }
+
+        binding.switchDoubleTapToast.isChecked =
+            prefs.getBoolean(LAB_DOUBLE_TAP_TOAST, false)
+
+        binding.switchDoubleTapToast.setOnCheckedChangeListener { _, checked ->
+            prefs.edit()
+                .putBoolean(LAB_DOUBLE_TAP_TOAST, checked)
+                .apply()
+        }
+
+        binding.root.setOnTouchListener { _, event ->
+            if (!prefs.getBoolean(LAB_DOUBLE_TAP_TOAST, false)) return@setOnTouchListener false
+            if (event.action != MotionEvent.ACTION_DOWN) return@setOnTouchListener false
+
+            val now = System.currentTimeMillis()
+            if (now - lastTapTime < 300) {
+                Toast.makeText(this, "LAB: 더블 탭 감지됨", Toast.LENGTH_SHORT).show()
+                lastTapTime = 0L
+            } else {
+                lastTapTime = now
+            }
+            false
+        }
+
+        binding.switchDoubleTapToast.setOnCheckedChangeListener { _, checked ->
+            prefs.edit().putBoolean(LAB_DOUBLE_TAP_TOAST, checked).apply()
+        }
+
+        binding.switchLongPressHint.setOnCheckedChangeListener { _, checked ->
+            prefs.edit().putBoolean(LAB_LONG_PRESS_HINT, checked).apply()
+        }
+
+        binding.root.setOnTouchListener { _, event ->
+            if (prefs.getBoolean(LAB_LONG_PRESS_HINT, false)) {
+                handleLongPress(event)
+            }
+            if (prefs.getBoolean(LAB_DOUBLE_TAP_TOAST, false)) {
+                handleDoubleTap(event)
+            }
+            false
+        }
+
+
 
     }
 
@@ -186,6 +243,38 @@ class LabActivity : AppCompatActivity(), SensorEventListener {
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+    }
+
+    private fun handleDoubleTap(event: MotionEvent) {
+        if (event.action != MotionEvent.ACTION_DOWN) return
+
+        val now = System.currentTimeMillis()
+        if (now - lastTapTime < 300) {
+            Toast.makeText(this, "LAB: 더블 탭 감지됨", Toast.LENGTH_SHORT).show()
+            lastTapTime = 0L
+        } else {
+            lastTapTime = now
+        }
+    }
+
+    private fun handleLongPress(event: MotionEvent) {
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                longPressRunnable = Runnable {
+                    Toast.makeText(
+                        this,
+                        "LAB 힌트: 여기는 실험실입니다",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                handler.postDelayed(longPressRunnable!!, 600)
+            }
+
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL -> {
+                longPressRunnable?.let { handler.removeCallbacks(it) }
+            }
+        }
     }
 
 }
