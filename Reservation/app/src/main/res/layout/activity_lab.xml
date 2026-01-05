@@ -113,9 +113,13 @@
             android:text="롱프레스 힌트 (LAB)"
             android:layout_marginTop="12dp"/>
 
+        <Switch
+            android:id="@+id/switchRandomTrigger"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="랜덤 트리거 실험 (5%)"
+            android:layout_marginTop="12dp"/>
+
 
     </LinearLayout>
-
-
-
 </ScrollView>

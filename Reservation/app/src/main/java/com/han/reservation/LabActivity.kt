@@ -8,14 +8,19 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.view.MotionEvent
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.han.reservation.databinding.ActivityLabBinding
+import kotlin.random.Random
 
 
 class LabActivity : AppCompatActivity(), SensorEventListener {
@@ -34,9 +39,18 @@ class LabActivity : AppCompatActivity(), SensorEventListener {
     private val handler = Handler(Looper.getMainLooper())
     private var longPressRunnable: Runnable? = null
 
+    private val swipeHistory = ArrayDeque<String>()
+
+    private val random = Random(System.currentTimeMillis())
+
     companion object {
         private const val LAB_DOUBLE_TAP_TOAST = "lab_double_tap_toast"
         private const val LAB_LONG_PRESS_HINT = "lab_long_press_hint"
+        private const val LAB_GESTURE_CHAIN = "lab_gesture_chain"
+        private const val LAB_TOUCH_COORD = "lab_touch_coord"
+        private const val LAB_DEV_MODE = "lab_dev_mode"
+
+        private const val LAB_RANDOM_TRIGGER = "lab_random_trigger"
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -94,25 +108,8 @@ class LabActivity : AppCompatActivity(), SensorEventListener {
         binding.switchDoubleTapToast.isChecked =
             prefs.getBoolean(LAB_DOUBLE_TAP_TOAST, false)
 
-        binding.switchDoubleTapToast.setOnCheckedChangeListener { _, checked ->
-            prefs.edit()
-                .putBoolean(LAB_DOUBLE_TAP_TOAST, checked)
-                .apply()
-        }
-
-        binding.root.setOnTouchListener { _, event ->
-            if (!prefs.getBoolean(LAB_DOUBLE_TAP_TOAST, false)) return@setOnTouchListener false
-            if (event.action != MotionEvent.ACTION_DOWN) return@setOnTouchListener false
-
-            val now = System.currentTimeMillis()
-            if (now - lastTapTime < 300) {
-                Toast.makeText(this, "LAB: 더블 탭 감지됨", Toast.LENGTH_SHORT).show()
-                lastTapTime = 0L
-            } else {
-                lastTapTime = now
-            }
-            false
-        }
+        binding.switchLongPressHint.isChecked =
+            prefs.getBoolean(LAB_LONG_PRESS_HINT, false)
 
         binding.switchDoubleTapToast.setOnCheckedChangeListener { _, checked ->
             prefs.edit().putBoolean(LAB_DOUBLE_TAP_TOAST, checked).apply()
@@ -132,7 +129,28 @@ class LabActivity : AppCompatActivity(), SensorEventListener {
             false
         }
 
+        binding.switchRandomTrigger.isChecked =
+            prefs.getBoolean(LAB_RANDOM_TRIGGER, false)
 
+        binding.switchRandomTrigger.setOnCheckedChangeListener { _, checked ->
+            prefs.edit().putBoolean(LAB_RANDOM_TRIGGER, checked).apply()
+        }
+
+        binding.root.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                if (prefs.getBoolean(LAB_RANDOM_TRIGGER, false)) {
+                    val chance = random.nextInt(100)
+                    if (chance < 5) {
+                        Toast.makeText(
+                            this,
+                            "LAB: 희귀 이벤트 발생!",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+            false
+        }
 
     }
 
@@ -277,5 +295,19 @@ class LabActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
+    private fun handleSwipe(event: MotionEvent) {
+        if (event.action != MotionEvent.ACTION_UP) return
+
+        val dx = event.x - event.downTime
+        val direction = if (dx > 0) "R" else "L"
+
+        swipeHistory.addLast(direction)
+        if (swipeHistory.size > 4) swipeHistory.removeFirst()
+
+        if (swipeHistory.joinToString("") == "LRLR") {
+            Toast.makeText(this, "LAB 이스터에그 발견!", Toast.LENGTH_LONG).show()
+            swipeHistory.clear()
+        }
+    }
 }
 
