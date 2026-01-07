@@ -48,6 +48,14 @@
                 android:layout_marginTop="8dp"
                 android:textColor="#666666"/>
 
+            <TextView
+                android:id="@+id/tvSummaryComment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="오늘은 바다 중심의 여행이었어요"
+                android:layout_marginTop="12dp"
+                android:textStyle="italic"
+                android:textColor="#444444"/>
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
