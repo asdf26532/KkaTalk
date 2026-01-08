@@ -6,7 +6,6 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- 화면 제목 -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -14,7 +13,29 @@
         android:textSize="20sp"
         android:textStyle="bold" />
 
-    <!-- 오늘 여행이 없을 때 표시 -->
+    <!-- 버튼 영역 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="12dp">
+
+        <Button
+            android:id="@+id/btnAddPlace"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="장소 추가" />
+
+        <Button
+            android:id="@+id/btnRemovePlace"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="마지막 장소 삭제" />
+    </LinearLayout>
+
     <TextView
         android:id="@+id/tvEmpty"
         android:layout_width="wrap_content"
@@ -24,7 +45,6 @@
         android:layout_marginTop="24dp"
         android:visibility="gone" />
 
-    <!-- 오늘 여행 요약 카드 -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardSummary"
         android:layout_width="match_parent"
@@ -39,43 +59,35 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- 도시 + n일차 -->
             <TextView
                 android:id="@+id/tvSummaryTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="부산 1일차 여행"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
-            <!-- 방문 장소 요약 -->
             <TextView
                 android:id="@+id/tvSummaryDesc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="광안리 → 해운대 → 자갈치시장"
-                android:textSize="14sp"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:textSize="14sp" />
 
-            <!-- 방문 개수 -->
             <TextView
                 android:id="@+id/tvSummaryTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="총 3곳 방문"
+                android:layout_marginTop="6dp"
                 android:textSize="13sp"
-                android:textColor="#666666"
-                android:layout_marginTop="6dp" />
+                android:textColor="#666666" />
 
-            <!-- 자동 코멘트 -->
             <TextView
                 android:id="@+id/tvSummaryComment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="오늘은 바다 중심의 여행이었어요"
+                android:layout_marginTop="10dp"
                 android:textSize="13sp"
-                android:textStyle="italic"
-                android:layout_marginTop="10dp" />
+                android:textStyle="italic" />
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>
