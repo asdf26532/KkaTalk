@@ -2,6 +2,7 @@ package com.han.tripnote
 
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.han.tripnote.databinding.ActivityMainBinding
 import java.time.LocalDate
@@ -11,9 +12,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     private val todayPlaces = mutableListOf(
-        TravelPlace("광안리"),
-        TravelPlace("해운대"),
-        TravelPlace("자갈치시장")
+        TravelPlace("광안리", TravelType.SEA),
+        TravelPlace("해운대", TravelType.SEA),
+        TravelPlace("자갈치시장", TravelType.CITY)
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,11 +32,20 @@ class MainActivity : AppCompatActivity() {
             removePlace()
         }
 
+        binding.cardSummary.setOnClickListener {
+            showPlaceDetail()
+        }
+
     }
 
     private fun addPlace() {
-        val nextIndex = todayPlaces.size + 1
-        todayPlaces.add(TravelPlace("새로운 장소 $nextIndex"))
+        val index = todayPlaces.size + 1
+        todayPlaces.add(
+            TravelPlace(
+                "새로운 장소 $index",
+                TravelType.values().random()
+            )
+        )
         updateUI()
     }
 
@@ -62,14 +72,41 @@ class MainActivity : AppCompatActivity() {
         binding.tvSummaryTime.text =
             "총 ${todayPlaces.size}곳 방문"
 
-        binding.tvSummaryComment.text = generateComment(todayPlaces.size)
+        binding.tvSummaryComment.text = generateTravelTypeSummary()
     }
 
-    private fun generateComment(count: Int): String {
+    private fun generateTravelTypeSummary(): String {
+        val seaCount = todayPlaces.count { it.type == TravelType.SEA }
+        val cityCount = todayPlaces.count { it.type == TravelType.CITY }
+        val natureCount = todayPlaces.count { it.type == TravelType.NATURE }
+
         return when {
-            count == 1 -> "가볍게 한 곳만 다녀온 하루였어요"
-            count <= 3 -> "여유로운 일정의 여행이었어요"
-            else -> "알차게 많이 돌아다닌 하루였어요"
+            seaCount >= cityCount && seaCount >= natureCount ->
+                "바다 중심의 여행이에요 🌊"
+            cityCount >= natureCount ->
+                "도시 위주의 여행이에요 🏙"
+            else ->
+                "자연을 즐기는 여행이에요 🌿"
+        }
+    }
+
+    private fun showPlaceDetail() {
+        val message = todayPlaces.joinToString("\n") {
+            "• ${it.name} (${typeToText(it.type)})"
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("오늘 방문한 장소")
+            .setMessage(message)
+            .setPositiveButton("확인", null)
+            .show()
+    }
+
+    private fun typeToText(type: TravelType): String {
+        return when (type) {
+            TravelType.SEA -> "바다"
+            TravelType.CITY -> "도시"
+            TravelType.NATURE -> "자연"
         }
     }
 }
