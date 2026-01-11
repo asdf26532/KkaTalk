@@ -17,6 +17,11 @@ class MainActivity : AppCompatActivity() {
         TravelPlace("자갈치시장", TravelType.CITY)
     )
 
+    private val travelDate = TravelDate(
+        startDate = LocalDate.of(2026, 1, 5),
+        endDate = LocalDate.of(2026, 1, 7)
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -38,25 +43,18 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun addPlace() {
-        val index = todayPlaces.size + 1
-        todayPlaces.add(
-            TravelPlace(
-                "새로운 장소 $index",
-                TravelType.values().random()
-            )
-        )
-        updateUI()
-    }
-
-    private fun removePlace() {
-        if (todayPlaces.isNotEmpty()) {
-            todayPlaces.removeAt(todayPlaces.lastIndex)
-            updateUI()
-        }
-    }
-
     private fun updateUI() {
+        val today = LocalDate.now()
+
+        if (!travelDate.isTravelDay(today) || todayPlaces.isEmpty()) {
+            binding.cardSummary.visibility = View.GONE
+            binding.tvEmpty.visibility = View.VISIBLE
+            binding.tvEmpty.text = "오늘은 여행 기간이 아니에요 ✨"
+            return
+        }
+
+        val dayIndex = travelDate.dayIndex(today)
+
         if (todayPlaces.isEmpty()) {
             binding.cardSummary.visibility = View.GONE
             binding.tvEmpty.visibility = View.VISIBLE
@@ -73,6 +71,24 @@ class MainActivity : AppCompatActivity() {
             "총 ${todayPlaces.size}곳 방문"
 
         binding.tvSummaryComment.text = generateTravelTypeSummary()
+    }
+
+    private fun addPlace() {
+        val index = todayPlaces.size + 1
+        todayPlaces.add(
+            TravelPlace(
+                "새로운 장소 $index",
+                TravelType.values().random()
+            )
+        )
+        updateUI()
+    }
+
+    private fun removePlace() {
+        if (todayPlaces.isNotEmpty()) {
+            todayPlaces.removeAt(todayPlaces.lastIndex)
+            updateUI()
+        }
     }
 
     private fun generateTravelTypeSummary(): String {
