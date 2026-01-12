@@ -73,6 +73,23 @@ class MainActivity : AppCompatActivity() {
         binding.tvSummaryComment.text = generateTravelTypeSummary()
     }
 
+    private fun showFinishedTravel() {
+        val summary = TravelSummaryGenerator.generate(
+            city = cityName,
+            places = todayPlaces
+        )
+
+        binding.cardSummary.visibility = View.VISIBLE
+        binding.tvEmpty.visibility = View.GONE
+
+        binding.tvSummaryTitle.text = summary.title
+        binding.tvSummaryDesc.text = summary.description
+        binding.tvSummaryTime.text =
+            "총 ${todayPlaces.size}곳 방문"
+        binding.tvSummaryComment.text =
+            "이번 여행을 이렇게 기억해요"
+    }
+
     private fun addPlace() {
         val index = todayPlaces.size + 1
         todayPlaces.add(
