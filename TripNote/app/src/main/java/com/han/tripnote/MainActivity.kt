@@ -11,11 +11,17 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
+    private val cityName = "부산"
+
     private val todayPlaces = mutableListOf(
         TravelPlace("광안리", TravelType.SEA),
         TravelPlace("해운대", TravelType.SEA),
-        TravelPlace("자갈치시장", TravelType.CITY)
+        TravelPlace("자갈치시장", TravelType.CITY),
+        TravelPlace("송도해수욕장", TravelType.SEA),
+        TravelPlace("흰여울문화마을", TravelType.CITY)
     )
+
+    private lateinit var summaryStorage: TravelSummaryStorage
 
     private val travelDate = TravelDate(
         startDate = LocalDate.of(2026, 1, 5),
@@ -27,50 +33,63 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        summaryStorage = TravelSummaryStorage(this)
+
         updateUI()
 
-        binding.btnAddPlace.setOnClickListener {
-            addPlace()
-        }
-
-        binding.btnRemovePlace.setOnClickListener {
-            removePlace()
-        }
-
-        binding.cardSummary.setOnClickListener {
-            showPlaceDetail()
-        }
+        binding.btnAddPlace.setOnClickListener { addPlace() }
+        binding.btnRemovePlace.setOnClickListener { removePlace() }
+        binding.cardSummary.setOnClickListener { showPlaceDetail() }
 
     }
 
     private fun updateUI() {
-        val today = LocalDate.now()
 
-        if (!travelDate.isTravelDay(today) || todayPlaces.isEmpty()) {
-            binding.cardSummary.visibility = View.GONE
-            binding.tvEmpty.visibility = View.VISIBLE
-            binding.tvEmpty.text = "오늘은 여행 기간이 아니에요 ✨"
+        if (restoreLastSummaryIfExists()) {
             return
         }
 
-        val dayIndex = travelDate.dayIndex(today)
+        val today = LocalDate.now()
+        val status = travelDate.status(today)
 
+        when (status) {
+            TravelStatus.BEFORE ->
+                showMessage("여행이 아직 시작되지 않았어요 ✈️")
+
+            TravelStatus.ONGOING ->
+                showOngoingTravel(today)
+
+            TravelStatus.FINISHED ->
+                showFinishedTravel()
+        }
+    }
+
+    private fun showMessage(text: String) {
+        binding.cardSummary.visibility = View.GONE
+        binding.tvEmpty.visibility = View.VISIBLE
+        binding.tvEmpty.text = text
+    }
+
+    private fun showOngoingTravel(today: LocalDate) {
         if (todayPlaces.isEmpty()) {
-            binding.cardSummary.visibility = View.GONE
-            binding.tvEmpty.visibility = View.VISIBLE
+            showMessage("오늘은 아직 방문한 장소가 없어요")
             return
         }
 
         binding.cardSummary.visibility = View.VISIBLE
         binding.tvEmpty.visibility = View.GONE
 
-        binding.tvSummaryTitle.text = "부산 1일차 여행"
+        binding.tvSummaryTitle.text =
+            "$cityName ${travelDate.dayIndex(today)}일차 여행"
+
         binding.tvSummaryDesc.text =
             todayPlaces.joinToString(" → ") { it.name }
+
         binding.tvSummaryTime.text =
             "총 ${todayPlaces.size}곳 방문"
 
-        binding.tvSummaryComment.text = generateTravelTypeSummary()
+        binding.tvSummaryComment.text =
+            generateTravelTypeSummary()
     }
 
     private fun showFinishedTravel() {
@@ -78,6 +97,8 @@ class MainActivity : AppCompatActivity() {
             city = cityName,
             places = todayPlaces
         )
+
+        summaryStorage.save(summary)
 
         binding.cardSummary.visibility = View.VISIBLE
         binding.tvEmpty.visibility = View.GONE
@@ -90,11 +111,24 @@ class MainActivity : AppCompatActivity() {
             "이번 여행을 이렇게 기억해요"
     }
 
+    private fun restoreLastSummaryIfExists(): Boolean {
+        val summary = summaryStorage.load() ?: return false
+
+        binding.cardSummary.visibility = View.VISIBLE
+        binding.tvEmpty.visibility = View.GONE
+
+        binding.tvSummaryTitle.text = summary.title
+        binding.tvSummaryDesc.text = summary.description
+        binding.tvSummaryTime.text = ""
+        binding.tvSummaryComment.text = "지난 여행 요약이에요"
+
+        return true
+    }
+
     private fun addPlace() {
-        val index = todayPlaces.size + 1
         todayPlaces.add(
             TravelPlace(
-                "새로운 장소 $index",
+                "새로운 장소 ${todayPlaces.size + 1}",
                 TravelType.values().random()
             )
         )
@@ -109,17 +143,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun generateTravelTypeSummary(): String {
-        val seaCount = todayPlaces.count { it.type == TravelType.SEA }
-        val cityCount = todayPlaces.count { it.type == TravelType.CITY }
-        val natureCount = todayPlaces.count { it.type == TravelType.NATURE }
+        val sea = todayPlaces.count { it.type == TravelType.SEA }
+        val city = todayPlaces.count { it.type == TravelType.CITY }
+        val nature = todayPlaces.count { it.type == TravelType.NATURE }
 
         return when {
-            seaCount >= cityCount && seaCount >= natureCount ->
-                "바다 중심의 여행이에요 🌊"
-            cityCount >= natureCount ->
-                "도시 위주의 여행이에요 🏙"
-            else ->
-                "자연을 즐기는 여행이에요 🌿"
+            sea >= city && sea >= nature -> "바다 중심의 여행이에요 🌊"
+            city >= nature -> "도시 위주의 여행이에요 🏙"
+            else -> "자연을 즐기는 여행이에요 🌿"
         }
     }
 
@@ -129,7 +160,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         AlertDialog.Builder(this)
-            .setTitle("오늘 방문한 장소")
+            .setTitle("이번 여행 장소")
             .setMessage(message)
             .setPositiveButton("확인", null)
             .show()
