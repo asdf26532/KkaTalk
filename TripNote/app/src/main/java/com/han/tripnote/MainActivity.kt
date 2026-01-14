@@ -1,5 +1,6 @@
 package com.han.tripnote
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AlertDialog
@@ -23,10 +24,15 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var summaryStorage: TravelSummaryStorage
 
-    private val travelDate = TravelDate(
+    private var travelDate = TravelDate(
         startDate = LocalDate.of(2026, 1, 5),
         endDate = LocalDate.of(2026, 1, 7)
     )
+
+    private val memoPrefs by lazy {
+        getSharedPreferences("travel_memo", Context.MODE_PRIVATE)
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,11 +41,14 @@ class MainActivity : AppCompatActivity() {
 
         summaryStorage = TravelSummaryStorage(this)
 
+        restoreMemo()
         updateUI()
 
         binding.btnAddPlace.setOnClickListener { addPlace() }
         binding.btnRemovePlace.setOnClickListener { removePlace() }
         binding.cardSummary.setOnClickListener { showPlaceDetail() }
+        binding.btnNewTravel.setOnClickListener { startNewTravel() }
+        binding.btnSaveMemo.setOnClickListener { saveMemo() }
 
     }
 
@@ -62,6 +71,31 @@ class MainActivity : AppCompatActivity() {
             TravelStatus.FINISHED ->
                 showFinishedTravel()
         }
+    }
+
+    private fun saveMemo() {
+        val memo = binding.etTravelMemo.text.toString()
+        memoPrefs.edit().putString("today_memo", memo).apply()
+    }
+
+    private fun restoreMemo() {
+        binding.etTravelMemo.setText(
+            memoPrefs.getString("today_memo", "")
+        )
+    }
+
+    private fun startNewTravel() {
+        summaryStorage.clear()
+        todayPlaces.clear()
+        memoPrefs.edit().clear().apply()
+
+        travelDate = TravelDate(
+            startDate = LocalDate.now(),
+            endDate = LocalDate.now().plusDays(2)
+        )
+
+        binding.etTravelMemo.setText("")
+        updateUI()
     }
 
     private fun showMessage(text: String) {

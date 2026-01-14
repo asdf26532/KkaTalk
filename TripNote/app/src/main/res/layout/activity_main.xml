@@ -1,95 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:padding="16dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="오늘의 여행 요약"
-        android:textSize="20sp"
-        android:textStyle="bold" />
-
-    <!-- 버튼 영역 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="12dp">
+        android:orientation="vertical">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardSummary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:elevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/tvSummaryTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="부산 1일차 여행"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvSummaryDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="광안리 → 해운대"
+                    android:layout_marginTop="8dp" />
+
+                <TextView
+                    android:id="@+id/tvSummaryTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="총 2곳 방문"
+                    android:layout_marginTop="4dp" />
+
+                <TextView
+                    android:id="@+id/tvSummaryComment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="바다 중심의 여행이에요 🌊"
+                    android:layout_marginTop="8dp" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:id="@+id/tvEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="여행 정보가 없어요"
+            android:gravity="center"
+            android:visibility="gone"
+            android:padding="24dp" />
 
         <Button
             android:id="@+id/btnAddPlace"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:text="장소 추가" />
 
         <Button
             android:id="@+id/btnRemovePlace"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:text="마지막 장소 삭제" />
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/tvEmpty"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="오늘은 여행 일정이 없어요 ✨"
-        android:textSize="16sp"
-        android:layout_marginTop="24dp"
-        android:visibility="gone" />
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardSummary"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:radius="12dp"
-        android:elevation="4dp">
-
-        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:text="장소 제거"
+            android:layout_marginTop="8dp" />
 
-            <TextView
-                android:id="@+id/tvSummaryTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+        <Button
+            android:id="@+id/btnNewTravel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="새 여행 시작"
+            android:layout_marginTop="12dp" />
 
-            <TextView
-                android:id="@+id/tvSummaryDesc"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textSize="14sp" />
+        <EditText
+            android:id="@+id/etTravelMemo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="오늘 여행 한 줄 메모"
+            android:layout_marginTop="16dp" />
 
-            <TextView
-                android:id="@+id/tvSummaryTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:textSize="13sp"
-                android:textColor="#666666" />
+        <Button
+            android:id="@+id/btnSaveMemo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="메모 저장"
+            android:layout_marginTop="8dp" />
 
-            <TextView
-                android:id="@+id/tvSummaryComment"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:textSize="13sp"
-                android:textStyle="italic" />
-
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
-
-</LinearLayout>
+    </LinearLayout>
+</ScrollView>
