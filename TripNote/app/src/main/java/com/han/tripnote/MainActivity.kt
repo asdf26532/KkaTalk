@@ -33,6 +33,9 @@ class MainActivity : AppCompatActivity() {
         getSharedPreferences("travel_memo", Context.MODE_PRIVATE)
     }
 
+    private val ratingPrefs by lazy {
+        getSharedPreferences("travel_rating", Context.MODE_PRIVATE)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +45,8 @@ class MainActivity : AppCompatActivity() {
         summaryStorage = TravelSummaryStorage(this)
 
         restoreMemo()
+        restoreRating()
+
         updateUI()
 
         binding.btnAddPlace.setOnClickListener { addPlace() }
@@ -49,6 +54,11 @@ class MainActivity : AppCompatActivity() {
         binding.cardSummary.setOnClickListener { showPlaceDetail() }
         binding.btnNewTravel.setOnClickListener { startNewTravel() }
         binding.btnSaveMemo.setOnClickListener { saveMemo() }
+
+        binding.ratingTravel.setOnRatingBarChangeListener { _, rating, _ ->
+            saveRating(rating)
+            updateRatingText(rating)
+        }
 
     }
 
@@ -82,6 +92,27 @@ class MainActivity : AppCompatActivity() {
         binding.etTravelMemo.setText(
             memoPrefs.getString("today_memo", "")
         )
+    }
+
+    private fun saveRating(rating: Float) {
+        ratingPrefs.edit()
+            .putFloat("today_rating", rating)
+            .apply()
+    }
+
+    private fun restoreRating() {
+        val rating = ratingPrefs.getFloat("today_rating", 0f)
+        binding.ratingTravel.rating = rating
+        updateRatingText(rating)
+    }
+
+    private fun updateRatingText(rating: Float) {
+        binding.tvRatingText.text =
+            if (rating == 0f) {
+                "아직 평가하지 않았어요"
+            } else {
+                "만족도 ${rating.toInt()} / 5"
+            }
     }
 
     private fun startNewTravel() {

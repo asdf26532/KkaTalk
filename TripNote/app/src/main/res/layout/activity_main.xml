@@ -90,6 +90,26 @@
             android:hint="오늘 여행 한 줄 메모"
             android:layout_marginTop="16dp" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="오늘 여행 만족도"
+            android:layout_marginTop="16dp"/>
+
+        <RatingBar
+            android:id="@+id/ratingTravel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numStars="5"
+            android:stepSize="1.0"/>
+
+        <TextView
+            android:id="@+id/tvRatingText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="아직 평가하지 않았어요"
+            android:layout_marginTop="4dp"/>
+
         <Button
             android:id="@+id/btnSaveMemo"
             android:layout_width="match_parent"
