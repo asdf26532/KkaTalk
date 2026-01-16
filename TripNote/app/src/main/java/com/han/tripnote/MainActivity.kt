@@ -14,20 +14,18 @@ class MainActivity : AppCompatActivity() {
 
     private val cityName = "부산"
 
-    private val todayPlaces = mutableListOf(
-        TravelPlace("광안리", TravelType.SEA),
-        TravelPlace("해운대", TravelType.SEA),
-        TravelPlace("자갈치시장", TravelType.CITY),
-        TravelPlace("송도해수욕장", TravelType.SEA),
-        TravelPlace("흰여울문화마을", TravelType.CITY)
-    )
-
-    private lateinit var summaryStorage: TravelSummaryStorage
-
     private var travelDate = TravelDate(
         startDate = LocalDate.of(2026, 1, 5),
         endDate = LocalDate.of(2026, 1, 7)
     )
+
+    private val todayPlaces = mutableListOf(
+        TravelPlace("광안리", TravelType.SEA),
+        TravelPlace("해운대", TravelType.SEA)
+    )
+
+    private lateinit var summaryStorage: TravelSummaryStorage
+    private lateinit var historyStorage: TravelHistoryStorage
 
     private val memoPrefs by lazy {
         getSharedPreferences("travel_memo", Context.MODE_PRIVATE)
@@ -43,15 +41,15 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         summaryStorage = TravelSummaryStorage(this)
+        historyStorage = TravelHistoryStorage(this)
 
         restoreMemo()
         restoreRating()
-
+        showHistory()
         updateUI()
 
         binding.btnAddPlace.setOnClickListener { addPlace() }
         binding.btnRemovePlace.setOnClickListener { removePlace() }
-        binding.cardSummary.setOnClickListener { showPlaceDetail() }
         binding.btnNewTravel.setOnClickListener { startNewTravel() }
         binding.btnSaveMemo.setOnClickListener { saveMemo() }
 
@@ -60,73 +58,21 @@ class MainActivity : AppCompatActivity() {
             updateRatingText(rating)
         }
 
+        binding.btnHistoryDetail.setOnClickListener {
+            showLatestHistoryDetail()
+        }
+
     }
 
     private fun updateUI() {
-
-        if (restoreLastSummaryIfExists()) {
-            return
-        }
+        if (restoreLastSummaryIfExists()) return
 
         val today = LocalDate.now()
-        val status = travelDate.status(today)
-
-        when (status) {
-            TravelStatus.BEFORE ->
-                showMessage("여행이 아직 시작되지 않았어요 ✈️")
-
-            TravelStatus.ONGOING ->
-                showOngoingTravel(today)
-
-            TravelStatus.FINISHED ->
-                showFinishedTravel()
+        when (travelDate.status(today)) {
+            TravelStatus.BEFORE -> showMessage("새 여행을 시작해보세요 ✈️")
+            TravelStatus.ONGOING -> showOngoingTravel(today)
+            TravelStatus.FINISHED -> showFinishedTravel()
         }
-    }
-
-    private fun saveMemo() {
-        val memo = binding.etTravelMemo.text.toString()
-        memoPrefs.edit().putString("today_memo", memo).apply()
-    }
-
-    private fun restoreMemo() {
-        binding.etTravelMemo.setText(
-            memoPrefs.getString("today_memo", "")
-        )
-    }
-
-    private fun saveRating(rating: Float) {
-        ratingPrefs.edit()
-            .putFloat("today_rating", rating)
-            .apply()
-    }
-
-    private fun restoreRating() {
-        val rating = ratingPrefs.getFloat("today_rating", 0f)
-        binding.ratingTravel.rating = rating
-        updateRatingText(rating)
-    }
-
-    private fun updateRatingText(rating: Float) {
-        binding.tvRatingText.text =
-            if (rating == 0f) {
-                "아직 평가하지 않았어요"
-            } else {
-                "만족도 ${rating.toInt()} / 5"
-            }
-    }
-
-    private fun startNewTravel() {
-        summaryStorage.clear()
-        todayPlaces.clear()
-        memoPrefs.edit().clear().apply()
-
-        travelDate = TravelDate(
-            startDate = LocalDate.now(),
-            endDate = LocalDate.now().plusDays(2)
-        )
-
-        binding.etTravelMemo.setText("")
-        updateUI()
     }
 
     private fun showMessage(text: String) {
@@ -153,11 +99,16 @@ class MainActivity : AppCompatActivity() {
         binding.tvSummaryTime.text =
             "총 ${todayPlaces.size}곳 방문"
 
+        val rating = binding.ratingTravel.rating.toInt()
+        val ratingText = if (rating == 0) "" else " · 만족도 $rating/5"
+
         binding.tvSummaryComment.text =
-            generateTravelTypeSummary()
+            generateTravelTypeSummary() + ratingText
     }
 
     private fun showFinishedTravel() {
+        saveHistoryIfFinished()
+
         val summary = TravelSummaryGenerator.generate(
             city = cityName,
             places = todayPlaces
@@ -170,10 +121,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.tvSummaryTitle.text = summary.title
         binding.tvSummaryDesc.text = summary.description
-        binding.tvSummaryTime.text =
-            "총 ${todayPlaces.size}곳 방문"
-        binding.tvSummaryComment.text =
-            "이번 여행을 이렇게 기억해요"
+        binding.tvSummaryComment.text = "이번 여행을 이렇게 기억해요"
     }
 
     private fun restoreLastSummaryIfExists(): Boolean {
@@ -184,7 +132,6 @@ class MainActivity : AppCompatActivity() {
 
         binding.tvSummaryTitle.text = summary.title
         binding.tvSummaryDesc.text = summary.description
-        binding.tvSummaryTime.text = ""
         binding.tvSummaryComment.text = "지난 여행 요약이에요"
 
         return true
@@ -207,6 +154,52 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun saveMemo() {
+        memoPrefs.edit()
+            .putString("today_memo", binding.etTravelMemo.text.toString())
+            .apply()
+    }
+
+    private fun restoreMemo() {
+        binding.etTravelMemo.setText(
+            memoPrefs.getString("today_memo", "")
+        )
+    }
+
+    private fun saveRating(rating: Float) {
+        ratingPrefs.edit().putFloat("today_rating", rating).apply()
+    }
+
+    private fun restoreRating() {
+        val rating = ratingPrefs.getFloat("today_rating", 0f)
+        binding.ratingTravel.rating = rating
+        updateRatingText(rating)
+    }
+
+    private fun updateRatingText(rating: Float) {
+        binding.tvRatingText.text =
+            if (rating == 0f) "아직 평가하지 않았어요"
+            else "만족도 ${rating.toInt()} / 5"
+    }
+
+    private fun startNewTravel() {
+        summaryStorage.clear()
+        todayPlaces.clear()
+        memoPrefs.edit().clear().apply()
+        ratingPrefs.edit().clear().apply()
+
+        travelDate = TravelDate(
+            startDate = LocalDate.now(),
+            endDate = LocalDate.now().plusDays(2)
+        )
+
+        binding.etTravelMemo.setText("")
+        binding.ratingTravel.rating = 0f
+        updateRatingText(0f)
+        showHistory()
+        updateUI()
+    }
+
     private fun generateTravelTypeSummary(): String {
         val sea = todayPlaces.count { it.type == TravelType.SEA }
         val city = todayPlaces.count { it.type == TravelType.CITY }
@@ -219,23 +212,41 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showPlaceDetail() {
-        val message = todayPlaces.joinToString("\n") {
-            "• ${it.name} (${typeToText(it.type)})"
-        }
-
-        AlertDialog.Builder(this)
-            .setTitle("이번 여행 장소")
-            .setMessage(message)
-            .setPositiveButton("확인", null)
-            .show()
+    private fun saveHistoryIfFinished() {
+        val history = TravelHistory(
+            city = cityName,
+            startDate = travelDate.startDate.toString(),
+            endDate = travelDate.endDate.toString(),
+            rating = binding.ratingTravel.rating.toInt()
+        )
+        historyStorage.save(history)
+        showHistory()
     }
 
-    private fun typeToText(type: TravelType): String {
-        return when (type) {
-            TravelType.SEA -> "바다"
-            TravelType.CITY -> "도시"
-            TravelType.NATURE -> "자연"
-        }
+    private fun showHistory() {
+        val list = historyStorage.loadAll()
+
+        binding.tvHistory.text =
+            if (list.isEmpty()) {
+                "아직 여행 기록이 없어요"
+            } else {
+                list.joinToString("\n\n") {
+                    "${it.city} (${it.startDate} ~ ${it.endDate})\n만족도 ${it.rating}/5"
+                }
+            }
+    }
+
+    private fun showLatestHistoryDetail() {
+        val history = historyStorage.loadAll().firstOrNull() ?: return
+
+        AlertDialog.Builder(this)
+            .setTitle("최근 여행 상세")
+            .setMessage(
+                "도시: ${history.city}\n" +
+                        "기간: ${history.startDate} ~ ${history.endDate}\n" +
+                        "만족도: ${history.rating}/5"
+            )
+            .setPositiveButton("확인", null)
+            .show()
     }
 }

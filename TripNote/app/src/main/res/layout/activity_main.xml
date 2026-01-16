@@ -26,7 +26,6 @@
                     android:id="@+id/tvSummaryTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="부산 1일차 여행"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -34,23 +33,19 @@
                     android:id="@+id/tvSummaryDesc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="광안리 → 해운대"
                     android:layout_marginTop="8dp" />
 
                 <TextView
                     android:id="@+id/tvSummaryTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="총 2곳 방문"
                     android:layout_marginTop="4dp" />
 
                 <TextView
                     android:id="@+id/tvSummaryComment"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="바다 중심의 여행이에요 🌊"
                     android:layout_marginTop="8dp" />
-
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -58,10 +53,9 @@
             android:id="@+id/tvEmpty"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="여행 정보가 없어요"
             android:gravity="center"
-            android:visibility="gone"
-            android:padding="24dp" />
+            android:padding="24dp"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/btnAddPlace"
@@ -73,49 +67,69 @@
             android:id="@+id/btnRemovePlace"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="장소 제거"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="8dp"
+            android:text="장소 제거" />
 
         <Button
             android:id="@+id/btnNewTravel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="새 여행 시작"
-            android:layout_marginTop="12dp" />
+            android:layout_marginTop="12dp"
+            android:text="새 여행 시작" />
 
         <EditText
             android:id="@+id/etTravelMemo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="오늘 여행 한 줄 메모"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:hint="오늘 여행 한 줄 메모" />
+
+        <Button
+            android:id="@+id/btnSaveMemo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="메모 저장" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="오늘 여행 만족도"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="16dp"
+            android:text="오늘 여행 만족도" />
 
         <RatingBar
             android:id="@+id/ratingTravel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:numStars="5"
-            android:stepSize="1.0"/>
+            android:stepSize="1.0" />
 
         <TextView
             android:id="@+id/tvRatingText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="아직 평가하지 않았어요"
-            android:layout_marginTop="4dp"/>
+            android:layout_marginTop="4dp" />
 
-        <Button
-            android:id="@+id/btnSaveMemo"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="최근 여행"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvHistory"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="메모 저장"
             android:layout_marginTop="8dp" />
+
+        <Button
+            android:id="@+id/btnHistoryDetail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="최근 여행 상세 보기" />
 
     </LinearLayout>
 </ScrollView>
+
