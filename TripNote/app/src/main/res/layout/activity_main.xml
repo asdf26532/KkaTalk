@@ -130,6 +130,19 @@
             android:layout_marginTop="8dp"
             android:text="최근 여행 상세 보기" />
 
+        <Spinner
+            android:id="@+id/spinnerHistory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" />
+
+        <Button
+            android:id="@+id/btnHistorySelectDetail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="선택한 여행 상세 보기" />
+
     </LinearLayout>
 </ScrollView>
 

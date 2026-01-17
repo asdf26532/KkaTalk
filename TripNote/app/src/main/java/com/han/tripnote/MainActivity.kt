@@ -3,6 +3,7 @@ package com.han.tripnote
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.han.tripnote.databinding.ActivityMainBinding
@@ -46,6 +47,7 @@ class MainActivity : AppCompatActivity() {
         restoreMemo()
         restoreRating()
         showHistory()
+        setupHistorySpinner()
         updateUI()
 
         binding.btnAddPlace.setOnClickListener { addPlace() }
@@ -58,8 +60,8 @@ class MainActivity : AppCompatActivity() {
             updateRatingText(rating)
         }
 
-        binding.btnHistoryDetail.setOnClickListener {
-            showLatestHistoryDetail()
+        binding.btnHistorySelectDetail.setOnClickListener {
+            showSelectedHistoryDetail()
         }
 
     }
@@ -236,11 +238,30 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
-    private fun showLatestHistoryDetail() {
-        val history = historyStorage.loadAll().firstOrNull() ?: return
+    private fun setupHistorySpinner() {
+        val list = historyStorage.loadAll()
+        val labels = list.mapIndexed { index, it ->
+            "${index + 1}. ${it.city} (${it.startDate})"
+        }
+
+        val adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            labels
+        )
+        adapter.setDropDownViewResource(
+            android.R.layout.simple_spinner_dropdown_item
+        )
+
+        binding.spinnerHistory.adapter = adapter
+    }
+
+    private fun showSelectedHistoryDetail() {
+        val index = binding.spinnerHistory.selectedItemPosition
+        val history = historyStorage.loadAll().getOrNull(index) ?: return
 
         AlertDialog.Builder(this)
-            .setTitle("최근 여행 상세")
+            .setTitle("여행 상세")
             .setMessage(
                 "도시: ${history.city}\n" +
                         "기간: ${history.startDate} ~ ${history.endDate}\n" +
