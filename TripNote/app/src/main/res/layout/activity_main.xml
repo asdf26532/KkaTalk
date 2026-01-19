@@ -64,5 +64,18 @@
             android:layout_height="wrap_content"
             android:text="선택한 여행 상세 보기" />
 
+        <Button
+            android:id="@+id/btnShareTrip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="여행 공유 문구 복사" />
+
+        <Button
+            android:id="@+id/btnShareIntent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="앱으로 바로 공유하기" />
+
     </LinearLayout>
 </ScrollView>

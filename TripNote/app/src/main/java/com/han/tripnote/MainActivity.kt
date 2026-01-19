@@ -1,11 +1,15 @@
 package com.han.tripnote
 
 import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.han.tripnote.databinding.ActivityMainBinding
 import java.time.LocalDate
@@ -41,6 +45,14 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnHistoryDetail.setOnClickListener {
             showSelectedHistoryDetail()
+        }
+
+        binding.btnShareTrip.setOnClickListener {
+            shareSelectedTrip()
+        }
+
+        binding.btnShareIntent.setOnClickListener {
+            shareViaIntent()
         }
     }
 
@@ -92,6 +104,68 @@ class MainActivity : AppCompatActivity() {
             )
             .setPositiveButton("확인", null)
             .show()
+    }
+
+    private fun shareSelectedTrip() {
+        val history = filteredList.getOrNull(selectedHistoryIndex)
+            ?: run {
+                Toast.makeText(this, "공유할 여행을 선택해주세요", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+        val shareText =
+            "✈️ ${history.city} 여행 다녀왔어요!\n" +
+                    "📅 ${history.startDate} ~ ${history.endDate}\n" +
+                    "⭐ 만족도 ${history.rating}/5\n" +
+                    "다음 여행도 기대 중!"
+
+        val clipboard =
+            getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+
+        clipboard.setPrimaryClip(
+            ClipData.newPlainText("trip_share", shareText)
+        )
+
+        Toast.makeText(this, "여행 공유 문구가 복사됐어요", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun buildShareText(history: TravelHistory): String {
+        return "✈️ ${history.city} 여행 다녀왔어요!\n" +
+                "📅 ${history.startDate} ~ ${history.endDate}\n" +
+                "⭐ 만족도 ${history.rating}/5\n" +
+                "다음 여행도 기대 중!"
+    }
+
+    private fun copyShareText() {
+        val history = filteredList.getOrNull(selectedHistoryIndex)
+            ?: run {
+                Toast.makeText(this, "공유할 여행을 선택해주세요", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+        val clipboard =
+            getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+
+        clipboard.setPrimaryClip(
+            ClipData.newPlainText("trip_share", buildShareText(history))
+        )
+
+        Toast.makeText(this, "여행 공유 문구가 복사됐어요", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun shareViaIntent() {
+        val history = filteredList.getOrNull(selectedHistoryIndex)
+            ?: run {
+                Toast.makeText(this, "공유할 여행을 선택해주세요", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, buildShareText(history))
+        }
+
+        startActivity(Intent.createChooser(intent, "여행 공유하기"))
     }
 
     private fun showBestTrip() {
