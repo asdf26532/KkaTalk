@@ -17,7 +17,6 @@ import java.time.LocalDate
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-
     private lateinit var historyStorage: TravelHistoryStorage
 
     private var selectedHistoryIndex: Int = -1
@@ -30,6 +29,7 @@ class MainActivity : AppCompatActivity() {
 
         historyStorage = TravelHistoryStorage(this)
 
+        showStats()
         showBestTrip()
         showHistoryList(historyStorage.loadAll())
 
@@ -54,6 +54,27 @@ class MainActivity : AppCompatActivity() {
         binding.btnShareIntent.setOnClickListener {
             shareViaIntent()
         }
+    }
+
+    private fun showStats() {
+        val list = historyStorage.loadAll()
+        if (list.isEmpty()) {
+            binding.cardStats.visibility = View.GONE
+            return
+        }
+
+        binding.cardStats.visibility = View.VISIBLE
+
+        val total = list.size
+        val average = list.map { it.rating }.average()
+        val mostVisitedCity = list.groupBy { it.city }
+            .maxByOrNull { it.value.size }?.key ?: "-"
+        val bestRatedCity = list.maxByOrNull { it.rating }?.city ?: "-"
+
+        binding.tvTotalTrips.text = "총 여행 횟수: ${total}회"
+        binding.tvAverageRating.text = "평균 만족도: ${"%.1f".format(average)} / 5"
+        binding.tvMostVisitedCity.text = "가장 많이 간 도시: $mostVisitedCity"
+        binding.tvBestRatedCity.text = "최고 만족 도시: $bestRatedCity"
     }
 
     private fun showHistoryList(list: List<TravelHistory>) {
