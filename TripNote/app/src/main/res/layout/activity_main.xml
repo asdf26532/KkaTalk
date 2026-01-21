@@ -107,6 +107,12 @@
             android:text="선택한 여행 상세 보기" />
 
         <Button
+            android:id="@+id/btnToggleFavorite"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⭐ 즐겨찾기 설정/해제" />
+
+        <Button
             android:id="@+id/btnShareTrip"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

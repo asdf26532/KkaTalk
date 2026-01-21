@@ -5,6 +5,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -18,6 +19,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var historyStorage: TravelHistoryStorage
+    private lateinit var prefs: SharedPreferences
 
     private var selectedHistoryIndex: Int = -1
     private var filteredList: List<TravelHistory> = emptyList()
@@ -28,6 +30,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         historyStorage = TravelHistoryStorage(this)
+        prefs = getSharedPreferences("favorite_prefs", MODE_PRIVATE)
 
         showStats()
         showBestTrip()
@@ -45,6 +48,14 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnHistoryDetail.setOnClickListener {
             showSelectedHistoryDetail()
+        }
+
+        binding.btnToggleFavorite.setOnClickListener {
+            toggleFavorite()
+        }
+
+        binding.btnShareTrip.setOnClickListener {
+            copyShareText()
         }
 
         binding.btnShareTrip.setOnClickListener {
@@ -78,16 +89,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showHistoryList(list: List<TravelHistory>) {
-        filteredList = list
+        val favoriteId = prefs.getString("favorite_id", null)
 
-        if (list.isEmpty()) {
-            binding.tvHistoryList.text = "검색 결과가 없어요"
+        filteredList = list.sortedByDescending {
+            it.id == favoriteId
+        }
+
+        if (filteredList.isEmpty()) {
+            binding.tvHistoryList.text = "표시할 여행이 없어요"
             selectedHistoryIndex = -1
             return
         }
 
-        binding.tvHistoryList.text = list.mapIndexed { index, it ->
-            "${index + 1}. ${it.city} (${it.startDate} ~ ${it.endDate}) · ${it.rating}/5"
+        binding.tvHistoryList.text = filteredList.mapIndexed { index, it ->
+            val star = if (it.id == favoriteId) "⭐ " else ""
+            "${index + 1}. $star${it.city} (${it.startDate} ~ ${it.endDate}) · ${it.rating}/5"
         }.joinToString("\n\n")
 
         binding.tvHistoryList.setOnClickListener {
@@ -95,13 +111,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun toggleFavorite() {
+        val history = filteredList.getOrNull(selectedHistoryIndex)
+            ?: return
+
+        val current = prefs.getString("favorite_id", null)
+
+        prefs.edit()
+            .putString("favorite_id", if (current == history.id) null else history.id)
+            .apply()
+
+        showHistoryList(historyStorage.loadAll())
+    }
+
 
     private fun filterHistoryByCity(keyword: String) {
         val all = historyStorage.loadAll()
 
         if (keyword.isBlank()) {
-            showHistoryList(all)
+            showStats()
             showBestTrip()
+            showHistoryList(all)
             return
         }
 
@@ -109,6 +139,7 @@ class MainActivity : AppCompatActivity() {
             it.city.contains(keyword, ignoreCase = true)
         }
 
+        binding.cardStats.visibility = View.GONE
         binding.cardBestTrip.visibility = View.GONE
         showHistoryList(filtered)
     }
