@@ -24,6 +24,11 @@ class MainActivity : AppCompatActivity() {
     private var selectedHistoryIndex: Int = -1
     private var filteredList: List<TravelHistory> = emptyList()
 
+    companion object {
+        private const val KEY_LAST_VIEWED_ID = "last_viewed_id"
+        private const val KEY_FAVORITE_ID = "favorite_id"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -36,6 +41,7 @@ class MainActivity : AppCompatActivity() {
         showBestTrip()
         showHistoryList(historyStorage.loadAll())
 
+        restoreLastViewed()
 
         binding.etSearchCity.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
@@ -47,6 +53,7 @@ class MainActivity : AppCompatActivity() {
 
 
         binding.btnHistoryDetail.setOnClickListener {
+            saveLastViewed()
             showSelectedHistoryDetail()
         }
 
@@ -65,6 +72,17 @@ class MainActivity : AppCompatActivity() {
         binding.btnShareIntent.setOnClickListener {
             shareViaIntent()
         }
+    }
+
+    private fun restoreLastViewed() {
+        val lastId = prefs.getString(KEY_LAST_VIEWED_ID, null) ?: return
+        val index = filteredList.indexOfFirst { it.id == lastId }
+        if (index >= 0) selectedHistoryIndex = index
+    }
+
+    private fun saveLastViewed() {
+        val history = filteredList.getOrNull(selectedHistoryIndex) ?: return
+        prefs.edit().putString(KEY_LAST_VIEWED_ID, history.id).apply()
     }
 
     private fun showStats() {
@@ -90,10 +108,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun showHistoryList(list: List<TravelHistory>) {
         val favoriteId = prefs.getString("favorite_id", null)
+        val lastViewedId = prefs.getString(KEY_LAST_VIEWED_ID, null)
 
-        filteredList = list.sortedByDescending {
-            it.id == favoriteId
-        }
+        filteredList = list.sortedWith(
+            compareByDescending<TravelHistory> { it.id == favoriteId }
+                .thenByDescending { it.id == lastViewedId }
+        )
 
         if (filteredList.isEmpty()) {
             binding.tvHistoryList.text = "표시할 여행이 없어요"
@@ -102,8 +122,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.tvHistoryList.text = filteredList.mapIndexed { index, it ->
-            val star = if (it.id == favoriteId) "⭐ " else ""
-            "${index + 1}. $star${it.city} (${it.startDate} ~ ${it.endDate}) · ${it.rating}/5"
+            val recent = if (it.id == lastViewedId) "🕒 " else ""
+            val fav = if (it.id == favoriteId) "⭐ " else ""
+            "${index + 1}. $fav$recent${it.city} (${it.startDate} ~ ${it.endDate}) · ${it.rating}/5"
         }.joinToString("\n\n")
 
         binding.tvHistoryList.setOnClickListener {
