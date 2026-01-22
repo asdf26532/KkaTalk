@@ -12,69 +12,147 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.addTextChangedListener
 import com.han.tripnote.databinding.ActivityMainBinding
 import java.time.LocalDate
+import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var historyStorage: TravelHistoryStorage
     private lateinit var prefs: SharedPreferences
 
-    private var selectedHistoryIndex: Int = -1
-    private var filteredList: List<TravelHistory> = emptyList()
-
-    companion object {
-        private const val KEY_LAST_VIEWED_ID = "last_viewed_id"
-        private const val KEY_FAVORITE_ID = "favorite_id"
-    }
+    private val histories = mutableListOf<TravelHistory>()
+    private var selected: TravelHistory? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        historyStorage = TravelHistoryStorage(this)
-        prefs = getSharedPreferences("favorite_prefs", MODE_PRIVATE)
+        prefs = getSharedPreferences("trip_prefs", MODE_PRIVATE)
 
-        showStats()
-        showBestTrip()
-        showHistoryList(historyStorage.loadAll())
+        seedData()
+        restoreLastSelected()
+        renderList()
+        updateStats()
+        updateSelectedInfo()
 
-        restoreLastViewed()
+        binding.etSearch.addTextChangedListener {
+            renderList(it.toString())
+        }
 
-        binding.etSearchCity.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                filterHistoryByCity(s.toString())
+        binding.tvHistoryList.setOnClickListener {
+            selected = histories.lastOrNull()
+            selected?.let {
+                binding.etMemo.setText(it.memo)
+                saveLastSelected(it.id)
             }
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        })
-
-
-        binding.btnHistoryDetail.setOnClickListener {
-            saveLastViewed()
-            showSelectedHistoryDetail()
+            updateSelectedInfo()
+            Toast.makeText(this, "여행 선택됨", Toast.LENGTH_SHORT).show()
         }
 
-        binding.btnToggleFavorite.setOnClickListener {
-            toggleFavorite()
+        binding.btnFavorite.setOnClickListener {
+            selected?.let {
+                it.isFavorite = !it.isFavorite
+                updateSelectedInfo()
+                renderList()
+            }
         }
 
-        binding.btnShareTrip.setOnClickListener {
-            copyShareText()
+        binding.btnCopy.setOnClickListener {
+            selected?.let {
+                val cm = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                cm.setPrimaryClip(
+                    ClipData.newPlainText(
+                        "trip",
+                        "${it.city} (${it.startDate}~${it.endDate})"
+                    )
+                )
+                Toast.makeText(this, "복사됨", Toast.LENGTH_SHORT).show()
+            }
         }
 
-        binding.btnShareTrip.setOnClickListener {
-            shareSelectedTrip()
+        binding.btnShare.setOnClickListener {
+            selected?.let {
+                startActivity(
+                    Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(
+                            Intent.EXTRA_TEXT,
+                            "${it.city} 여행 (${it.startDate}~${it.endDate})"
+                        )
+                    }
+                )
+            }
         }
 
-        binding.btnShareIntent.setOnClickListener {
-            shareViaIntent()
+        binding.btnSaveMemo.setOnClickListener {
+            selected?.memo = binding.etMemo.text.toString()
+            Toast.makeText(this, "후기 저장됨", Toast.LENGTH_SHORT).show()
+        }
+
+    }
+
+    private fun seedData() {
+        histories.add(
+            TravelHistory(
+                id = UUID.randomUUID().toString(),
+                city = "도쿄",
+                startDate = "2024-03-01",
+                endDate = "2024-03-05",
+                rating = 5
+            )
+        )
+        histories.add(
+            TravelHistory(
+                id = UUID.randomUUID().toString(),
+                city = "오사카",
+                startDate = "2024-04-10",
+                endDate = "2024-04-12",
+                rating = 4
+            )
+        )
+    }
+
+    private fun renderList(keyword: String = "") {
+        binding.tvHistoryList.text =
+            histories
+                .filter { it.city.contains(keyword, true) }
+                .joinToString("\n") {
+                    val fav = if (it.isFavorite) "⭐" else ""
+                    "$fav ${it.city} (${it.rating}점)"
+                }
+    }
+
+    private fun updateStats() {
+        val avg = histories.map { it.rating }.average()
+        val best = histories.maxByOrNull { it.rating }?.city ?: "-"
+        binding.tvStats.text =
+            "총 여행 ${histories.size}회 · 평균 ${"%.1f".format(avg)}점 · 최고 $best"
+    }
+
+    private fun updateSelectedInfo() {
+        selected?.let {
+            val fav = if (it.isFavorite) "⭐ 즐겨찾기" else "일반"
+            binding.tvSelectedInfo.text =
+                "선택됨: ${it.city} (${it.startDate}~${it.endDate}) · ${it.rating}점 · $fav"
+        } ?: run {
+            binding.tvSelectedInfo.text = "선택된 여행 없음"
         }
     }
 
-    private fun restoreLastViewed() {
+    private fun saveLastSelected(id: String) {
+        prefs.edit().putString("last_selected_id", id).apply()
+    }
+
+    private fun restoreLastSelected() {
+        val id = prefs.getString("last_selected_id", null) ?: return
+        selected = histories.find { it.id == id }
+    }
+}
+
+   /* private fun restoreLastViewed() {
         val lastId = prefs.getString(KEY_LAST_VIEWED_ID, null) ?: return
         val index = filteredList.indexOfFirst { it.id == lastId }
         if (index >= 0) selectedHistoryIndex = index
@@ -255,4 +333,4 @@ class MainActivity : AppCompatActivity() {
         binding.tvBestTripRating.text =
             "만족도 ${best.rating} / 5"
     }
-}
+}*/

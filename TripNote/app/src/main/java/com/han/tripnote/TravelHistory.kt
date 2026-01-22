@@ -5,5 +5,7 @@ data class TravelHistory(
     val city: String,
     val startDate: String,
     val endDate: String,
-    val rating: Int
+    val rating: Int,
+    var isFavorite: Boolean = false,
+    var memo: String = ""
 )

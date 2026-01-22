@@ -9,133 +9,84 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardStats"
+        <TextView
+            android:id="@+id/tvSelectedInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:padding="16dp">
+            android:text="선택된 여행 없음"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:paddingBottom="12dp" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/tvTotalTrips"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="총 여행 횟수"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:id="@+id/tvAverageRating"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="평균 만족도" />
-
-                <TextView
-                    android:id="@+id/tvMostVisitedCity"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="가장 많이 간 도시" />
-
-                <TextView
-                    android:id="@+id/tvBestRatedCity"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="최고 만족 도시" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardBestTrip"
+        <TextView
+            android:id="@+id/tvStats"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:padding="16dp"
-            android:visibility="gone">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/tvBestTripTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="⭐ 최고의 여행"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvBestTripDesc"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="도시 / 기간" />
-
-                <TextView
-                    android:id="@+id/tvBestTripRating"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="만족도" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:paddingBottom="12dp" />
 
         <EditText
-            android:id="@+id/etSearchCity"
+            android:id="@+id/etSearch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="도시 검색"
-            android:layout_marginBottom="12dp" />
+            android:hint="도시 검색" />
 
-        <!-- 여행 히스토리 리스트 -->
         <TextView
             android:id="@+id/tvHistoryList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="여행 목록"
-            android:textSize="14sp"
             android:padding="8dp"
             android:background="#EEEEEE"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginTop="8dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:weightSum="3">
+            android:weightSum="3"
+            android:layout_marginTop="8dp">
 
             <Button
-                android:id="@+id/btnHistoryDetail"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="상세보기" />
-
-            <Button
-                android:id="@+id/btnToggleFavorite"
+                android:id="@+id/btnFavorite"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="즐겨찾기" />
 
             <Button
-                android:id="@+id/btnShareTrip"
+                android:id="@+id/btnCopy"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="복사" />
 
+            <Button
+                android:id="@+id/btnShare"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="공유" />
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btnShareIntent"
+        <TextView
+            android:layout_marginTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="✍️ 여행 후기"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/etMemo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="다른 앱으로 공유"
-            android:layout_marginTop="8dp" />
+            android:hint="여행 후기를 입력하세요" />
+
+        <Button
+            android:id="@+id/btnSaveMemo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="후기 저장" />
 
     </LinearLayout>
 </ScrollView>
