@@ -10,6 +10,8 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
@@ -40,6 +42,10 @@ class MainActivity : AppCompatActivity() {
 
         binding.etSearch.addTextChangedListener {
             renderList(it.toString())
+        }
+
+        binding.btnAddTrip.setOnClickListener {
+            showAddTripDialog()
         }
 
         binding.tvHistoryList.setOnClickListener {
@@ -92,6 +98,43 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "후기 저장됨", Toast.LENGTH_SHORT).show()
         }
 
+    }
+
+    private fun showAddTripDialog() {
+        val city = EditText(this).apply { hint = "도시" }
+        val start = EditText(this).apply { hint = "시작일 (YYYY-MM-DD)" }
+        val end = EditText(this).apply { hint = "종료일 (YYYY-MM-DD)" }
+        val rating = EditText(this).apply { hint = "평점 (1~5)" }
+
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(32, 16, 32, 0)
+            addView(city)
+            addView(start)
+            addView(end)
+            addView(rating)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("여행 추가")
+            .setView(layout)
+            .setPositiveButton("추가") { _, _ ->
+                val trip = TravelHistory(
+                    id = UUID.randomUUID().toString(),
+                    city = city.text.toString(),
+                    startDate = start.text.toString(),
+                    endDate = end.text.toString(),
+                    rating = rating.text.toString().toIntOrNull() ?: 3
+                )
+                histories.add(trip)
+                selected = trip
+                saveLastSelected(trip.id)
+                renderList()
+                updateStats()
+                updateSelectedInfo()
+            }
+            .setNegativeButton("취소", null)
+            .show()
     }
 
     private fun seedData() {

@@ -32,6 +32,13 @@
             android:layout_height="wrap_content"
             android:hint="도시 검색" />
 
+        <Button
+            android:id="@+id/btnAddTrip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="➕ 여행 추가"
+            android:layout_marginTop="8dp" />
+
         <TextView
             android:id="@+id/tvHistoryList"
             android:layout_width="match_parent"
