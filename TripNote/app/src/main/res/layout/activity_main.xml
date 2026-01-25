@@ -39,6 +39,20 @@
             android:text="➕ 여행 추가"
             android:layout_marginTop="8dp" />
 
+        <Button
+            android:id="@+id/btnEditTrip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="✏️ 여행 수정"
+            android:layout_marginTop="4dp" />
+
+        <Button
+            android:id="@+id/btnDeleteTrip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🗑️ 여행 삭제"
+            android:layout_marginTop="4dp" />
+
         <TextView
             android:id="@+id/tvHistoryList"
             android:layout_width="match_parent"

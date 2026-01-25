@@ -3,21 +3,18 @@ package com.han.tripnote
 import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.view.View
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
+import com.google.android.material.snackbar.Snackbar
 import com.han.tripnote.databinding.ActivityMainBinding
-import java.time.LocalDate
 import java.util.UUID
+import android.text.InputType
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,6 +23,9 @@ class MainActivity : AppCompatActivity() {
 
     private val histories = mutableListOf<TravelHistory>()
     private var selected: TravelHistory? = null
+
+    private var lastDeleted: TravelHistory? = null
+    private var lastDeletedIndex: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,8 +44,24 @@ class MainActivity : AppCompatActivity() {
             renderList(it.toString())
         }
 
+        binding.etSearch.addTextChangedListener { text ->
+            renderList(text.toString())
+        }
+
         binding.btnAddTrip.setOnClickListener {
-            showAddTripDialog()
+            showTripDialog()
+        }
+
+        binding.btnEditTrip.setOnClickListener {
+            if (selected == null) {
+                Toast.makeText(this, "수정할 여행을 선택하세요", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            showTripDialog(selected)
+        }
+
+        binding.btnDeleteTrip.setOnClickListener {
+            deleteSelectedTrip()
         }
 
         binding.tvHistoryList.setOnClickListener {
@@ -100,11 +116,24 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun showAddTripDialog() {
-        val city = EditText(this).apply { hint = "도시" }
-        val start = EditText(this).apply { hint = "시작일 (YYYY-MM-DD)" }
-        val end = EditText(this).apply { hint = "종료일 (YYYY-MM-DD)" }
-        val rating = EditText(this).apply { hint = "평점 (1~5)" }
+    private fun showTripDialog(target: TravelHistory? = null) {
+        val city = EditText(this).apply {
+            hint = "도시 (필수)"
+            setText(target?.city ?: "")
+        }
+        val start = EditText(this).apply {
+            hint = "시작일 (YYYY-MM-DD)"
+            setText(target?.startDate ?: "")
+        }
+        val end = EditText(this).apply {
+            hint = "종료일 (YYYY-MM-DD)"
+            setText(target?.endDate ?: "")
+        }
+        val rating = EditText(this).apply {
+            hint = "평점 (1~5)"
+            inputType = InputType.TYPE_CLASS_NUMBER
+            setText(target?.rating?.toString() ?: "")
+        }
 
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -116,24 +145,67 @@ class MainActivity : AppCompatActivity() {
         }
 
         AlertDialog.Builder(this)
-            .setTitle("여행 추가")
+            .setTitle(if (target == null) "여행 추가" else "여행 수정")
             .setView(layout)
-            .setPositiveButton("추가") { _, _ ->
-                val trip = TravelHistory(
-                    id = UUID.randomUUID().toString(),
-                    city = city.text.toString(),
-                    startDate = start.text.toString(),
-                    endDate = end.text.toString(),
-                    rating = rating.text.toString().toIntOrNull() ?: 3
-                )
-                histories.add(trip)
-                selected = trip
-                saveLastSelected(trip.id)
+            .setPositiveButton("저장") { _, _ ->
+                if (city.text.isBlank()) {
+                    Toast.makeText(this, "도시는 필수입니다", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                if (target == null) {
+                    val trip = TravelHistory(
+                        id = UUID.randomUUID().toString(),
+                        city = city.text.toString(),
+                        startDate = start.text.toString(),
+                        endDate = end.text.toString(),
+                        rating = rating.text.toString().toIntOrNull() ?: 3
+                    )
+                    histories.add(trip)
+                    selected = trip
+                    saveLastSelected(trip.id)
+                } else {
+                    target.city = city.text.toString()
+                    target.startDate = start.text.toString()
+                    target.endDate = end.text.toString()
+                    target.rating = rating.text.toString().toIntOrNull() ?: target.rating
+                }
+
                 renderList()
                 updateStats()
                 updateSelectedInfo()
             }
             .setNegativeButton("취소", null)
+            .show()
+    }
+
+    private fun deleteSelectedTrip() {
+        val target = selected ?: run {
+            Toast.makeText(this, "삭제할 여행을 선택하세요", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        lastDeletedIndex = histories.indexOf(target)
+        lastDeleted = target
+        histories.remove(target)
+        selected = null
+        saveLastSelected("")
+
+        renderList()
+        updateStats()
+        updateSelectedInfo()
+
+        Snackbar.make(binding.root, "여행이 삭제되었습니다", Snackbar.LENGTH_LONG)
+            .setAction("UNDO") {
+                lastDeleted?.let {
+                    histories.add(lastDeletedIndex, it)
+                    selected = it
+                    saveLastSelected(it.id)
+                    renderList()
+                    updateStats()
+                    updateSelectedInfo()
+                }
+            }
             .show()
     }
 
@@ -194,186 +266,3 @@ class MainActivity : AppCompatActivity() {
         selected = histories.find { it.id == id }
     }
 }
-
-   /* private fun restoreLastViewed() {
-        val lastId = prefs.getString(KEY_LAST_VIEWED_ID, null) ?: return
-        val index = filteredList.indexOfFirst { it.id == lastId }
-        if (index >= 0) selectedHistoryIndex = index
-    }
-
-    private fun saveLastViewed() {
-        val history = filteredList.getOrNull(selectedHistoryIndex) ?: return
-        prefs.edit().putString(KEY_LAST_VIEWED_ID, history.id).apply()
-    }
-
-    private fun showStats() {
-        val list = historyStorage.loadAll()
-        if (list.isEmpty()) {
-            binding.cardStats.visibility = View.GONE
-            return
-        }
-
-        binding.cardStats.visibility = View.VISIBLE
-
-        val total = list.size
-        val average = list.map { it.rating }.average()
-        val mostVisitedCity = list.groupBy { it.city }
-            .maxByOrNull { it.value.size }?.key ?: "-"
-        val bestRatedCity = list.maxByOrNull { it.rating }?.city ?: "-"
-
-        binding.tvTotalTrips.text = "총 여행 횟수: ${total}회"
-        binding.tvAverageRating.text = "평균 만족도: ${"%.1f".format(average)} / 5"
-        binding.tvMostVisitedCity.text = "가장 많이 간 도시: $mostVisitedCity"
-        binding.tvBestRatedCity.text = "최고 만족 도시: $bestRatedCity"
-    }
-
-    private fun showHistoryList(list: List<TravelHistory>) {
-        val favoriteId = prefs.getString("favorite_id", null)
-        val lastViewedId = prefs.getString(KEY_LAST_VIEWED_ID, null)
-
-        filteredList = list.sortedWith(
-            compareByDescending<TravelHistory> { it.id == favoriteId }
-                .thenByDescending { it.id == lastViewedId }
-        )
-
-        if (filteredList.isEmpty()) {
-            binding.tvHistoryList.text = "표시할 여행이 없어요"
-            selectedHistoryIndex = -1
-            return
-        }
-
-        binding.tvHistoryList.text = filteredList.mapIndexed { index, it ->
-            val recent = if (it.id == lastViewedId) "🕒 " else ""
-            val fav = if (it.id == favoriteId) "⭐ " else ""
-            "${index + 1}. $fav$recent${it.city} (${it.startDate} ~ ${it.endDate}) · ${it.rating}/5"
-        }.joinToString("\n\n")
-
-        binding.tvHistoryList.setOnClickListener {
-            selectedHistoryIndex = 0
-        }
-    }
-
-    private fun toggleFavorite() {
-        val history = filteredList.getOrNull(selectedHistoryIndex)
-            ?: return
-
-        val current = prefs.getString("favorite_id", null)
-
-        prefs.edit()
-            .putString("favorite_id", if (current == history.id) null else history.id)
-            .apply()
-
-        showHistoryList(historyStorage.loadAll())
-    }
-
-
-    private fun filterHistoryByCity(keyword: String) {
-        val all = historyStorage.loadAll()
-
-        if (keyword.isBlank()) {
-            showStats()
-            showBestTrip()
-            showHistoryList(all)
-            return
-        }
-
-        val filtered = all.filter {
-            it.city.contains(keyword, ignoreCase = true)
-        }
-
-        binding.cardStats.visibility = View.GONE
-        binding.cardBestTrip.visibility = View.GONE
-        showHistoryList(filtered)
-    }
-
-    private fun showSelectedHistoryDetail() {
-        val history = filteredList.getOrNull(selectedHistoryIndex) ?: return
-
-        AlertDialog.Builder(this)
-            .setTitle("여행 상세")
-            .setMessage(
-                "도시: ${history.city}\n" +
-                        "기간: ${history.startDate} ~ ${history.endDate}\n" +
-                        "만족도: ${history.rating}/5"
-            )
-            .setPositiveButton("확인", null)
-            .show()
-    }
-
-    private fun shareSelectedTrip() {
-        val history = filteredList.getOrNull(selectedHistoryIndex)
-            ?: run {
-                Toast.makeText(this, "공유할 여행을 선택해주세요", Toast.LENGTH_SHORT).show()
-                return
-            }
-
-        val shareText =
-            "✈️ ${history.city} 여행 다녀왔어요!\n" +
-                    "📅 ${history.startDate} ~ ${history.endDate}\n" +
-                    "⭐ 만족도 ${history.rating}/5\n" +
-                    "다음 여행도 기대 중!"
-
-        val clipboard =
-            getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-
-        clipboard.setPrimaryClip(
-            ClipData.newPlainText("trip_share", shareText)
-        )
-
-        Toast.makeText(this, "여행 공유 문구가 복사됐어요", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun buildShareText(history: TravelHistory): String {
-        return "✈️ ${history.city} 여행 다녀왔어요!\n" +
-                "📅 ${history.startDate} ~ ${history.endDate}\n" +
-                "⭐ 만족도 ${history.rating}/5\n" +
-                "다음 여행도 기대 중!"
-    }
-
-    private fun copyShareText() {
-        val history = filteredList.getOrNull(selectedHistoryIndex)
-            ?: run {
-                Toast.makeText(this, "공유할 여행을 선택해주세요", Toast.LENGTH_SHORT).show()
-                return
-            }
-
-        val clipboard =
-            getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-
-        clipboard.setPrimaryClip(
-            ClipData.newPlainText("trip_share", buildShareText(history))
-        )
-
-        Toast.makeText(this, "여행 공유 문구가 복사됐어요", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun shareViaIntent() {
-        val history = filteredList.getOrNull(selectedHistoryIndex)
-            ?: run {
-                Toast.makeText(this, "공유할 여행을 선택해주세요", Toast.LENGTH_SHORT).show()
-                return
-            }
-
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, buildShareText(history))
-        }
-
-        startActivity(Intent.createChooser(intent, "여행 공유하기"))
-    }
-
-    private fun showBestTrip() {
-        val list = historyStorage.loadAll()
-        if (list.isEmpty()) return
-
-        val best = list.maxByOrNull { it.rating } ?: return
-        if (best.rating <= 0) return
-
-        binding.cardBestTrip.visibility = View.VISIBLE
-        binding.tvBestTripTitle.text = "⭐ 최고의 여행"
-        binding.tvBestTripDesc.text =
-            "${best.city} (${best.startDate} ~ ${best.endDate})"
-        binding.tvBestTripRating.text =
-            "만족도 ${best.rating} / 5"
-    }
-}*/

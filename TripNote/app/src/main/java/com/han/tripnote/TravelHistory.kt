@@ -2,10 +2,10 @@ package com.han.tripnote
 
 data class TravelHistory(
     val id: String,
-    val city: String,
-    val startDate: String,
-    val endDate: String,
-    val rating: Int,
+    var city: String,
+    var startDate: String,
+    var endDate: String,
+    var rating: Int,
     var isFavorite: Boolean = false,
     var memo: String = ""
 )
