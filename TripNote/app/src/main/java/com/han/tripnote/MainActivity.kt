@@ -15,6 +15,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.han.tripnote.databinding.ActivityMainBinding
 import java.util.UUID
 import android.text.InputType
+import androidx.recyclerview.widget.LinearLayoutManager
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,6 +24,7 @@ class MainActivity : AppCompatActivity() {
 
     private val histories = mutableListOf<TravelHistory>()
     private var selected: TravelHistory? = null
+    private lateinit var memoAdapter: MemoAdapter
 
     private var lastDeleted: TravelHistory? = null
     private var lastDeletedIndex: Int = -1
@@ -33,6 +35,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         prefs = getSharedPreferences("trip_prefs", MODE_PRIVATE)
+        memoAdapter = MemoAdapter(emptyList())
+
 
         seedData()
         restoreLastSelected()
@@ -67,7 +71,6 @@ class MainActivity : AppCompatActivity() {
         binding.tvHistoryList.setOnClickListener {
             selected = histories.lastOrNull()
             selected?.let {
-                binding.etMemo.setText(it.memo)
                 saveLastSelected(it.id)
             }
             updateSelectedInfo()
@@ -110,9 +113,26 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnSaveMemo.setOnClickListener {
-            selected?.memo = binding.etMemo.text.toString()
-            Toast.makeText(this, "후기 저장됨", Toast.LENGTH_SHORT).show()
+            val text = binding.etMemo.text.toString().trim()
+            if (text.isEmpty()) return@setOnClickListener
+
+            selected?.let {
+                it.memos.add(
+                    TravelMemo(
+                        id = UUID.randomUUID().toString(),
+                        content = text
+                    )
+                )
+                binding.etMemo.setText("")
+                renderMemos(it)
+                Toast.makeText(this, "메모 추가됨", Toast.LENGTH_SHORT).show()
+            }
         }
+
+        binding.rvMemos.apply {
+                layoutManager = LinearLayoutManager(this@MainActivity)
+                adapter = memoAdapter
+            }
 
     }
 
@@ -252,9 +272,15 @@ class MainActivity : AppCompatActivity() {
             val fav = if (it.isFavorite) "⭐ 즐겨찾기" else "일반"
             binding.tvSelectedInfo.text =
                 "선택됨: ${it.city} (${it.startDate}~${it.endDate}) · ${it.rating}점 · $fav"
+            renderMemos(it)
         } ?: run {
             binding.tvSelectedInfo.text = "선택된 여행 없음"
+            memoAdapter.submit(emptyList())
         }
+    }
+
+    private fun renderMemos(history: TravelHistory) {
+        memoAdapter.submit(history.memos)
     }
 
     private fun saveLastSelected(id: String) {

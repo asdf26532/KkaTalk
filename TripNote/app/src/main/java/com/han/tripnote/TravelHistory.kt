@@ -7,5 +7,5 @@ data class TravelHistory(
     var endDate: String,
     var rating: Int,
     var isFavorite: Boolean = false,
-    var memo: String = ""
+    var memos: MutableList<TravelMemo> = mutableListOf()
 )
