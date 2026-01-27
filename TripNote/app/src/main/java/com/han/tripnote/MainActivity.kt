@@ -16,6 +16,8 @@ import com.han.tripnote.databinding.ActivityMainBinding
 import java.util.UUID
 import android.text.InputType
 import androidx.recyclerview.widget.LinearLayoutManager
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 class MainActivity : AppCompatActivity() {
 
@@ -28,6 +30,9 @@ class MainActivity : AppCompatActivity() {
 
     private var lastDeleted: TravelHistory? = null
     private var lastDeletedIndex: Int = -1
+
+    private enum class SortType { DEFAULT, RATING, DURATION }
+    private var sortType = SortType.DEFAULT
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,10 +96,10 @@ class MainActivity : AppCompatActivity() {
                 cm.setPrimaryClip(
                     ClipData.newPlainText(
                         "trip",
-                        "${it.city} (${it.startDate}~${it.endDate})"
+                        buildTripSummary(it)
                     )
                 )
-                Toast.makeText(this, "복사됨", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "여행 요약 복사됨", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -103,10 +108,7 @@ class MainActivity : AppCompatActivity() {
                 startActivity(
                     Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
-                        putExtra(
-                            Intent.EXTRA_TEXT,
-                            "${it.city} 여행 (${it.startDate}~${it.endDate})"
-                        )
+                        putExtra(Intent.EXTRA_TEXT, buildTripSummary(it))
                     }
                 )
             }
@@ -134,6 +136,39 @@ class MainActivity : AppCompatActivity() {
                 adapter = memoAdapter
             }
 
+        binding.tvStats.setOnClickListener {
+            sortType = when (sortType) {
+                SortType.DEFAULT -> SortType.RATING
+                SortType.RATING -> SortType.DURATION
+                SortType.DURATION -> SortType.DEFAULT
+            }
+            renderList(binding.etSearch.text.toString())
+            Toast.makeText(this, "정렬: $sortType", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.tvSelectedInfo.setOnLongClickListener {
+            selected?.let { showSummaryDialog(it) }
+            true
+        }
+    }
+
+    private fun buildTripSummary(t: TravelHistory): String {
+        val days = calculateDays(t.startDate, t.endDate)
+        return """
+            ✈️ 여행 요약
+            도시: ${t.city}
+            기간: ${t.startDate} ~ ${t.endDate} (${days}일)
+            평점: ${t.rating}점
+            메모 수: ${t.memos.size}개
+        """.trimIndent()
+    }
+
+    private fun showSummaryDialog(t: TravelHistory) {
+        AlertDialog.Builder(this)
+            .setTitle("여행 요약")
+            .setMessage(buildTripSummary(t))
+            .setPositiveButton("확인", null)
+            .show()
     }
 
     private fun showTripDialog(target: TravelHistory? = null) {
@@ -270,8 +305,12 @@ class MainActivity : AppCompatActivity() {
     private fun updateSelectedInfo() {
         selected?.let {
             val fav = if (it.isFavorite) "⭐ 즐겨찾기" else "일반"
+            val days = calculateDays(it.startDate, it.endDate)
+
             binding.tvSelectedInfo.text =
-                "선택됨: ${it.city} (${it.startDate}~${it.endDate}) · ${it.rating}점 · $fav"
+
+                "선택됨: ${it.city} (${it.startDate}~${it.endDate}, ${days}일) · ${it.rating}점 · $fav"
+
             renderMemos(it)
         } ?: run {
             binding.tvSelectedInfo.text = "선택된 여행 없음"
@@ -291,4 +330,16 @@ class MainActivity : AppCompatActivity() {
         val id = prefs.getString("last_selected_id", null) ?: return
         selected = histories.find { it.id == id }
     }
+
+    private fun calculateDays(start: String, end: String): Long {
+        return try {
+            val s = LocalDate.parse(start)
+            val e = LocalDate.parse(end)
+            ChronoUnit.DAYS.between(s, e) + 1
+        } catch (e: Exception) {
+            0
+        }
+    }
+
+
 }
