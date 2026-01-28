@@ -115,5 +115,15 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp" />
 
+        <TextView
+            android:id="@+id/tvRecentTrip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🔥 최근 여행 추천"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:padding="8dp"
+            android:textColor="#FF5722"/>
+
     </LinearLayout>
 </ScrollView>

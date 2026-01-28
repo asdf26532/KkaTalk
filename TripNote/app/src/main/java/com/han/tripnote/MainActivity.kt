@@ -31,8 +31,8 @@ class MainActivity : AppCompatActivity() {
     private var lastDeleted: TravelHistory? = null
     private var lastDeletedIndex: Int = -1
 
-    private enum class SortType { DEFAULT, RATING, DURATION }
-    private var sortType = SortType.DEFAULT
+    private var sortByRating = false
+    private var sortByUpcoming = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,10 +53,6 @@ class MainActivity : AppCompatActivity() {
             renderList(it.toString())
         }
 
-        binding.etSearch.addTextChangedListener { text ->
-            renderList(text.toString())
-        }
-
         binding.btnAddTrip.setOnClickListener {
             showTripDialog()
         }
@@ -75,18 +71,15 @@ class MainActivity : AppCompatActivity() {
 
         binding.tvHistoryList.setOnClickListener {
             selected = histories.lastOrNull()
-            selected?.let {
-                saveLastSelected(it.id)
-            }
+            selected?.let { saveLastSelected(it.id) }
             updateSelectedInfo()
-            Toast.makeText(this, "여행 선택됨", Toast.LENGTH_SHORT).show()
         }
 
         binding.btnFavorite.setOnClickListener {
             selected?.let {
                 it.isFavorite = !it.isFavorite
+                renderList(binding.etSearch.text.toString())
                 updateSelectedInfo()
-                renderList()
             }
         }
 
@@ -96,10 +89,10 @@ class MainActivity : AppCompatActivity() {
                 cm.setPrimaryClip(
                     ClipData.newPlainText(
                         "trip",
-                        buildTripSummary(it)
+                        "${it.city} (${it.startDate}~${it.endDate})"
                     )
                 )
-                Toast.makeText(this, "여행 요약 복사됨", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "복사됨", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -108,7 +101,10 @@ class MainActivity : AppCompatActivity() {
                 startActivity(
                     Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, buildTripSummary(it))
+                        putExtra(
+                            Intent.EXTRA_TEXT,
+                            "${it.city} 여행 (${it.startDate}~${it.endDate})"
+                        )
                     }
                 )
             }
@@ -127,29 +123,32 @@ class MainActivity : AppCompatActivity() {
                 )
                 binding.etMemo.setText("")
                 renderMemos(it)
-                Toast.makeText(this, "메모 추가됨", Toast.LENGTH_SHORT).show()
+                renderList(binding.etSearch.text.toString())
             }
         }
 
         binding.rvMemos.apply {
-                layoutManager = LinearLayoutManager(this@MainActivity)
-                adapter = memoAdapter
-            }
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            adapter = memoAdapter
+        }
 
         binding.tvStats.setOnClickListener {
-            sortType = when (sortType) {
-                SortType.DEFAULT -> SortType.RATING
-                SortType.RATING -> SortType.DURATION
-                SortType.DURATION -> SortType.DEFAULT
+            when {
+                !sortByRating && !sortByUpcoming -> {
+                    sortByUpcoming = true
+                }
+                sortByUpcoming -> {
+                    sortByUpcoming = false
+                    sortByRating = true
+                }
+                sortByRating -> {
+                    sortByRating = false
+                }
             }
             renderList(binding.etSearch.text.toString())
-            Toast.makeText(this, "정렬: $sortType", Toast.LENGTH_SHORT).show()
+            updateStats()
         }
 
-        binding.tvSelectedInfo.setOnLongClickListener {
-            selected?.let { showSummaryDialog(it) }
-            true
-        }
     }
 
     private fun buildTripSummary(t: TravelHistory): String {
@@ -235,10 +234,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun deleteSelectedTrip() {
-        val target = selected ?: run {
-            Toast.makeText(this, "삭제할 여행을 선택하세요", Toast.LENGTH_SHORT).show()
-            return
-        }
+        val target = selected ?: return
 
         lastDeletedIndex = histories.indexOf(target)
         lastDeleted = target
@@ -246,7 +242,7 @@ class MainActivity : AppCompatActivity() {
         selected = null
         saveLastSelected("")
 
-        renderList()
+        renderList(binding.etSearch.text.toString())
         updateStats()
         updateSelectedInfo()
 
@@ -256,12 +252,22 @@ class MainActivity : AppCompatActivity() {
                     histories.add(lastDeletedIndex, it)
                     selected = it
                     saveLastSelected(it.id)
-                    renderList()
+                    renderList(binding.etSearch.text.toString())
                     updateStats()
                     updateSelectedInfo()
                 }
             }
             .show()
+    }
+
+    private fun calculateDDay(start: String): Long {
+        return try {
+            val today = LocalDate.now()
+            val s = LocalDate.parse(start)
+            ChronoUnit.DAYS.between(today, s)
+        } catch (e: Exception) {
+            Long.MAX_VALUE
+        }
     }
 
     private fun seedData() {
@@ -286,31 +292,46 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun renderList(keyword: String = "") {
+        val filtered = histories.filter {
+            it.city.contains(keyword, true)
+        }
+
+        val list = when {
+            sortByUpcoming -> filtered.sortedBy { calculateDDay(it.startDate) }
+            sortByRating -> filtered.sortedByDescending { it.rating }
+            else -> filtered
+        }
+
         binding.tvHistoryList.text =
-            histories
-                .filter { it.city.contains(keyword, true) }
-                .joinToString("\n") {
-                    val fav = if (it.isFavorite) "⭐" else ""
-                    "$fav ${it.city} (${it.rating}점)"
-                }
+            list.joinToString("\n") {
+                val fav = if (it.isFavorite) "⭐" else ""
+                val days = calculateDays(it.startDate, it.endDate)
+                val dday = calculateDDay(it.startDate)
+                val ddayText =
+                    if (dday > 0) "D-$dday"
+                    else if (dday == 0L) "D-DAY"
+                    else "종료"
+
+                "$fav ${it.city} ($ddayText, ${days}일) · ${it.rating}점 · 메모 ${it.memos.size}"
+            }
     }
 
     private fun updateStats() {
         val avg = histories.map { it.rating }.average()
         val best = histories.maxByOrNull { it.rating }?.city ?: "-"
+        val upcoming = histories
+            .filter { calculateDDay(it.startDate) >= 0 }
+            .minByOrNull { calculateDDay(it.startDate) }
+            ?.city ?: "-"
+
         binding.tvStats.text =
-            "총 여행 ${histories.size}회 · 평균 ${"%.1f".format(avg)}점 · 최고 $best"
+            "총 ${histories.size}회 · 평균 ${"%.1f".format(avg)}점 · 최고 $best · 다음 $upcoming"
     }
 
     private fun updateSelectedInfo() {
         selected?.let {
-            val fav = if (it.isFavorite) "⭐ 즐겨찾기" else "일반"
-            val days = calculateDays(it.startDate, it.endDate)
-
             binding.tvSelectedInfo.text =
-
-                "선택됨: ${it.city} (${it.startDate}~${it.endDate}, ${days}일) · ${it.rating}점 · $fav"
-
+                "선택됨: ${it.city} (${it.startDate}~${it.endDate})"
             renderMemos(it)
         } ?: run {
             binding.tvSelectedInfo.text = "선택된 여행 없음"
@@ -330,16 +351,5 @@ class MainActivity : AppCompatActivity() {
         val id = prefs.getString("last_selected_id", null) ?: return
         selected = histories.find { it.id == id }
     }
-
-    private fun calculateDays(start: String, end: String): Long {
-        return try {
-            val s = LocalDate.parse(start)
-            val e = LocalDate.parse(end)
-            ChronoUnit.DAYS.between(s, e) + 1
-        } catch (e: Exception) {
-            0
-        }
-    }
-
 
 }
