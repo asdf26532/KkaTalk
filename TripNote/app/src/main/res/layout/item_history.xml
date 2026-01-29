@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:background="?attr/selectableItemBackground"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/tvStatus"
+        android:text="예정"
+        android:textStyle="bold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/tvCity"
+        android:layout_marginStart="8dp"
+        android:textSize="16sp"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"/>
+
+    <ImageView
+        android:id="@+id/ivFavorite"
+        android:src="@android:drawable/btn_star_big_on"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/tvRating"
+        android:layout_marginStart="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+</LinearLayout>
