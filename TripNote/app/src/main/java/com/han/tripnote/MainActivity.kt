@@ -42,9 +42,13 @@ class MainActivity : AppCompatActivity() {
         prefs = getSharedPreferences("trip_prefs", MODE_PRIVATE)
         memoAdapter = MemoAdapter(emptyList())
 
-
         seedData()
         restoreLastSelected()
+
+        if (selected == null) {
+            selectMostRecentTrip()
+        }
+
         renderList()
         updateStats()
         updateSelectedInfo()
@@ -134,21 +138,20 @@ class MainActivity : AppCompatActivity() {
 
         binding.tvStats.setOnClickListener {
             when {
-                !sortByRating && !sortByUpcoming -> {
-                    sortByUpcoming = true
-                }
+                !sortByRating && !sortByUpcoming -> sortByUpcoming = true
                 sortByUpcoming -> {
                     sortByUpcoming = false
                     sortByRating = true
                 }
-                sortByRating -> {
-                    sortByRating = false
-                }
+                sortByRating -> sortByRating = false
             }
             renderList(binding.etSearch.text.toString())
             updateStats()
         }
 
+        binding.tvSelectedInfo.setOnClickListener {
+            selected?.let { showSummaryDialog(it) }
+        }
     }
 
     private fun buildTripSummary(t: TravelHistory): String {
@@ -242,6 +245,8 @@ class MainActivity : AppCompatActivity() {
         selected = null
         saveLastSelected("")
 
+        selectMostRecentTrip()
+
         renderList(binding.etSearch.text.toString())
         updateStats()
         updateSelectedInfo()
@@ -258,6 +263,16 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             .show()
+    }
+
+    private fun calculateDays(start: String, end: String): Long {
+        return try {
+            val s = LocalDate.parse(start)
+            val e = LocalDate.parse(end)
+            ChronoUnit.DAYS.between(s, e) + 1
+        } catch (e: Exception) {
+            0
+        }
     }
 
     private fun calculateDDay(start: String): Long {
@@ -352,4 +367,10 @@ class MainActivity : AppCompatActivity() {
         selected = histories.find { it.id == id }
     }
 
+    private fun selectMostRecentTrip() {
+        selected = histories.maxByOrNull {
+            calculateDDay(it.startDate)
+        }
+        selected?.let { saveLastSelected(it.id) }
+    }
 }
