@@ -61,6 +61,12 @@
             android:background="#EEEEEE"
             android:layout_marginTop="8dp" />
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvHistories"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

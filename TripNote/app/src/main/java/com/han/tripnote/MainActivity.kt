@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     private val histories = mutableListOf<TravelHistory>()
     private var selected: TravelHistory? = null
     private lateinit var memoAdapter: MemoAdapter
+    private lateinit var historyAdapter: TravelHistoryAdapter
 
     private var lastDeleted: TravelHistory? = null
     private var lastDeletedIndex: Int = -1
@@ -48,6 +49,20 @@ class MainActivity : AppCompatActivity() {
         if (selected == null) {
             selectMostRecentTrip()
         }
+
+        historyAdapter = TravelHistoryAdapter(
+            onClick = {
+                selected = it
+                saveLastSelected(it.id)
+                updateSelectedInfo()
+                historyAdapter.refreshSelection()
+            },
+            onLongClick = {
+                selected = it
+                showSummaryDialog(it)
+            },
+            isSelected = { it.id == selected?.id }
+        )
 
         renderList()
         updateStats()
@@ -317,18 +332,12 @@ class MainActivity : AppCompatActivity() {
             else -> filtered
         }
 
-        binding.tvHistoryList.text =
-            list.joinToString("\n") {
-                val fav = if (it.isFavorite) "⭐" else ""
-                val days = calculateDays(it.startDate, it.endDate)
-                val dday = calculateDDay(it.startDate)
-                val ddayText =
-                    if (dday > 0) "D-$dday"
-                    else if (dday == 0L) "D-DAY"
-                    else "종료"
+        historyAdapter.submit(list)
 
-                "$fav ${it.city} ($ddayText, ${days}일) · ${it.rating}점 · 메모 ${it.memos.size}"
-            }
+        binding.tvRecentTrip.text =
+            list.firstOrNull()?.let {
+                "🔥 최근 여행 추천: ${it.city}"
+            } ?: "🔥 추천 여행 없음"
     }
 
     private fun updateStats() {
