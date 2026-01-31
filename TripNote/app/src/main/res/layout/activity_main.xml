@@ -1,135 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <!-- 앱 타이틀 -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:text="TripNote"
+        android:textSize="26sp"
+        android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tvSelectedInfo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="선택된 여행 없음"
-            android:textStyle="bold"
-            android:textSize="15sp"
-            android:paddingBottom="12dp" />
+    <!-- 앱 설명 -->
+    <TextView
+        android:id="@+id/tvSubTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="여행을 기록하고 정리하세요"
+        android:textSize="16sp" />
 
-        <TextView
-            android:id="@+id/tvStats"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:paddingBottom="12dp" />
+    <!-- 여행 목록 RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvTripList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_weight="1" />
 
-        <EditText
-            android:id="@+id/etSearch"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="도시 검색" />
-
-        <Button
-            android:id="@+id/btnAddTrip"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="➕ 여행 추가"
-            android:layout_marginTop="8dp" />
-
-        <Button
-            android:id="@+id/btnEditTrip"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="✏️ 여행 수정"
-            android:layout_marginTop="4dp" />
-
-        <Button
-            android:id="@+id/btnDeleteTrip"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="🗑️ 여행 삭제"
-            android:layout_marginTop="4dp" />
-
-        <TextView
-            android:id="@+id/tvHistoryList"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:background="#EEEEEE"
-            android:layout_marginTop="8dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvHistories"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="3"
-            android:layout_marginTop="8dp">
-
-            <Button
-                android:id="@+id/btnFavorite"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="즐겨찾기" />
-
-            <Button
-                android:id="@+id/btnCopy"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="복사" />
-
-            <Button
-                android:id="@+id/btnShare"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="공유" />
-        </LinearLayout>
-
-        <TextView
-            android:layout_marginTop="16dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="✍️ 여행 후기"
-            android:textStyle="bold" />
-
-        <EditText
-            android:id="@+id/etMemo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="여행 후기를 입력하세요" />
-
-        <Button
-            android:id="@+id/btnSaveMemo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="후기 저장" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvMemos"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp" />
-
-        <TextView
-            android:id="@+id/tvRecentTrip"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="🔥 최근 여행 추천"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:padding="8dp"
-            android:textColor="#FF5722"/>
-
-    </LinearLayout>
-</ScrollView>
+</LinearLayout>
