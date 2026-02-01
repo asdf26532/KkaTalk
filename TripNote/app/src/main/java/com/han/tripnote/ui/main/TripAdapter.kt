@@ -30,7 +30,6 @@ class TripAdapter(
         private val tvLocation: TextView = itemView.findViewById(R.id.tvTripLocation)
         private val tvDate: TextView = itemView.findViewById(R.id.tvTripDate)
 
-        // [2일차] 데이터 바인딩
         fun bind(trip: Trip) {
             tvTitle.text = trip.title
             tvLocation.text = trip.location
