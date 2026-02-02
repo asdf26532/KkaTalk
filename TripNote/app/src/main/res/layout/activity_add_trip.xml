@@ -26,7 +26,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:hint="시작 날짜" />
+        android:hint="시작 날짜"
+        android:focusable="false"
+        android:clickable="true"/>
 
     <!-- 종료 날짜 -->
     <EditText
@@ -34,7 +36,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:hint="종료 날짜" />
+        android:hint="종료 날짜"
+        android:focusable="false"
+        android:clickable="true"/>
 
     <!-- 저장 버튼 -->
     <Button
