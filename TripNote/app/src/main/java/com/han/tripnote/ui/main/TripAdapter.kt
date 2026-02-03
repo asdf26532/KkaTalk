@@ -9,7 +9,8 @@ import com.han.tripnote.R
 import com.han.tripnote.data.model.Trip
 
 class TripAdapter(
-    private val tripList: List<Trip>
+    private val tripList: List<Trip>,
+    private val onLongClick: (Int) -> Unit
 ) : RecyclerView.Adapter<TripAdapter.TripViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TripViewHolder {
@@ -20,6 +21,11 @@ class TripAdapter(
 
     override fun onBindViewHolder(holder: TripViewHolder, position: Int) {
         holder.bind(tripList[position])
+
+        holder.itemView.setOnLongClickListener {
+            onLongClick(position)
+            true
+        }
     }
 
     override fun getItemCount(): Int = tripList.size

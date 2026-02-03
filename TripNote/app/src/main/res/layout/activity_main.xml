@@ -27,6 +27,29 @@
             android:text="여행을 기록하고 정리하세요"
             android:textSize="16sp" />
 
+        <LinearLayout
+            android:id="@+id/layoutEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="아직 여행이 없어요 ✈️"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="아래 + 버튼을 눌러 여행을 추가해보세요"
+                android:textSize="14sp" />
+        </LinearLayout>
+
         <!-- 여행 목록 RecyclerView -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvTripList"
