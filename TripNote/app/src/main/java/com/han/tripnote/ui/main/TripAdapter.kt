@@ -9,7 +9,7 @@ import com.han.tripnote.R
 import com.han.tripnote.data.model.Trip
 
 class TripAdapter(
-    private val tripList: List<Trip>,
+    private val tripList: MutableList<Trip>,
     private val onLongClick: (Int) -> Unit
 ) : RecyclerView.Adapter<TripAdapter.TripViewHolder>() {
 
@@ -30,7 +30,7 @@ class TripAdapter(
 
     override fun getItemCount(): Int = tripList.size
 
-    class TripViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class TripViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         private val tvTitle: TextView = itemView.findViewById(R.id.tvTripTitle)
         private val tvLocation: TextView = itemView.findViewById(R.id.tvTripLocation)
@@ -41,5 +41,11 @@ class TripAdapter(
             tvLocation.text = trip.location
             tvDate.text = "${trip.startDate} ~ ${trip.endDate}"
         }
+    }
+
+    fun submitList(newList: MutableList<Trip>) {
+        tripList.clear()
+        tripList.addAll(newList)
+        notifyDataSetChanged()
     }
 }

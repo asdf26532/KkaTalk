@@ -13,12 +13,12 @@ import com.han.tripnote.data.model.Trip
 import com.han.tripnote.ui.add.AddTripActivity
 import com.han.tripnote.util.TripStorage
 import android.widget.LinearLayout
+import androidx.lifecycle.ViewModelProvider
 
 class MainActivity : AppCompatActivity() {
 
-    private val tripList = mutableListOf<Trip>()
+    private lateinit var viewModel: TripViewModel
     private lateinit var adapter: TripAdapter
-
     private lateinit var emptyLayout: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,19 +28,21 @@ class MainActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.rvTripList)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        adapter = TripAdapter(tripList) { position ->
+        viewModel = ViewModelProvider(this)[TripViewModel::class.java]
+
+        adapter = TripAdapter(mutableListOf()) { position ->
             showDeleteDialog(position)
         }
         recyclerView.adapter = adapter
 
         emptyLayout = findViewById(R.id.layoutEmpty)
 
-        // 저장된 여행 목록 불러오기
-        val savedTrips = TripStorage.load(this)
-        tripList.addAll(savedTrips)
-        adapter.notifyDataSetChanged()
+        viewModel.tripList.observe(this) { list ->
+            adapter.submitList(list.toMutableList())
+            updateEmptyView(list)
+        }
 
-        updateEmptyView()
+        viewModel.load(this)
 
         // 여행 추가 버튼
         findViewById<View>(R.id.fabAddTrip).setOnClickListener {
@@ -62,13 +64,7 @@ class MainActivity : AppCompatActivity() {
                 endDate = data?.getStringExtra("endDate") ?: ""
             )
 
-            tripList.add(trip)
-            adapter.notifyItemInserted(tripList.size - 1)
-
-            updateEmptyView()
-
-            // 여행 목록 저장
-            TripStorage.save(this, tripList)
+            viewModel.addTrip(this, trip)
         }
     }
 
@@ -77,22 +73,14 @@ class MainActivity : AppCompatActivity() {
             .setTitle("여행 삭제")
             .setMessage("이 여행을 삭제하시겠습니까?")
             .setPositiveButton("삭제") { _, _ ->
-                tripList.removeAt(position)
-                adapter.notifyItemRemoved(position)
-
-                updateEmptyView()
-
-                TripStorage.save(this, tripList)
+                viewModel.removeTrip(this, position)
             }
             .setNegativeButton("취소", null)
             .show()
     }
 
-    private fun updateEmptyView() {
-        if (tripList.isEmpty()) {
-            emptyLayout.visibility = View.VISIBLE
-        } else {
-            emptyLayout.visibility = View.GONE
-        }
+    private fun updateEmptyView(list: List<Trip>) {
+        emptyLayout.visibility =
+            if (list.isEmpty()) View.VISIBLE else View.GONE
     }
 }
