@@ -4,31 +4,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.han.tripnote.R
 import com.han.tripnote.data.model.Trip
 
 class TripAdapter(
-    private val tripList: MutableList<Trip>,
-    private val onLongClick: (Int) -> Unit
-) : RecyclerView.Adapter<TripAdapter.TripViewHolder>() {
+    private val onItemClick: (Trip) -> Unit,
+    private val onItemLongClick: (Int) -> Unit
+) : ListAdapter<Trip, TripAdapter.TripViewHolder>(TripDiffCallback()) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TripViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_trip, parent, false)
-        return TripViewHolder(view)
-    }
-
-    override fun onBindViewHolder(holder: TripViewHolder, position: Int) {
-        holder.bind(tripList[position])
-
-        holder.itemView.setOnLongClickListener {
-            onLongClick(position)
-            true
-        }
-    }
-
-    override fun getItemCount(): Int = tripList.size
 
     inner class TripViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -40,12 +25,25 @@ class TripAdapter(
             tvTitle.text = trip.title
             tvLocation.text = trip.location
             tvDate.text = "${trip.startDate} ~ ${trip.endDate}"
+
+            itemView.setOnClickListener {
+                onItemClick(trip)
+            }
+
+            itemView.setOnLongClickListener {
+                onItemLongClick(adapterPosition)
+                true
+            }
         }
     }
 
-    fun submitList(newList: MutableList<Trip>) {
-        tripList.clear()
-        tripList.addAll(newList)
-        notifyDataSetChanged()
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TripViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_trip, parent, false)
+        return TripViewHolder(view)
     }
-}
+
+    override fun onBindViewHolder(holder: TripViewHolder, position: Int) {
+        holder.bind(getItem(position))
+        }
+    }

@@ -14,6 +14,7 @@ import com.han.tripnote.ui.add.AddTripActivity
 import com.han.tripnote.util.TripStorage
 import android.widget.LinearLayout
 import androidx.lifecycle.ViewModelProvider
+import com.han.tripnote.ui.detail.TripDetailActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,15 +31,25 @@ class MainActivity : AppCompatActivity() {
 
         viewModel = ViewModelProvider(this)[TripViewModel::class.java]
 
-        adapter = TripAdapter(mutableListOf()) { position ->
-            showDeleteDialog(position)
-        }
+        adapter = TripAdapter(
+            onItemClick = { trip ->
+                val intent = Intent(this, TripDetailActivity::class.java)
+                intent.putExtra("title", trip.title)
+                intent.putExtra("location", trip.location)
+                intent.putExtra("startDate", trip.startDate)
+                intent.putExtra("endDate", trip.endDate)
+                startActivity(intent)
+            },
+            onItemLongClick = { position ->
+                showDeleteDialog(position)
+            }
+        )
         recyclerView.adapter = adapter
 
         emptyLayout = findViewById(R.id.layoutEmpty)
 
         viewModel.tripList.observe(this) { list ->
-            adapter.submitList(list.toMutableList())
+            adapter.submitList(list.toList())
             updateEmptyView(list)
         }
 
