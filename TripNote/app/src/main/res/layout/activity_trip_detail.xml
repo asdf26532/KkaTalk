@@ -27,4 +27,11 @@
         android:layout_marginTop="8dp"
         android:textSize="14sp" />
 
+    <Button
+        android:id="@+id/btnEdit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="수정"
+        android:layout_marginTop="16dp"/>
+
 </LinearLayout>

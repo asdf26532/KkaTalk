@@ -34,10 +34,7 @@ class MainActivity : AppCompatActivity() {
         adapter = TripAdapter(
             onItemClick = { trip ->
                 val intent = Intent(this, TripDetailActivity::class.java)
-                intent.putExtra("title", trip.title)
-                intent.putExtra("location", trip.location)
-                intent.putExtra("startDate", trip.startDate)
-                intent.putExtra("endDate", trip.endDate)
+                intent.putExtra("trip", trip)
                 startActivity(intent)
             },
             onItemLongClick = { position ->

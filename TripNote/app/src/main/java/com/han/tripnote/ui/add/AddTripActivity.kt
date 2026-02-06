@@ -7,18 +7,37 @@ import androidx.appcompat.app.AppCompatActivity
 import com.han.tripnote.databinding.ActivityAddTripBinding
 import java.util.UUID
 import android.app.DatePickerDialog
+import android.os.Build
 import android.widget.Toast
+import com.han.tripnote.data.model.Trip
 import java.util.Calendar
 
 class AddTripActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddTripBinding
 
+    private var isEditMode = false
+    private var editTrip: Trip? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityAddTripBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Edit Mode
+        editTrip = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra("trip", Trip::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getParcelableExtra("trip")
+        }
+
+        // Edit Mode 판별
+        if (editTrip != null) {
+            isEditMode = true
+            setupEditMode()
+        }
 
         // 날짜 선택 처리
         binding.etStartDate.setOnClickListener {
@@ -54,6 +73,16 @@ class AddTripActivity : AppCompatActivity() {
             setResult(Activity.RESULT_OK, intent)
             finish()
         }
+    }
+
+    private fun setupEditMode() {
+        binding.etTitle.setText(editTrip?.title)
+        binding.etLocation.setText(editTrip?.location)
+        binding.etStartDate.setText(editTrip?.startDate)
+        binding.etEndDate.setText(editTrip?.endDate)
+
+        binding.btnSave.text = "수정 완료"
+        supportActionBar?.title = "여행 수정"
     }
 
     private fun showDatePicker(onDateSelected: (String) -> Unit) {
