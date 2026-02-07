@@ -11,10 +11,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.han.tripnote.R
 import com.han.tripnote.data.model.Trip
 import com.han.tripnote.ui.add.AddTripActivity
-import com.han.tripnote.util.TripStorage
 import android.widget.LinearLayout
 import androidx.lifecycle.ViewModelProvider
-import com.han.tripnote.ui.detail.TripDetailActivity
+import com.han.tripnote.ui.viewmodel.TripViewModel
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,7 +32,7 @@ class MainActivity : AppCompatActivity() {
 
         adapter = TripAdapter(
             onItemClick = { trip ->
-                val intent = Intent(this, TripDetailActivity::class.java)
+                val intent = Intent(this, TripViewModel::class.java)
                 intent.putExtra("trip", trip)
                 startActivity(intent)
             },
@@ -46,11 +45,10 @@ class MainActivity : AppCompatActivity() {
         emptyLayout = findViewById(R.id.layoutEmpty)
 
         viewModel.tripList.observe(this) { list ->
-            adapter.submitList(list.toList())
+            adapter.submitList(list)
             updateEmptyView(list)
         }
 
-        viewModel.load(this)
 
         // 여행 추가 버튼
         findViewById<View>(R.id.fabAddTrip).setOnClickListener {
