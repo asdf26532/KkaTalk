@@ -9,21 +9,24 @@ import java.util.UUID
 import android.app.DatePickerDialog
 import android.os.Build
 import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
 import com.han.tripnote.data.model.Trip
+import com.han.tripnote.ui.viewmodel.TripViewModel
 import java.util.Calendar
 
 class AddTripActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddTripBinding
+    private lateinit var viewModel: TripViewModel
 
-    private var isEditMode = false
     private var editTrip: Trip? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivityAddTripBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        viewModel = ViewModelProvider(this)[TripViewModel::class.java]
 
         // Edit Mode
         editTrip = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -33,70 +36,48 @@ class AddTripActivity : AppCompatActivity() {
             intent.getParcelableExtra("trip")
         }
 
-        // Edit Mode 판별
         if (editTrip != null) {
-            isEditMode = true
-            setupEditMode()
-        }
+            binding.etTitle.setText(editTrip!!.title)
+            binding.etLocation.setText(editTrip!!.location)
+            binding.etStartDate.setText(editTrip!!.startDate)
+            binding.etEndDate.setText(editTrip!!.endDate)
 
-        // 날짜 선택 처리
-        binding.etStartDate.setOnClickListener {
-            showDatePicker { date ->
-                binding.etStartDate.setText(date)
-            }
+            binding.btnSave.text = "수정 완료"
         }
 
         // 저장 버튼
         binding.btnSave.setOnClickListener {
-
-            val title = binding.etTitle.text.toString()
-            val location = binding.etLocation.text.toString()
-            val startDate = binding.etStartDate.text.toString()
-            val endDate = binding.etEndDate.text.toString()
-
-            // 입력값 검증
-            if (title.isBlank() || location.isBlank()
-                || startDate.isBlank() || endDate.isBlank()
-            ) {
-                Toast.makeText(this, "모든 항목을 입력해주세요", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val intent = Intent().apply {
-                putExtra("id", UUID.randomUUID().toString())
-                putExtra("title", title)
-                putExtra("location", location)
-                putExtra("startDate", startDate)
-                putExtra("endDate", endDate)
-            }
-
-            setResult(Activity.RESULT_OK, intent)
-            finish()
+            saveTrip()
         }
     }
 
-    private fun setupEditMode() {
-        binding.etTitle.setText(editTrip?.title)
-        binding.etLocation.setText(editTrip?.location)
-        binding.etStartDate.setText(editTrip?.startDate)
-        binding.etEndDate.setText(editTrip?.endDate)
+    private fun saveTrip() {
+        val title = binding.etTitle.text.toString()
+        val location = binding.etLocation.text.toString()
+        val startDate = binding.etStartDate.text.toString()
+        val endDate = binding.etEndDate.text.toString()
 
-        binding.btnSave.text = "수정 완료"
-        supportActionBar?.title = "여행 수정"
-    }
+        //  추가 / 수정 분기 핵심
+        val trip = if (editTrip != null) {
+            // 수정 → 기존 id 유지
+            editTrip!!.copy(
+                title = title,
+                location = location,
+                startDate = startDate,
+                endDate = endDate
+            )
+        } else {
+            // 추가 → 새 id 생성
+            Trip(
+                id = UUID.randomUUID().toString(),
+                title = title,
+                location = location,
+                startDate = startDate,
+                endDate = endDate
+            )
+        }
 
-    private fun showDatePicker(onDateSelected: (String) -> Unit) {
-        val calendar = Calendar.getInstance()
-
-        DatePickerDialog(
-            this,
-            { _, year, month, dayOfMonth ->
-                val date = "${year}.${month + 1}.${dayOfMonth}"
-                onDateSelected(date)
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        ).show()
+        viewModel.upsertTrip(trip)
+        finish()
     }
 }

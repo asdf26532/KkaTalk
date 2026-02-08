@@ -13,6 +13,7 @@ import com.han.tripnote.data.model.Trip
 import com.han.tripnote.ui.add.AddTripActivity
 import android.widget.LinearLayout
 import androidx.lifecycle.ViewModelProvider
+import com.han.tripnote.ui.detail.TripDetailActivity
 import com.han.tripnote.ui.viewmodel.TripViewModel
 
 class MainActivity : AppCompatActivity() {
@@ -32,14 +33,15 @@ class MainActivity : AppCompatActivity() {
 
         adapter = TripAdapter(
             onItemClick = { trip ->
-                val intent = Intent(this, TripViewModel::class.java)
+                val intent = Intent(this, TripDetailActivity::class.java)
                 intent.putExtra("trip", trip)
                 startActivity(intent)
             },
-            onItemLongClick = { position ->
-                showDeleteDialog(position)
+            onItemLongClick = { trip ->
+                viewModel.removeTrip(trip)
             }
         )
+
         recyclerView.adapter = adapter
 
         emptyLayout = findViewById(R.id.layoutEmpty)
@@ -52,37 +54,8 @@ class MainActivity : AppCompatActivity() {
 
         // 여행 추가 버튼
         findViewById<View>(R.id.fabAddTrip).setOnClickListener {
-            val intent = Intent(this, AddTripActivity::class.java)
-            startActivityForResult(intent, 100)
+            startActivity(Intent(this, AddTripActivity::class.java))
         }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == 100 && resultCode == Activity.RESULT_OK) {
-
-            val trip = Trip(
-                id = data?.getStringExtra("id") ?: "",
-                title = data?.getStringExtra("title") ?: "",
-                location = data?.getStringExtra("location") ?: "",
-                startDate = data?.getStringExtra("startDate") ?: "",
-                endDate = data?.getStringExtra("endDate") ?: ""
-            )
-
-            viewModel.addTrip(this, trip)
-        }
-    }
-
-    private fun showDeleteDialog(position: Int) {
-        AlertDialog.Builder(this)
-            .setTitle("여행 삭제")
-            .setMessage("이 여행을 삭제하시겠습니까?")
-            .setPositiveButton("삭제") { _, _ ->
-                viewModel.removeTrip(this, position)
-            }
-            .setNegativeButton("취소", null)
-            .show()
     }
 
     private fun updateEmptyView(list: List<Trip>) {

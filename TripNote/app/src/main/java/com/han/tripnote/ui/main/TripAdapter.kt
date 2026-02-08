@@ -11,7 +11,7 @@ import com.han.tripnote.data.model.Trip
 
 class TripAdapter(
     private val onItemClick: (Trip) -> Unit,
-    private val onItemLongClick: (Int) -> Unit
+    private val onItemLongClick: (Trip) -> Unit
 ) : ListAdapter<Trip, TripAdapter.TripViewHolder>(TripDiffCallback()) {
 
 
@@ -31,7 +31,7 @@ class TripAdapter(
             }
 
             itemView.setOnLongClickListener {
-                onItemLongClick(adapterPosition)
+                onItemLongClick(trip)
                 true
             }
         }
