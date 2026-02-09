@@ -1,32 +1,54 @@
 package com.han.tripnote.data.repository
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.han.tripnote.data.local.TripDatabase
+import com.han.tripnote.data.local.entity.TripEntity
 import com.han.tripnote.data.model.Trip
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class TripRepository {
+object TripRepository {
 
-    private val _tripList = MutableLiveData<List<Trip>>(emptyList())
-    val tripList: LiveData<List<Trip>> get() = _tripList
+    private val _trips = MutableLiveData<List<Trip>>()
+    val trips: LiveData<List<Trip>> get() = _trips
 
-    fun addTrip(trip: Trip) {
-        val current = _tripList.value?.toMutableList() ?: mutableListOf()
-        current.add(trip)
-        _tripList.value = current
+    private lateinit var db: TripDatabase
+
+    fun init(context: Context) {
+        db = TripDatabase.getInstance(context)
+        loadTrips()
     }
 
-    fun removeTrip(trip: Trip) {
-        val current = _tripList.value?.toMutableList() ?: mutableListOf()
-        current.remove(trip)
-        _tripList.value = current
+    private fun loadTrips() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val entities = db.tripDao().getAll()
+            val list = entities.map { it.toTrip() }
+            _trips.postValue(list)
+        }
     }
 
-    fun updateTrip(updatedTrip: Trip) {
-        val current = _tripList.value?.toMutableList() ?: mutableListOf()
-        val index = current.indexOfFirst { it.id == updatedTrip.id }
-        if (index != -1) {
-            current[index] = updatedTrip
-            _tripList.value = current
+    fun upsert(trip: Trip) {
+        CoroutineScope(Dispatchers.IO).launch {
+            db.tripDao().upsert(trip.toEntity())
+            loadTrips()
+        }
+    }
+
+    fun remove(trip: Trip) {
+        CoroutineScope(Dispatchers.IO).launch {
+            db.tripDao().delete(trip.toEntity())
+            loadTrips()
         }
     }
 }
+
+private fun TripEntity.toTrip() = Trip(
+    id, title, location, startDate, endDate
+)
+
+private fun Trip.toEntity() = TripEntity(
+    id, title, location, startDate, endDate
+)

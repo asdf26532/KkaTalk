@@ -13,6 +13,7 @@ import com.han.tripnote.data.model.Trip
 import com.han.tripnote.ui.add.AddTripActivity
 import android.widget.LinearLayout
 import androidx.lifecycle.ViewModelProvider
+import com.han.tripnote.data.repository.TripRepository
 import com.han.tripnote.ui.detail.TripDetailActivity
 import com.han.tripnote.ui.viewmodel.TripViewModel
 
@@ -25,6 +26,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        TripRepository.init(this)
 
         val recyclerView = findViewById<RecyclerView>(R.id.rvTripList)
         recyclerView.layoutManager = LinearLayoutManager(this)
