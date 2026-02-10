@@ -6,9 +6,11 @@ import androidx.lifecycle.MutableLiveData
 import com.han.tripnote.data.local.TripDatabase
 import com.han.tripnote.data.local.entity.TripEntity
 import com.han.tripnote.data.model.Trip
+import com.han.tripnote.data.model.TripStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 object TripRepository {
 
@@ -32,7 +34,8 @@ object TripRepository {
 
     fun upsert(trip: Trip) {
         CoroutineScope(Dispatchers.IO).launch {
-            db.tripDao().upsert(trip.toEntity())
+            val updatedTrip = calculateStatus(trip)
+            db.tripDao().upsert(updatedTrip.toEntity())
             loadTrips()
         }
     }
@@ -46,9 +49,24 @@ object TripRepository {
 }
 
 private fun TripEntity.toTrip() = Trip(
-    id, title, location, startDate, endDate
+    id, title, location, startDate, endDate, status
 )
 
 private fun Trip.toEntity() = TripEntity(
-    id, title, location, startDate, endDate
+    id, title, location, startDate, endDate, status
 )
+
+private fun calculateStatus(trip: Trip): Trip {
+    val today = LocalDate.now()
+
+    val start = LocalDate.parse(trip.startDate)
+    val end = LocalDate.parse(trip.endDate)
+
+    val status = when {
+        today.isBefore(start) -> TripStatus.UPCOMING
+        today.isAfter(end) -> TripStatus.COMPLETED
+        else -> TripStatus.ONGOING
+    }
+
+    return trip.copy(status = status)
+}

@@ -50,6 +50,7 @@ class MainActivity : AppCompatActivity() {
         emptyLayout = findViewById(R.id.layoutEmpty)
 
         viewModel.tripList.observe(this) { list ->
+            val sorted = list.sortedBy { it.status }
             adapter.submitList(list)
             updateEmptyView(list)
         }
