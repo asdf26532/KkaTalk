@@ -1,36 +1,32 @@
 package com.han.tripnote.ui.main
 
-import android.app.Activity
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.han.tripnote.R
 import com.han.tripnote.data.model.Trip
 import com.han.tripnote.ui.add.AddTripActivity
-import android.widget.LinearLayout
 import androidx.lifecycle.ViewModelProvider
+import com.han.tripnote.data.model.TripStatus
 import com.han.tripnote.data.repository.TripRepository
+import com.han.tripnote.databinding.ActivityMainBinding
 import com.han.tripnote.ui.detail.TripDetailActivity
+import com.han.tripnote.ui.trip.TripFilter
 import com.han.tripnote.ui.viewmodel.TripViewModel
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: TripViewModel
     private lateinit var adapter: TripAdapter
-    private lateinit var emptyLayout: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         TripRepository.init(this)
-
-        val recyclerView = findViewById<RecyclerView>(R.id.rvTripList)
-        recyclerView.layoutManager = LinearLayoutManager(this)
 
         viewModel = ViewModelProvider(this)[TripViewModel::class.java]
 
@@ -45,25 +41,43 @@ class MainActivity : AppCompatActivity() {
             }
         )
 
-        recyclerView.adapter = adapter
+        binding.rvTripList.layoutManager = LinearLayoutManager(this)
+        binding.rvTripList.adapter = adapter
 
-        emptyLayout = findViewById(R.id.layoutEmpty)
-
-        viewModel.tripList.observe(this) { list ->
-            val sorted = list.sortedBy { it.status }
+        viewModel.filteredTrips.observe(this) { list ->
             adapter.submitList(list)
             updateEmptyView(list)
         }
 
-
-        // 여행 추가 버튼
-        findViewById<View>(R.id.fabAddTrip).setOnClickListener {
+        binding.fabAddTrip.setOnClickListener {
             startActivity(Intent(this, AddTripActivity::class.java))
+        }
+
+        binding.btnAll.setOnClickListener {
+            viewModel.setFilter(TripFilter.ALL)
+        }
+
+        binding.btnUpcoming.setOnClickListener {
+            viewModel.setFilter(
+                TripFilter.BY_STATUS(TripStatus.UPCOMING)
+            )
+        }
+
+        binding.btnOngoing.setOnClickListener {
+            viewModel.setFilter(
+                TripFilter.BY_STATUS(TripStatus.ONGOING)
+            )
+        }
+
+        binding.btnCompleted.setOnClickListener {
+            viewModel.setFilter(
+                TripFilter.BY_STATUS(TripStatus.COMPLETED)
+            )
         }
     }
 
     private fun updateEmptyView(list: List<Trip>) {
-        emptyLayout.visibility =
+        binding.layoutEmpty.visibility =
             if (list.isEmpty()) View.VISIBLE else View.GONE
     }
 }
