@@ -39,28 +39,44 @@
                 android:id="@+id/btnAll"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="전체" />
+                android:text="전체"
+                android:background="@drawable/bg_filter_unselected"
+                android:textColor="@android:color/black"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"/>
 
             <Button
                 android:id="@+id/btnUpcoming"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="예정" />
+                android:text="예정"
+                android:background="@drawable/bg_filter_unselected"
+                android:textColor="@android:color/black"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"/>
 
             <Button
                 android:id="@+id/btnOngoing"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="진행중" />
+                android:text="진행중"
+                android:background="@drawable/bg_filter_unselected"
+                android:textColor="@android:color/black"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"/>
 
             <Button
                 android:id="@+id/btnCompleted"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="완료" />
+                android:text="완료"
+                android:background="@drawable/bg_filter_unselected"
+                android:textColor="@android:color/black"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"/>
 
         </LinearLayout>
 

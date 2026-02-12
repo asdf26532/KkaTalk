@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.han.tripnote.data.model.Trip
 import com.han.tripnote.ui.add.AddTripActivity
@@ -14,6 +15,7 @@ import com.han.tripnote.databinding.ActivityMainBinding
 import com.han.tripnote.ui.detail.TripDetailActivity
 import com.han.tripnote.ui.trip.TripFilter
 import com.han.tripnote.ui.viewmodel.TripViewModel
+import com.han.tripnote.R
 
 class MainActivity : AppCompatActivity() {
 
@@ -49,6 +51,10 @@ class MainActivity : AppCompatActivity() {
             updateEmptyView(list)
         }
 
+        viewModel.filter.observe(this) { filter ->
+            updateFilterUI(filter)
+        }
+
         binding.fabAddTrip.setOnClickListener {
             startActivity(Intent(this, AddTripActivity::class.java))
         }
@@ -79,5 +85,36 @@ class MainActivity : AppCompatActivity() {
     private fun updateEmptyView(list: List<Trip>) {
         binding.layoutEmpty.visibility =
             if (list.isEmpty()) View.VISIBLE else View.GONE
+    }
+
+    private fun updateFilterUI(filter: TripFilter) {
+
+        val buttons = listOf(
+            binding.btnAll,
+            binding.btnUpcoming,
+            binding.btnOngoing,
+            binding.btnCompleted
+        )
+
+        buttons.forEach {
+            it.setBackgroundResource(R.drawable.bg_filter_unselected)
+            it.setTextColor(
+                ContextCompat.getColor(this, android.R.color.black)
+            )
+        }
+
+        val selectedButton = when (filter) {
+            is TripFilter.ALL -> binding.btnAll
+            is TripFilter.BY_STATUS -> when (filter.status) {
+                TripStatus.UPCOMING -> binding.btnUpcoming
+                TripStatus.ONGOING -> binding.btnOngoing
+                TripStatus.COMPLETED -> binding.btnCompleted
+            }
+        }
+
+        selectedButton.setBackgroundResource(R.drawable.bg_filter_selected)
+        selectedButton.setTextColor(
+            ContextCompat.getColor(this, android.R.color.white)
+        )
     }
 }

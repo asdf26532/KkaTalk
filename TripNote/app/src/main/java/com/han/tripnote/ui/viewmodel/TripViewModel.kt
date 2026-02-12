@@ -1,6 +1,7 @@
 package com.han.tripnote.ui.viewmodel
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.han.tripnote.data.model.Trip
@@ -15,28 +16,25 @@ class TripViewModel : ViewModel() {
     private val _filter = MutableLiveData<TripFilter>(TripFilter.ALL)
     val filter: LiveData<TripFilter> = _filter
 
-    private val _filteredTrips = MutableLiveData<List<Trip>>()
+    private val _filteredTrips = MediatorLiveData<List<Trip>>()
     val filteredTrips: LiveData<List<Trip>> = _filteredTrips
 
     init {
-        tripList.observeForever { list ->
-            applyFilter(list)
-        }
+        _filteredTrips.addSource(tripList) { applyFilter() }
+        _filteredTrips.addSource(_filter) { applyFilter() }
     }
 
     fun setFilter(filter: TripFilter) {
         _filter.value = filter
-        applyFilter(tripList.value ?: emptyList())
     }
 
-    private fun applyFilter(trips: List<Trip>) {
+    private fun applyFilter() {
 
+        val trips = tripList.value ?: emptyList()
         val currentFilter = _filter.value ?: TripFilter.ALL
 
         val result = when (currentFilter) {
-
             is TripFilter.ALL -> trips
-
             is TripFilter.BY_STATUS ->
                 trips.filter { it.status == currentFilter.status }
         }
