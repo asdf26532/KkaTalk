@@ -16,6 +16,7 @@ import com.han.tripnote.ui.detail.TripDetailActivity
 import com.han.tripnote.ui.trip.TripFilter
 import com.han.tripnote.ui.viewmodel.TripViewModel
 import com.han.tripnote.R
+import com.han.tripnote.ui.trip.TripSort
 
 class MainActivity : AppCompatActivity() {
 
@@ -117,4 +118,34 @@ class MainActivity : AppCompatActivity() {
             ContextCompat.getColor(this, android.R.color.white)
         )
     }
+
+    private fun updateSortUI(sort: TripSort) {
+
+        val buttons = listOf(
+            binding.btnSortNewest,
+            binding.btnSortOldest,
+            binding.btnSortStartAsc,
+            binding.btnSortStartDesc
+        )
+
+        buttons.forEach {
+            it.setBackgroundResource(R.drawable.bg_filter_unselected)
+            it.setTextColor(
+                ContextCompat.getColor(this, android.R.color.black)
+            )
+        }
+
+        val selectedButton = when (sort) {
+            is TripSort.NEWEST -> binding.btnSortNewest
+            is TripSort.OLDEST -> binding.btnSortOldest
+            is TripSort.START_DATE_ASC -> binding.btnSortStartAsc
+            is TripSort.START_DATE_DESC -> binding.btnSortStartDesc
+        }
+
+        selectedButton.setBackgroundResource(R.drawable.bg_filter_selected)
+        selectedButton.setTextColor(
+            ContextCompat.getColor(this, android.R.color.white)
+        )
+    }
+
 }

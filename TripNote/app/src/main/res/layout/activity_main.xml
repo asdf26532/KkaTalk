@@ -1,125 +1,140 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#F8F9FB">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:padding="16dp">
 
-        <!-- 앱 타이틀 -->
+        <!-- 상단 타이틀 -->
         <TextView
-            android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="TripNote"
             android:textSize="26sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textColor="#111111"
+            android:layout_marginBottom="16dp"/>
 
-        <!-- 앱 설명 -->
-        <TextView
-            android:id="@+id/tvSubTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="여행을 기록하고 정리하세요"
-            android:textSize="16sp" />
-
-        <LinearLayout
-            android:id="@+id/layoutFilter"
+        <!-- 필터 영역 -->
+        <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:orientation="horizontal"
-            android:gravity="center">
+            android:scrollbars="none"
+            android:layout_marginBottom="8dp">
 
-            <Button
-                android:id="@+id/btnAll"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="전체"
-                android:background="@drawable/bg_filter_unselected"
-                android:textColor="@android:color/black"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="8dp"/>
+                android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/btnUpcoming"
+                <Button
+                    android:id="@+id/btnAll"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:text="전체"/>
+
+                <Button
+                    android:id="@+id/btnUpcoming"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:text="예정"
+                    android:layout_marginStart="8dp"/>
+
+                <Button
+                    android:id="@+id/btnOngoing"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:text="진행중"
+                    android:layout_marginStart="8dp"/>
+
+                <Button
+                    android:id="@+id/btnCompleted"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:text="완료"
+                    android:layout_marginStart="8dp"/>
+
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <!-- 정렬 영역 -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:layout_marginBottom="12dp">
+
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="예정"
-                android:background="@drawable/bg_filter_unselected"
-                android:textColor="@android:color/black"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="8dp"/>
+                android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/btnOngoing"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="진행중"
-                android:background="@drawable/bg_filter_unselected"
-                android:textColor="@android:color/black"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="8dp"/>
+                <Button
+                    android:id="@+id/btnSortNewest"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:text="최신순"/>
 
-            <Button
-                android:id="@+id/btnCompleted"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="완료"
-                android:background="@drawable/bg_filter_unselected"
-                android:textColor="@android:color/black"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="8dp"/>
+                <Button
+                    android:id="@+id/btnSortOldest"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:text="오래된순"
+                    android:layout_marginStart="8dp"/>
 
-        </LinearLayout>
+                <Button
+                    android:id="@+id/btnSortStartAsc"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:text="출발일↑"
+                    android:layout_marginStart="8dp"/>
 
+                <Button
+                    android:id="@+id/btnSortStartDesc"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:text="출발일↓"
+                    android:layout_marginStart="8dp"/>
+
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <!-- 여행 리스트 -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvTripList"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingBottom="80dp"/>
+
+        <!-- Empty View -->
         <LinearLayout
             android:id="@+id/layoutEmpty"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center"
             android:orientation="vertical"
+            android:gravity="center"
             android:visibility="gone">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="아직 여행이 없어요 ✈️"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:text="여행이 없습니다 ✈"
+                android:textSize="16sp"
+                android:textColor="#777777"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="아래 + 버튼을 눌러 여행을 추가해보세요"
-                android:textSize="14sp" />
         </LinearLayout>
-
-        <!-- 여행 목록 RecyclerView -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvTripList"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginTop="16dp"
-            android:layout_weight="1" />
 
     </LinearLayout>
 
+    <!-- FAB -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddTrip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="24dp"
+        android:layout_margin="16dp"
         android:contentDescription="여행 추가"
-        android:src="@android:drawable/ic_input_add" />
+        android:src="@drawable/ic_add"
+        app:layout_gravity="bottom|end"/>
 
-</FrameLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
