@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
             if (list.isEmpty()) View.VISIBLE else View.GONE
     }
 
-    private fun updateFilterUI(filter: TripFilter) {
+    /*private fun updateFilterUI(filter: TripFilter) {
 
         val buttons = listOf(
             binding.btnAll,
@@ -117,9 +117,9 @@ class MainActivity : AppCompatActivity() {
         selectedButton.setTextColor(
             ContextCompat.getColor(this, android.R.color.white)
         )
-    }
+    }*/
 
-    private fun updateSortUI(sort: TripSort) {
+   /* private fun updateSortUI(sort: TripSort) {
 
         val buttons = listOf(
             binding.btnSortNewest,
@@ -146,6 +146,57 @@ class MainActivity : AppCompatActivity() {
         selectedButton.setTextColor(
             ContextCompat.getColor(this, android.R.color.white)
         )
+    }*/
+
+    private fun setupFilterChips() {
+
+        binding.btnAll.setOnClickListener {
+            viewModel.setFilter(TripFilter.ALL)
+        }
+
+        binding.btnUpcoming.setOnClickListener {
+            viewModel.setFilter(
+                TripFilter.BY_STATUS(TripStatus.UPCOMING)
+            )
+        }
+
+        binding.btnOngoing.setOnClickListener {
+            viewModel.setFilter(
+                TripFilter.BY_STATUS(TripStatus.ONGOING)
+            )
+        }
+
+        binding.btnCompleted.setOnClickListener {
+            viewModel.setFilter(
+                TripFilter.BY_STATUS(TripStatus.COMPLETED)
+            )
+        }
+    }
+
+    private fun setupFab() {
+        binding.fabAddTrip.setOnClickListener {
+            startActivity(Intent(this, AddTripActivity::class.java))
+        }
+    }
+
+    private fun updateFilterUI(filter: TripFilter) {
+        when (filter) {
+            is TripFilter.ALL -> binding.btnAll.isChecked = true
+            is TripFilter.BY_STATUS -> when (filter.status) {
+                TripStatus.UPCOMING -> binding.btnUpcoming.isChecked = true
+                TripStatus.ONGOING -> binding.btnOngoing.isChecked = true
+                TripStatus.COMPLETED -> binding.btnCompleted.isChecked = true
+            }
+        }
+    }
+
+    private fun updateSortUI(sort: TripSort) {
+        when (sort) {
+            is TripSort.NEWEST -> binding.btnSortNewest.isChecked = true
+            is TripSort.OLDEST -> binding.btnSortOldest.isChecked = true
+            is TripSort.START_DATE_ASC -> binding.btnSortStartAsc.isChecked = true
+            is TripSort.START_DATE_DESC -> binding.btnSortStartDesc.isChecked = true
+        }
     }
 
 }

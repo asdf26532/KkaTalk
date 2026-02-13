@@ -22,81 +22,65 @@
             android:textColor="#111111"
             android:layout_marginBottom="16dp"/>
 
-        <!-- 필터 영역 -->
-        <HorizontalScrollView
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupFilter"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scrollbars="none"
+            app:singleSelection="true"
             android:layout_marginBottom="8dp">
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+            <com.google.android.material.chip.Chip
+                android:id="@+id/btnAll"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:text="전체"
+                android:checked="true"/>
 
-                <Button
-                    android:id="@+id/btnAll"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:text="전체"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/btnUpcoming"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:text="예정"/>
 
-                <Button
-                    android:id="@+id/btnUpcoming"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:text="예정"
-                    android:layout_marginStart="8dp"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/btnOngoing"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:text="진행중"/>
 
-                <Button
-                    android:id="@+id/btnOngoing"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:text="진행중"
-                    android:layout_marginStart="8dp"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/btnCompleted"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:text="완료"/>
 
-                <Button
-                    android:id="@+id/btnCompleted"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:text="완료"
-                    android:layout_marginStart="8dp"/>
+        </com.google.android.material.chip.ChipGroup>
 
-            </LinearLayout>
-        </HorizontalScrollView>
-
-        <!-- 정렬 영역 -->
-        <HorizontalScrollView
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupSort"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scrollbars="none"
+            app:singleSelection="true"
             android:layout_marginBottom="12dp">
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+            <com.google.android.material.chip.Chip
+                android:id="@+id/btnSortNewest"
+                style="@style/Widget.Material3.Chip.Assist"
+                android:text="최신순"
+                android:checked="true"/>
 
-                <Button
-                    android:id="@+id/btnSortNewest"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:text="최신순"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/btnSortOldest"
+                style="@style/Widget.Material3.Chip.Assist"
+                android:text="오래된순"/>
 
-                <Button
-                    android:id="@+id/btnSortOldest"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:text="오래된순"
-                    android:layout_marginStart="8dp"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/btnSortStartAsc"
+                style="@style/Widget.Material3.Chip.Assist"
+                android:text="출발일↑"/>
 
-                <Button
-                    android:id="@+id/btnSortStartAsc"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:text="출발일↑"
-                    android:layout_marginStart="8dp"/>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/btnSortStartDesc"
+                style="@style/Widget.Material3.Chip.Assist"
+                android:text="출발일↓"/>
 
-                <Button
-                    android:id="@+id/btnSortStartDesc"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:text="출발일↓"
-                    android:layout_marginStart="8dp"/>
-
-            </LinearLayout>
-        </HorizontalScrollView>
+        </com.google.android.material.chip.ChipGroup>
 
         <!-- 여행 리스트 -->
         <androidx.recyclerview.widget.RecyclerView
