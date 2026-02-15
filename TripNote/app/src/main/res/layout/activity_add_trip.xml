@@ -40,6 +40,20 @@
         android:focusable="false"
         android:clickable="true"/>
 
+    <!-- 여행 메모 -->
+    <EditText
+        android:id="@+id/etMemo"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_marginTop="8dp"
+        android:hint="여행 메모 (선택)"
+        android:gravity="top|start"
+        android:padding="12dp"
+        android:background="@android:drawable/edit_text"
+        android:inputType="textMultiLine"
+        android:maxLines="5"/>
+
+
     <!-- 저장 버튼 -->
     <Button
         android:id="@+id/btnSave"

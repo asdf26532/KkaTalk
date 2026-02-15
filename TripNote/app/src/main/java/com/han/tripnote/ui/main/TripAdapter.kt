@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -28,15 +29,21 @@ class TripAdapter(
 
         inner class TripViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-            private val tvTitle: TextView = itemView.findViewById(R.id.tvTripTitle)
-            private val tvLocation: TextView = itemView.findViewById(R.id.tvTripLocation)
-            private val tvDate: TextView = itemView.findViewById(R.id.tvTripDate)
+            private val tvTitle: TextView = itemView.findViewById(R.id.tvTitle)
+            private val tvDate: TextView = itemView.findViewById(R.id.tvDate)
+            private val tvMemo: TextView = itemView.findViewById(R.id.tvMemo)
             private val tvStatus: TextView = itemView.findViewById(R.id.tvStatus)
 
             fun bind(trip: Trip) {
+
                 tvTitle.text = trip.title
-                tvLocation.text = trip.location
+
                 tvDate.text = "${trip.startDate} ~ ${trip.endDate}"
+
+                tvMemo.text =
+                    if (trip.memo.isNullOrEmpty()) "메모 없음"
+                    else trip.memo
+
                 tvStatus.text = trip.status.displayText()
 
                 val colorRes = when (trip.status) {
@@ -45,15 +52,31 @@ class TripAdapter(
                     TripStatus.COMPLETED -> R.color.status_completed
                 }
 
+                tvStatus.setBackgroundColor(
+                    ContextCompat.getColor(itemView.context, colorRes)
+                )
+
+                // 클릭
                 itemView.setOnClickListener {
                     onItemClick(trip)
                 }
 
+                // 롱클릭 삭제
                 itemView.setOnLongClickListener {
                     onItemLongClick(trip)
                     true
                 }
             }
         }
+
+    class TripDiffCallback : DiffUtil.ItemCallback<Trip>() {
+        override fun areItemsTheSame(oldItem: Trip, newItem: Trip): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: Trip, newItem: Trip): Boolean {
+            return oldItem == newItem
+        }
     }
+}
 

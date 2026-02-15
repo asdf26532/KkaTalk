@@ -41,6 +41,7 @@ class AddTripActivity : AppCompatActivity() {
             binding.etLocation.setText(editTrip!!.location)
             binding.etStartDate.setText(editTrip!!.startDate)
             binding.etEndDate.setText(editTrip!!.endDate)
+            binding.etMemo.setText(editTrip!!.memo ?: "")
 
             binding.btnSave.text = "수정 완료"
         }
@@ -56,6 +57,7 @@ class AddTripActivity : AppCompatActivity() {
         val location = binding.etLocation.text.toString()
         val startDate = binding.etStartDate.text.toString()
         val endDate = binding.etEndDate.text.toString()
+        val memo = binding.etMemo.text.toString()
 
         //  추가 / 수정 분기 핵심
         val trip = if (editTrip != null) {
@@ -64,7 +66,8 @@ class AddTripActivity : AppCompatActivity() {
                 title = title,
                 location = location,
                 startDate = startDate,
-                endDate = endDate
+                endDate = endDate,
+                memo = memo
             )
         } else {
             // 추가 → 새 id 생성
@@ -73,7 +76,8 @@ class AddTripActivity : AppCompatActivity() {
                 title = title,
                 location = location,
                 startDate = startDate,
-                endDate = endDate
+                endDate = endDate,
+                memo = memo
             )
         }
 
