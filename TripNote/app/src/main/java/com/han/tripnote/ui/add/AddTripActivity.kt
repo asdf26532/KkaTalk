@@ -13,6 +13,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.han.tripnote.data.model.Trip
 import com.han.tripnote.ui.viewmodel.TripViewModel
 import java.util.Calendar
+import android.widget.ArrayAdapter
+import com.han.tripnote.data.model.TripStatus
 
 class AddTripActivity : AppCompatActivity() {
 
@@ -28,6 +30,14 @@ class AddTripActivity : AppCompatActivity() {
 
         viewModel = ViewModelProvider(this)[TripViewModel::class.java]
 
+        val statusList = TripStatus.values().map { it.name }
+        val adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_dropdown_item,
+            statusList
+        )
+        binding.spinnerStatus.adapter = adapter
+
         // Edit Mode
         editTrip = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getParcelableExtra("trip", Trip::class.java)
@@ -42,6 +52,9 @@ class AddTripActivity : AppCompatActivity() {
             binding.etStartDate.setText(editTrip!!.startDate)
             binding.etEndDate.setText(editTrip!!.endDate)
             binding.etMemo.setText(editTrip!!.memo ?: "")
+
+            val index = TripStatus.values().indexOf(editTrip!!.status)
+            binding.spinnerStatus.setSelection(index)
 
             binding.btnSave.text = "수정 완료"
         }
@@ -59,6 +72,16 @@ class AddTripActivity : AppCompatActivity() {
         val endDate = binding.etEndDate.text.toString()
         val memo = binding.etMemo.text.toString()
 
+        val selectedStatus =
+            TripStatus.valueOf(binding.spinnerStatus.selectedItem.toString())
+
+        // 간단 유효성 검사
+        if (title.isEmpty() || location.isEmpty() || startDate.isEmpty() || endDate.isEmpty()) {
+            Toast.makeText(this, "모든 항목을 입력해주세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+
         //  추가 / 수정 분기 핵심
         val trip = if (editTrip != null) {
             // 수정 → 기존 id 유지
@@ -67,7 +90,8 @@ class AddTripActivity : AppCompatActivity() {
                 location = location,
                 startDate = startDate,
                 endDate = endDate,
-                memo = memo
+                memo = memo,
+                status = selectedStatus
             )
         } else {
             // 추가 → 새 id 생성
@@ -77,7 +101,8 @@ class AddTripActivity : AppCompatActivity() {
                 location = location,
                 startDate = startDate,
                 endDate = endDate,
-                memo = memo
+                memo = memo,
+                status = selectedStatus
             )
         }
 

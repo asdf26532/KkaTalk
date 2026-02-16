@@ -53,6 +53,11 @@
         android:inputType="textMultiLine"
         android:maxLines="5"/>
 
+    <Spinner
+        android:id="@+id/spinnerStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"/>
 
     <!-- 저장 버튼 -->
     <Button
