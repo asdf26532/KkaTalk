@@ -82,6 +82,22 @@
 
         </com.google.android.material.chip.ChipGroup>
 
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutFilter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+            <AutoCompleteTextView
+                android:id="@+id/dropdownFilter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="필터 선택"
+                android:inputType="none" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
         <!-- 여행 리스트 -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvTripList"

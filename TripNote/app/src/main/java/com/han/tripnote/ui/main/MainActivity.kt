@@ -3,26 +3,29 @@ package com.han.tripnote.ui.main
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.AdapterView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import android.widget.ArrayAdapter
+import com.han.tripnote.data.model.TripStatus
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.han.tripnote.data.model.Trip
 import com.han.tripnote.ui.add.AddTripActivity
 import androidx.lifecycle.ViewModelProvider
-import com.han.tripnote.data.model.TripStatus
 import com.han.tripnote.data.repository.TripRepository
 import com.han.tripnote.databinding.ActivityMainBinding
 import com.han.tripnote.ui.detail.TripDetailActivity
 import com.han.tripnote.ui.trip.TripFilter
 import com.han.tripnote.ui.viewmodel.TripViewModel
-import com.han.tripnote.R
 import com.han.tripnote.ui.trip.TripSort
+import com.google.android.material.textfield.MaterialAutoCompleteTextView
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: TripViewModel
     private lateinit var adapter: TripAdapter
+    private var selectedFilter: String = "ALL"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +49,38 @@ class MainActivity : AppCompatActivity() {
 
         binding.rvTripList.layoutManager = LinearLayoutManager(this)
         binding.rvTripList.adapter = adapter
+
+        val filterItems = listOf(
+            "전체",
+            "예정",
+            "진행중",
+            "완료"
+        )
+
+        val dropdownAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_list_item_1,
+            filterItems
+        )
+
+        binding.dropdownFilter.setAdapter(dropdownAdapter)
+        binding.dropdownFilter.setText(filterItems[0], false)
+
+        binding.dropdownFilter.setOnItemClickListener { _, _, position, _ ->
+
+            when (position) {
+                0 -> viewModel.setFilter(TripFilter.ALL)
+                1 -> viewModel.setFilter(
+                    TripFilter.BY_STATUS(TripStatus.UPCOMING)
+                )
+                2 -> viewModel.setFilter(
+                    TripFilter.BY_STATUS(TripStatus.ONGOING)
+                )
+                3 -> viewModel.setFilter(
+                    TripFilter.BY_STATUS(TripStatus.COMPLETED)
+                )
+            }
+        }
 
         viewModel.filteredTrips.observe(this) { list ->
             adapter.submitList(list)
@@ -88,65 +123,6 @@ class MainActivity : AppCompatActivity() {
             if (list.isEmpty()) View.VISIBLE else View.GONE
     }
 
-    /*private fun updateFilterUI(filter: TripFilter) {
-
-        val buttons = listOf(
-            binding.btnAll,
-            binding.btnUpcoming,
-            binding.btnOngoing,
-            binding.btnCompleted
-        )
-
-        buttons.forEach {
-            it.setBackgroundResource(R.drawable.bg_filter_unselected)
-            it.setTextColor(
-                ContextCompat.getColor(this, android.R.color.black)
-            )
-        }
-
-        val selectedButton = when (filter) {
-            is TripFilter.ALL -> binding.btnAll
-            is TripFilter.BY_STATUS -> when (filter.status) {
-                TripStatus.UPCOMING -> binding.btnUpcoming
-                TripStatus.ONGOING -> binding.btnOngoing
-                TripStatus.COMPLETED -> binding.btnCompleted
-            }
-        }
-
-        selectedButton.setBackgroundResource(R.drawable.bg_filter_selected)
-        selectedButton.setTextColor(
-            ContextCompat.getColor(this, android.R.color.white)
-        )
-    }*/
-
-   /* private fun updateSortUI(sort: TripSort) {
-
-        val buttons = listOf(
-            binding.btnSortNewest,
-            binding.btnSortOldest,
-            binding.btnSortStartAsc,
-            binding.btnSortStartDesc
-        )
-
-        buttons.forEach {
-            it.setBackgroundResource(R.drawable.bg_filter_unselected)
-            it.setTextColor(
-                ContextCompat.getColor(this, android.R.color.black)
-            )
-        }
-
-        val selectedButton = when (sort) {
-            is TripSort.NEWEST -> binding.btnSortNewest
-            is TripSort.OLDEST -> binding.btnSortOldest
-            is TripSort.START_DATE_ASC -> binding.btnSortStartAsc
-            is TripSort.START_DATE_DESC -> binding.btnSortStartDesc
-        }
-
-        selectedButton.setBackgroundResource(R.drawable.bg_filter_selected)
-        selectedButton.setTextColor(
-            ContextCompat.getColor(this, android.R.color.white)
-        )
-    }*/
 
     private fun setupFilterChips() {
 
