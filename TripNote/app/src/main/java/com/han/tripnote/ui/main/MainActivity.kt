@@ -116,6 +116,18 @@ class MainActivity : AppCompatActivity() {
                 TripFilter.BY_STATUS(TripStatus.COMPLETED)
             )
         }
+
+        viewModel.upcomingCount.observe(this) {
+            binding.tvUpcomingCount.text = it.toString()
+        }
+
+        viewModel.ongoingCount.observe(this) {
+            binding.tvOngoingCount.text = it.toString()
+        }
+
+        viewModel.completedCount.observe(this) {
+            binding.tvCompletedCount.text = it.toString()
+        }
     }
 
     private fun updateEmptyView(list: List<Trip>) {

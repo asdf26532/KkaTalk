@@ -9,6 +9,8 @@ import com.han.tripnote.data.repository.TripRepository
 import com.han.tripnote.ui.trip.TripFilter
 import com.han.tripnote.ui.trip.TripSort
 import java.time.LocalDate
+import androidx.lifecycle.map
+import com.han.tripnote.data.model.TripStatus
 
 
 class TripViewModel : ViewModel() {
@@ -23,6 +25,22 @@ class TripViewModel : ViewModel() {
 
     private val _sort = MutableLiveData<TripSort>(TripSort.NEWEST)
     val sort: LiveData<TripSort> = _sort
+
+    val upcomingCount: LiveData<Int> = tripList.map { list ->
+        list.count { it.status == TripStatus.UPCOMING }
+    }
+
+    val ongoingCount: LiveData<Int> = tripList.map { list ->
+        list.count { it.status == TripStatus.ONGOING }
+    }
+
+    val completedCount: LiveData<Int> = tripList.map { list ->
+        list.count { it.status == TripStatus.COMPLETED }
+    }
+
+    val totalCount: LiveData<Int> = tripList.map { list ->
+        list.size
+    }
 
     init {
         _filteredTrips.addSource(tripList) { applyFilterAndSort() }

@@ -98,6 +98,87 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <LinearLayout
+            android:id="@+id/layoutStats"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:weightSum="3">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:background="#E3F2FD"
+                android:padding="12dp"
+                android:layout_margin="4dp">
+
+                <TextView
+                    android:text="예정"
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+                    android:textStyle="bold"
+                    android:textSize="14sp"/>
+
+                <TextView
+                    android:id="@+id/tvUpcomingCount"
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+                    android:text="0"
+                    android:textSize="18sp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:background="#FFF3E0"
+                android:padding="12dp"
+                android:layout_margin="4dp">
+
+                <TextView
+                    android:text="진행중"
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+                    android:textStyle="bold"
+                    android:textSize="14sp"/>
+
+                <TextView
+                    android:id="@+id/tvOngoingCount"
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+                    android:text="0"
+                    android:textSize="18sp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:background="#E8F5E9"
+                android:padding="12dp"
+                android:layout_margin="4dp">
+
+                <TextView
+                    android:text="완료"
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+                    android:textStyle="bold"
+                    android:textSize="14sp"/>
+
+                <TextView
+                    android:id="@+id/tvCompletedCount"
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+                    android:text="0"
+                    android:textSize="18sp"/>
+            </LinearLayout>
+
+        </LinearLayout>
         <!-- 여행 리스트 -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvTripList"
