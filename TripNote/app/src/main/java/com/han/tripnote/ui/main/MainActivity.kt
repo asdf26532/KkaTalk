@@ -128,6 +128,19 @@ class MainActivity : AppCompatActivity() {
         viewModel.completedCount.observe(this) {
             binding.tvCompletedCount.text = it.toString()
         }
+
+        binding.cardUpcoming.setOnClickListener {
+            viewModel.setFilter(TripFilter.BY_STATUS(TripStatus.UPCOMING))
+        }
+
+        binding.cardOngoing.setOnClickListener {
+            viewModel.setFilter(TripFilter.BY_STATUS(TripStatus.ONGOING))
+        }
+
+        binding.cardCompleted.setOnClickListener {
+            viewModel.setFilter(TripFilter.BY_STATUS(TripStatus.COMPLETED))
+        }
+
     }
 
     private fun updateEmptyView(list: List<Trip>) {

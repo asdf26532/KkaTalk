@@ -26,6 +26,13 @@ class TripViewModel : ViewModel() {
     private val _sort = MutableLiveData<TripSort>(TripSort.NEWEST)
     val sort: LiveData<TripSort> = _sort
 
+    val selectedStatus: LiveData<TripStatus?> = filter.map { filter ->
+        when (filter) {
+            is TripFilter.ALL -> null
+            is TripFilter.BY_STATUS -> filter.status
+        }
+    }
+
     val upcomingCount: LiveData<Int> = tripList.map { list ->
         list.count { it.status == TripStatus.UPCOMING }
     }

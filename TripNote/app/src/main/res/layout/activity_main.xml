@@ -107,13 +107,16 @@
             android:weightSum="3">
 
             <LinearLayout
+                android:id="@+id/cardUpcoming"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:background="#E3F2FD"
                 android:padding="12dp"
-                android:layout_margin="4dp">
+                android:layout_margin="4dp"
+                android:clickable="true"
+                android:focusable="true">
 
                 <TextView
                     android:text="예정"
@@ -131,13 +134,16 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/cardOngoing"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:background="#FFF3E0"
                 android:padding="12dp"
-                android:layout_margin="4dp">
+                android:layout_margin="4dp"
+                android:clickable="true"
+                android:focusable="true">
 
                 <TextView
                     android:text="진행중"
@@ -155,13 +161,16 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/cardCompleted"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:background="#E8F5E9"
                 android:padding="12dp"
-                android:layout_margin="4dp">
+                android:layout_margin="4dp"
+                android:clickable="true"
+                android:focusable="true">
 
                 <TextView
                     android:text="완료"
