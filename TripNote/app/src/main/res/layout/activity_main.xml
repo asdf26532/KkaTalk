@@ -188,6 +188,15 @@
             </LinearLayout>
 
         </LinearLayout>
+
+        <EditText
+            android:id="@+id/etSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="여행 제목 또는 지역 검색"
+            android:padding="12dp"
+            android:layout_margin="8dp"/>
+
         <!-- 여행 리스트 -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvTripList"

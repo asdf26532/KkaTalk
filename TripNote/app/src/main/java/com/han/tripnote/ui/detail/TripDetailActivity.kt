@@ -8,11 +8,14 @@ import com.google.android.material.snackbar.Snackbar
 import com.han.tripnote.data.model.Trip
 import com.han.tripnote.databinding.ActivityTripDetailBinding
 import com.han.tripnote.ui.add.AddTripActivity
+import com.han.tripnote.ui.viewmodel.TripViewModel
+import androidx.activity.viewModels
 
 class TripDetailActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityTripDetailBinding
     private lateinit var trip: Trip
+    private val viewModel: TripViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,14 +41,19 @@ class TripDetailActivity : AppCompatActivity() {
 
         // 삭제 버튼
         binding.btnDelete.setOnClickListener {
+
+            viewModel.removeTrip(trip)
+
             Snackbar.make(binding.root, "여행이 삭제되었습니다", Snackbar.LENGTH_LONG)
                 .setAction("되돌리기") {
 
+                    // 되돌리기 누르면 다시 추가
+                    viewModel.upsertTrip(trip)
                 }
                 .addCallback(object : Snackbar.Callback() {
                     override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                         if (event != Snackbar.Callback.DISMISS_EVENT_ACTION) {
-                            finish() // 되돌리기 안 눌렀을 때만 종료
+                            finish()
                         }
                     }
                 })
@@ -58,4 +66,4 @@ class TripDetailActivity : AppCompatActivity() {
         binding.tvDetailLocation.text = trip.location
         binding.tvDetailDate.text = "${trip.startDate} ~ ${trip.endDate}"
     }
-    }
+}

@@ -18,7 +18,8 @@ import com.han.tripnote.ui.detail.TripDetailActivity
 import com.han.tripnote.ui.trip.TripFilter
 import com.han.tripnote.ui.viewmodel.TripViewModel
 import com.han.tripnote.ui.trip.TripSort
-import com.google.android.material.textfield.MaterialAutoCompleteTextView
+import android.text.Editable
+import android.text.TextWatcher
 
 class MainActivity : AppCompatActivity() {
 
@@ -140,6 +141,15 @@ class MainActivity : AppCompatActivity() {
         binding.cardCompleted.setOnClickListener {
             viewModel.setFilter(TripFilter.BY_STATUS(TripStatus.COMPLETED))
         }
+
+        binding.etSearch.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                viewModel.setSearchQuery(s.toString())
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
 
     }
 

@@ -26,13 +26,12 @@ class TripViewModel : ViewModel() {
     private val _sort = MutableLiveData<TripSort>(TripSort.NEWEST)
     val sort: LiveData<TripSort> = _sort
 
-    val selectedStatus: LiveData<TripStatus?> = filter.map { filter ->
-        when (filter) {
-            is TripFilter.ALL -> null
-            is TripFilter.BY_STATUS -> filter.status
-        }
-    }
+    private val _searchQuery = MutableLiveData<String>("")
+    val searchQuery: LiveData<String> = _searchQuery
 
+    fun setSearchQuery(query: String) {
+        _searchQuery.value = query
+    }
     val upcomingCount: LiveData<Int> = tripList.map { list ->
         list.count { it.status == TripStatus.UPCOMING }
     }
@@ -53,6 +52,7 @@ class TripViewModel : ViewModel() {
         _filteredTrips.addSource(tripList) { applyFilterAndSort() }
         _filteredTrips.addSource(_filter) { applyFilterAndSort() }
         _filteredTrips.addSource(_sort) { applyFilterAndSort() }
+        _filteredTrips.addSource(_searchQuery) { applyFilterAndSort() }
     }
 
     fun setFilter(filter: TripFilter) {
@@ -68,6 +68,7 @@ class TripViewModel : ViewModel() {
         val trips = tripList.value ?: emptyList()
         val currentFilter = _filter.value ?: TripFilter.ALL
         val currentSort = _sort.value ?: TripSort.NEWEST
+        val currentQuery = _searchQuery.value?.lowercase() ?: ""
 
         val filtered = when (currentFilter) {
             is TripFilter.ALL -> trips
@@ -75,19 +76,27 @@ class TripViewModel : ViewModel() {
                 trips.filter { it.status == currentFilter.status }
         }
 
-        val sorted = when (currentSort) {
+        val searched = if (currentQuery.isBlank()) {
+            filtered
+        } else {
+            filtered.filter {
+                it.title.lowercase().contains(currentQuery) ||
+                        it.location.lowercase().contains(currentQuery)
+            }
+        }
 
+        val sorted = when (currentSort) {
             is TripSort.NEWEST ->
-                filtered.sortedByDescending { it.id }
+                searched.sortedByDescending { it.id }
 
             is TripSort.OLDEST ->
-                filtered.sortedBy { it.id }
+                searched.sortedBy { it.id }
 
             is TripSort.START_DATE_ASC ->
-                filtered.sortedBy { LocalDate.parse(it.startDate) }
+                searched.sortedBy { LocalDate.parse(it.startDate) }
 
             is TripSort.START_DATE_DESC ->
-                filtered.sortedByDescending { LocalDate.parse(it.startDate) }
+                searched.sortedByDescending { LocalDate.parse(it.startDate) }
         }
 
         _filteredTrips.value = sorted
