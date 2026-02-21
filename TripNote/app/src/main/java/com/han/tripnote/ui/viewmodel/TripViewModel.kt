@@ -11,6 +11,10 @@ import com.han.tripnote.ui.trip.TripSort
 import java.time.LocalDate
 import androidx.lifecycle.map
 import com.han.tripnote.data.model.TripStatus
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 class TripViewModel : ViewModel() {
@@ -29,8 +33,14 @@ class TripViewModel : ViewModel() {
     private val _searchQuery = MutableLiveData<String>("")
     val searchQuery: LiveData<String> = _searchQuery
 
+    private var searchJob: Job? = null
+
     fun setSearchQuery(query: String) {
-        _searchQuery.value = query
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            delay(300) // 0.3초 디바운싱
+            _searchQuery.value = query
+        }
     }
     val upcomingCount: LiveData<Int> = tripList.map { list ->
         list.count { it.status == TripStatus.UPCOMING }

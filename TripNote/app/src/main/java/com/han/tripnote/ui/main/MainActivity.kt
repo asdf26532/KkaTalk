@@ -1,6 +1,7 @@
 package com.han.tripnote.ui.main
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -20,6 +21,7 @@ import com.han.tripnote.ui.viewmodel.TripViewModel
 import com.han.tripnote.ui.trip.TripSort
 import android.text.Editable
 import android.text.TextWatcher
+import androidx.appcompat.app.AppCompatDelegate
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,6 +29,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: TripViewModel
     private lateinit var adapter: TripAdapter
     private var selectedFilter: String = "ALL"
+    private lateinit var prefs: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +39,13 @@ class MainActivity : AppCompatActivity() {
         TripRepository.init(this)
 
         viewModel = ViewModelProvider(this)[TripViewModel::class.java]
+
+        prefs = getSharedPreferences("search_prefs", MODE_PRIVATE)
+
+        // 저장된 검색어 복원
+        val savedQuery = prefs.getString("last_query", "")
+        binding.etSearch.setText(savedQuery)
+        viewModel.setSearchQuery(savedQuery ?: "")
 
         adapter = TripAdapter(
             onItemClick = { trip ->
@@ -144,7 +154,9 @@ class MainActivity : AppCompatActivity() {
 
         binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-                viewModel.setSearchQuery(s.toString())
+                val query = s.toString()
+                viewModel.setSearchQuery(query)
+                prefs.edit().putString("last_query", query).apply()
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
