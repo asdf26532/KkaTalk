@@ -59,6 +59,21 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"/>
 
+    <ImageView
+        android:id="@+id/ivPreview"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginTop="12dp"
+        android:scaleType="centerCrop"
+        android:background="@android:color/darker_gray" />
+
+    <Button
+        android:id="@+id/btnSelectImage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="사진 선택"
+        android:layout_marginTop="8dp"/>
+
     <!-- 저장 버튼 -->
     <Button
         android:id="@+id/btnSave"

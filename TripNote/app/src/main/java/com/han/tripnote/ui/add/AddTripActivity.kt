@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.han.tripnote.databinding.ActivityAddTripBinding
 import java.util.UUID
 import android.app.DatePickerDialog
+import android.net.Uri
 import android.os.Build
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
@@ -14,12 +15,14 @@ import com.han.tripnote.data.model.Trip
 import com.han.tripnote.ui.viewmodel.TripViewModel
 import java.util.Calendar
 import android.widget.ArrayAdapter
+import androidx.activity.result.contract.ActivityResultContracts
 import com.han.tripnote.data.model.TripStatus
 
 class AddTripActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddTripBinding
     private lateinit var viewModel: TripViewModel
+    private var selectedImageUri: Uri? = null
 
     private var editTrip: Trip? = null
 
@@ -56,7 +59,17 @@ class AddTripActivity : AppCompatActivity() {
             val index = TripStatus.values().indexOf(editTrip!!.status)
             binding.spinnerStatus.setSelection(index)
 
+            editTrip!!.imageUri?.let {
+                selectedImageUri = Uri.parse(it)
+                binding.ivPreview.setImageURI(selectedImageUri)
+            }
+
             binding.btnSave.text = "수정 완료"
+        }
+
+        // 이미지 선택
+        binding.btnSelectImage.setOnClickListener {
+            imagePickerLauncher.launch("image/*")
         }
 
         // 저장 버튼
@@ -81,8 +94,6 @@ class AddTripActivity : AppCompatActivity() {
             return
         }
 
-
-        //  추가 / 수정 분기 핵심
         val trip = if (editTrip != null) {
             // 수정 → 기존 id 유지
             editTrip!!.copy(
@@ -91,7 +102,8 @@ class AddTripActivity : AppCompatActivity() {
                 startDate = startDate,
                 endDate = endDate,
                 memo = memo,
-                status = selectedStatus
+                status = selectedStatus,
+                imageUri = selectedImageUri?.toString() ?: editTrip!!.imageUri
             )
         } else {
             // 추가 → 새 id 생성
@@ -102,11 +114,21 @@ class AddTripActivity : AppCompatActivity() {
                 startDate = startDate,
                 endDate = endDate,
                 memo = memo,
-                status = selectedStatus
+                status = selectedStatus,
+                imageUri = selectedImageUri?.toString()
             )
         }
 
         viewModel.upsertTrip(trip)
         finish()
     }
+
+    private val imagePickerLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            uri?.let {
+                selectedImageUri = it
+                binding.ivPreview.setImageURI(it)
+            }
+        }
+
 }

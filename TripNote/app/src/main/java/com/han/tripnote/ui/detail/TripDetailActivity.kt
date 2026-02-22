@@ -1,8 +1,10 @@
 package com.han.tripnote.ui.detail
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import com.han.tripnote.data.model.Trip
@@ -65,5 +67,13 @@ class TripDetailActivity : AppCompatActivity() {
         binding.tvDetailTitle.text = trip.title
         binding.tvDetailLocation.text = trip.location
         binding.tvDetailDate.text = "${trip.startDate} ~ ${trip.endDate}"
+
+        if (!trip.imageUri.isNullOrEmpty()) {
+            binding.ivDetailImage.visibility = View.VISIBLE
+            binding.ivDetailImage.setImageURI(Uri.parse(trip.imageUri))
+        } else {
+            binding.ivDetailImage.visibility = View.GONE
+        }
     }
+
 }

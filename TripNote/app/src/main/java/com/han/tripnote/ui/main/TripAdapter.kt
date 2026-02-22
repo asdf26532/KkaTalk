@@ -1,8 +1,10 @@
 package com.han.tripnote.ui.main
 
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
@@ -33,6 +35,7 @@ class TripAdapter(
             private val tvDate: TextView = itemView.findViewById(R.id.tvDate)
             private val tvMemo: TextView = itemView.findViewById(R.id.tvMemo)
             private val tvStatus: TextView = itemView.findViewById(R.id.tvStatus)
+            private val ivTripImage: ImageView = itemView.findViewById(R.id.ivTripImage)
 
             fun bind(trip: Trip) {
 
@@ -55,6 +58,13 @@ class TripAdapter(
                 tvStatus.setBackgroundColor(
                     ContextCompat.getColor(itemView.context, colorRes)
                 )
+
+                if (!trip.imageUri.isNullOrEmpty()) {
+                    ivTripImage.visibility = View.VISIBLE
+                    ivTripImage.setImageURI(Uri.parse(trip.imageUri))
+                } else {
+                    ivTripImage.visibility = View.GONE
+                }
 
                 // 클릭
                 itemView.setOnClickListener {
