@@ -12,6 +12,7 @@ import com.han.tripnote.databinding.ActivityTripDetailBinding
 import com.han.tripnote.ui.add.AddTripActivity
 import com.han.tripnote.ui.viewmodel.TripViewModel
 import androidx.activity.viewModels
+import com.bumptech.glide.Glide
 
 class TripDetailActivity : AppCompatActivity() {
 
@@ -61,6 +62,13 @@ class TripDetailActivity : AppCompatActivity() {
                 })
                 .show()
         }
+
+        binding.ivDetailImage.setOnClickListener {
+
+            val intent = Intent(this, ImagePreviewActivity::class.java)
+            intent.putExtra("imageUri", trip.imageUri)
+            startActivity(intent)
+        }
     }
 
     private fun bindTripInfo() {
@@ -68,9 +76,10 @@ class TripDetailActivity : AppCompatActivity() {
         binding.tvDetailLocation.text = trip.location
         binding.tvDetailDate.text = "${trip.startDate} ~ ${trip.endDate}"
 
-        if (!trip.imageUri.isNullOrEmpty()) {
-            binding.ivDetailImage.visibility = View.VISIBLE
-            binding.ivDetailImage.setImageURI(Uri.parse(trip.imageUri))
+        if (trip.imageUri != null) {
+            Glide.with(this)
+                .load(trip.imageUri)
+                .into(binding.ivDetailImage)
         } else {
             binding.ivDetailImage.visibility = View.GONE
         }
