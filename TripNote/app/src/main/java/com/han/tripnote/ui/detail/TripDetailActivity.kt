@@ -63,11 +63,26 @@ class TripDetailActivity : AppCompatActivity() {
                 .show()
         }
 
-        binding.ivDetailImage.setOnClickListener {
+        binding.btnShare.setOnClickListener {
 
-            val intent = Intent(this, ImagePreviewActivity::class.java)
-            intent.putExtra("imageUri", trip.imageUri)
-            startActivity(intent)
+            val shareText = """
+        ✈ TripNote 여행 정보
+        장소: ${trip.title}
+        여행 기간: ${trip.startDate} ~ ${trip.endDate}
+        메모: ${trip.memo ?: "없음"}
+         """.trimIndent()
+
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, shareText)
+            }
+
+            startActivity(Intent.createChooser(intent, "여행 정보 공유"))
+        }
+
+        binding.ivDetailImage.setOnClickListener {
+            val dialog = ImagePreviewDialog(trip.imageUri)
+            dialog.show(supportFragmentManager, "ImagePreviewDialog")
         }
     }
 
@@ -75,6 +90,7 @@ class TripDetailActivity : AppCompatActivity() {
         binding.tvDetailTitle.text = trip.title
         binding.tvDetailLocation.text = trip.location
         binding.tvDetailDate.text = "${trip.startDate} ~ ${trip.endDate}"
+        binding.tvMemo.text = trip.memo?.takeIf { it.isNotBlank() } ?: "작성된 메모가 없습니다."
 
         if (trip.imageUri != null) {
             Glide.with(this)
