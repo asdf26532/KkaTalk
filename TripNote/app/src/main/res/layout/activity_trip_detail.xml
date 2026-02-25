@@ -60,6 +60,13 @@
             android:layout_marginTop="8dp"
             android:textSize="14sp"/>
 
+        <Button
+            android:id="@+id/btnEditMemo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="메모 수정"
+            android:layout_marginTop="8dp"/>
+
         <!-- 버튼 영역 -->
         <LinearLayout
             android:layout_width="match_parent"

@@ -13,6 +13,8 @@ import com.han.tripnote.ui.add.AddTripActivity
 import com.han.tripnote.ui.viewmodel.TripViewModel
 import androidx.activity.viewModels
 import com.bumptech.glide.Glide
+import android.app.AlertDialog
+import android.widget.EditText
 
 class TripDetailActivity : AppCompatActivity() {
 
@@ -83,6 +85,33 @@ class TripDetailActivity : AppCompatActivity() {
         binding.ivDetailImage.setOnClickListener {
             val dialog = ImagePreviewDialog(trip.imageUri)
             dialog.show(supportFragmentManager, "ImagePreviewDialog")
+        }
+
+        binding.btnEditMemo.setOnClickListener {
+
+            val editText = EditText(this)
+            editText.setText(trip.memo ?: "")
+            editText.setPadding(50, 40, 50, 40)
+
+            AlertDialog.Builder(this)
+                .setTitle("메모 수정")
+                .setView(editText)
+                .setPositiveButton("저장") { _, _ ->
+
+                    val newMemo = editText.text.toString()
+                    trip.memo = newMemo
+
+                    // UI 즉시 반영
+                    binding.tvMemo.text =
+                        if (newMemo.isNotBlank()) newMemo
+                        else "작성된 메모가 없습니다."
+
+                    // 중요: 기존 ViewModel 업데이트 함수 사용
+                    viewModel.upsertTrip(trip)
+
+                }
+                .setNegativeButton("취소", null)
+                .show()
         }
     }
 

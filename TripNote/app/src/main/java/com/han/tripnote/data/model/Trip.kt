@@ -11,7 +11,7 @@ data class Trip(
     val startDate: String,
     val endDate: String,
     val status: TripStatus = TripStatus.UPCOMING,
-    val memo: String? = null,
+    var memo: String? = null,
     val imageUri: String? = null
 
 ) : Parcelable
