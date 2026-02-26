@@ -197,6 +197,14 @@
             android:padding="12dp"
             android:layout_margin="8dp"/>
 
+        <ImageButton
+            android:id="@+id/btnSort"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_menu_sort_by_size"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="정렬"/>
+
         <!-- 여행 리스트 -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvTripList"

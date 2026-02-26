@@ -6,6 +6,7 @@ import android.view.*
 import androidx.fragment.app.DialogFragment
 import com.bumptech.glide.Glide
 import com.han.tripnote.databinding.DialogImagePreviewBinding
+import android.view.animation.DecelerateInterpolator
 
 class ImagePreviewDialog(
     private val imageUri: String?
@@ -37,6 +38,31 @@ class ImagePreviewDialog(
         binding.ivPreview.setOnClickListener {
             dismiss()
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        dialog?.window?.apply {
+            setLayout(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+
+            attributes.windowAnimations = android.R.style.Animation_Translucent
+        }
+
+        binding.root.alpha = 0f
+        binding.root.scaleX = 0.9f
+        binding.root.scaleY = 0.9f
+
+        binding.root.animate()
+            .alpha(1f)
+            .scaleX(1f)
+            .scaleY(1f)
+            .setDuration(250)
+            .setInterpolator(DecelerateInterpolator())
+            .start()
     }
 
     override fun onDestroyView() {

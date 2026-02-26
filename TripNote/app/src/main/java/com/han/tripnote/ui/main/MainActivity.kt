@@ -21,6 +21,7 @@ import com.han.tripnote.ui.viewmodel.TripViewModel
 import com.han.tripnote.ui.trip.TripSort
 import android.text.Editable
 import android.text.TextWatcher
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
 
 class MainActivity : AppCompatActivity() {
@@ -162,6 +163,24 @@ class MainActivity : AppCompatActivity() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
+
+        binding.btnSort.setOnClickListener {
+
+            val options = arrayOf("최신순", "시작일순", "종료일순")
+
+            AlertDialog.Builder(this)
+                .setTitle("정렬 방식 선택")
+                .setItems(options) { _, which ->
+
+                    when (which) {
+                        0 -> viewModel.setSort(TripSort.NEWEST)
+                        1 -> viewModel.setSort(TripSort.START_DATE_ASC)
+                        2 -> viewModel.setSort(TripSort.START_DATE_DESC)
+                    }
+
+                }
+                .show()
+        }
 
     }
 
